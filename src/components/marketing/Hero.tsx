@@ -64,7 +64,7 @@ export function Hero({ shirts }: { shirts: HeroShirt[] }) {
             </motion.div>
           </motion.div>
           <motion.div
-            className="relative aspect-[4/5]"
+            className="relative aspect-[4/5] overflow-hidden"
             initial={reduceMotion ? false : { opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}

@@ -37,7 +37,7 @@ export default async function Home() {
     <>
       <GrainOverlay />
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         <Hero shirts={heroShirts} />
         <InspirationSection />
         {designYourWayPreview && <DesignYourWay preview={designYourWayPreview} />}

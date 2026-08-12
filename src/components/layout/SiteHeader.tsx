@@ -21,7 +21,7 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
       <Container>
-        <div className="flex h-16 items-center justify-between gap-6 md:h-18">
+        <div className="flex h-16 items-center justify-between gap-3 md:h-18">
           <Wordmark />
           <nav className="hidden items-center gap-8 md:flex">
             {NAV_LINKS.map((link) => (
