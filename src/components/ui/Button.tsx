@@ -11,7 +11,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 const BASE_CLASSES =
-  "inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full px-6 text-body font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+  "inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full px-6 text-body font-medium transition-[colors,transform] duration-150 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
 
 type LinkButtonProps = {
   href: string;

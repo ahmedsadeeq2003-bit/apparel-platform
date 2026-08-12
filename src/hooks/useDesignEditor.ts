@@ -126,7 +126,7 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     const current = useEditorStore.getState().side;
     const next = otherSide(current);
 
-    sidesRef.current[current] = canvas.toJSON(["id"]);
+    sidesRef.current[current] = canvas.toObject(["id"]);
     canvas.discardActiveObject();
 
     const nextSideData = sidesRef.current[next];

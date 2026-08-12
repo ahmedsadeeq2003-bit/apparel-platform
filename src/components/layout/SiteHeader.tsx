@@ -12,7 +12,7 @@ export async function SiteHeader() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="border-b border-border">
+    <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
       <Container>
         <div className="flex h-16 items-center justify-between gap-4 md:h-18">
           <Wordmark />
