@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
+import { TShirtMockup } from "@/components/apparel/TShirtMockup";
 
 const CONTAINER_VARIANTS = {
   hidden: {},
@@ -54,22 +54,25 @@ export function Hero() {
             </motion.div>
           </motion.div>
           <motion.div
-            className="relative aspect-[4/5] overflow-hidden rounded-sm border border-accent/40"
+            className="relative aspect-[4/5]"
             initial={reduceMotion ? false : { opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Placeholder — swap for real brand/product photography before launch */}
-            <Image
-              src="https://picsum.photos/seed/stitch-streetwear-tee/900/1125"
-              alt="Model wearing a custom-printed T-shirt designed on the platform"
-              fill
-              priority
-              className="object-cover grayscale contrast-125"
-              sizes="(min-width: 768px) 40vw, 90vw"
+            <TShirtMockup
+              hex="#F4F2EC"
+              side="front"
+              crop="full"
+              label="Bone-colored T-shirt design"
+              className="absolute left-[6%] top-[10%] h-[78%] w-[68%] rotate-[-6deg] drop-shadow-2xl"
             />
-            <div className="absolute inset-0 bg-accent mix-blend-color opacity-30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+            <TShirtMockup
+              hex="#D7FF3E"
+              side="front"
+              crop="full"
+              label="Volt green T-shirt design"
+              className="absolute bottom-[4%] right-[2%] h-[82%] w-[72%] rotate-[4deg] drop-shadow-2xl"
+            />
           </motion.div>
         </div>
       </Container>

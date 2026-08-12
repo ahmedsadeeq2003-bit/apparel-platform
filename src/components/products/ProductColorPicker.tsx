@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { TShirtMockup } from "@/components/apparel/TShirtMockup";
 import type { ProductColor } from "@/lib/products/queries";
 
 export function ProductColorPicker({
@@ -19,13 +19,13 @@ export function ProductColorPicker({
   return (
     <div className="flex flex-col gap-6">
       <div className="relative aspect-square overflow-hidden rounded-sm border border-border bg-background">
-        {selected?.front_mockup_url && (
-          <Image
-            src={selected.front_mockup_url}
-            alt={`${productName} in ${selected.name}`}
-            fill
-            className="object-cover"
-            sizes="(min-width: 768px) 45vw, 90vw"
+        {selected && (
+          <TShirtMockup
+            hex={selected.hex}
+            side="front"
+            crop="full"
+            label={`${productName} in ${selected.name}`}
+            className="h-full w-full"
           />
         )}
       </div>

@@ -1,29 +1,30 @@
 "use client";
 
-import Image from "next/image";
 import type { RefObject } from "react";
+import { TShirtMockup } from "@/components/apparel/TShirtMockup";
 import { CANVAS_SIZE } from "@/lib/editor/constants";
+import type { EditorSide } from "@/lib/editor/side";
 
 export function DesignCanvas({
   canvasRef,
-  mockupUrl,
-  alt,
+  hex,
+  side,
+  label,
 }: {
   canvasRef: RefObject<HTMLCanvasElement | null>;
-  mockupUrl: string | null;
-  alt: string;
+  hex: string;
+  side: EditorSide;
+  label: string;
 }) {
   return (
     <div className="relative aspect-square w-full max-w-[600px] overflow-hidden rounded-sm border border-border bg-surface">
-      {mockupUrl && (
-        <Image
-          src={mockupUrl}
-          alt={alt}
-          fill
-          className="pointer-events-none object-cover"
-          sizes="(min-width: 768px) 600px, 90vw"
-        />
-      )}
+      <TShirtMockup
+        hex={hex}
+        side={side}
+        crop="print-area"
+        label={label}
+        className="pointer-events-none absolute inset-0 h-full w-full"
+      />
       <canvas
         ref={canvasRef}
         width={CANVAS_SIZE}

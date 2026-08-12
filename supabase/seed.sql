@@ -11,16 +11,18 @@ values (
 )
 on conflict (slug) do nothing;
 
-insert into public.product_colors (product_id, name, hex, front_mockup_url, back_mockup_url, is_active)
-select p.id, c.name, c.hex, c.front_mockup_url, c.back_mockup_url, true
+-- No mockup URLs: the app renders a color-tinted SVG mockup (TShirtMockup)
+-- from `hex` directly rather than a photographic mockup per color.
+insert into public.product_colors (product_id, name, hex, is_active)
+select p.id, c.name, c.hex, true
 from public.products p
 cross join (
   values
-    ('Ash Grey', '#A8A69F', 'https://picsum.photos/seed/tee-ash-front/800/900', 'https://picsum.photos/seed/tee-ash-back/800/900'),
-    ('Black', '#0B0B0C', 'https://picsum.photos/seed/tee-black-front/800/900', 'https://picsum.photos/seed/tee-black-back/800/900'),
-    ('Volt Green', '#D7FF3E', 'https://picsum.photos/seed/tee-volt-front/800/900', 'https://picsum.photos/seed/tee-volt-back/800/900'),
-    ('White', '#F4F2EC', 'https://picsum.photos/seed/tee-white-front/800/900', 'https://picsum.photos/seed/tee-white-back/800/900')
-) as c(name, hex, front_mockup_url, back_mockup_url)
+    ('Ash Grey', '#A8A69F'),
+    ('Black', '#0B0B0C'),
+    ('Volt Green', '#D7FF3E'),
+    ('White', '#F4F2EC')
+) as c(name, hex)
 where p.slug = 'classic-tee'
   and not exists (
     select 1 from public.product_colors pc
