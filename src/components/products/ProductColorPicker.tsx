@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import type { ProductColor } from "@/lib/products/queries";
 
 export function ProductColorPicker({
   productName,
   colors,
+  selectedId,
+  onSelect,
 }: {
   productName: string;
   colors: ProductColor[];
+  selectedId: string | undefined;
+  onSelect: (id: string) => void;
 }) {
-  const [selectedId, setSelectedId] = useState(colors[0]?.id);
   const selected = colors.find((color) => color.id === selectedId) ?? colors[0];
 
   return (
@@ -36,7 +38,7 @@ export function ProductColorPicker({
             <button
               key={color.id}
               type="button"
-              onClick={() => setSelectedId(color.id)}
+              onClick={() => onSelect(color.id)}
               aria-label={color.name}
               aria-pressed={color.id === selectedId}
               className={`h-10 w-10 rounded-full border-2 transition-colors ${

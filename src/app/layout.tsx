@@ -1,17 +1,6 @@
 import type { Metadata } from "next";
-import { Anton, Archivo } from "next/font/google";
+import { anton, archivo } from "@/lib/fonts";
 import "./globals.css";
-
-const anton = Anton({
-  weight: "400",
-  variable: "--font-anton",
-  subsets: ["latin"],
-});
-
-const archivo = Archivo({
-  variable: "--font-archivo",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "STITCH — Design Your Own Tee",
