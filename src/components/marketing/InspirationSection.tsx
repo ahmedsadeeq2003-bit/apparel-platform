@@ -14,10 +14,11 @@ export async function InspirationSection() {
     <Section>
       <Container>
         <h2 className="font-display text-display-xl uppercase text-foreground">
-          Start with inspiration
+          Borrow the idea. Make it yours.
         </h2>
         <p className="mt-3 max-w-md text-body text-muted">
-          Pick a starting point, then make it yours in the editor.
+          Not sure what to design? Explore real designs across every style,
+          then customize one in the editor. Not a designer? No problem.
         </p>
         <div className="mt-12">
           <InspirationGrid featured={featured} />

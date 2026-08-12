@@ -7,23 +7,27 @@ import { Section } from "@/components/layout/Section";
 const STEPS = [
   {
     number: "1",
-    title: "Design it",
-    description:
-      "Add text, upload art, pick a shirt color, and place it front or back in the editor.",
+    title: "Design",
+    description: "Create your T-shirt online, with text, art, or photos.",
   },
   {
     number: "2",
-    title: "We print it",
-    description:
-      "Your order goes to our print partner as soon as payment clears.",
+    title: "Preview",
+    description: "See exactly how your design looks on the shirt.",
   },
   {
     number: "3",
-    title: "It ships",
-    description:
-      "Track your order's status from print to delivery on your account page.",
+    title: "Order",
+    description: "Choose your color, size, and quantity.",
+  },
+  {
+    number: "4",
+    title: "Print & deliver",
+    description: "We produce your shirt and get it to your door.",
   },
 ] as const;
+
+const OFFSETS = ["", "md:mt-8", "md:mt-16", "md:mt-24"] as const;
 
 export function HowItWorks() {
   const reduceMotion = useReducedMotion();
@@ -34,15 +38,15 @@ export function HowItWorks() {
         <h2 className="font-display text-display-xl uppercase text-foreground">
           How it works
         </h2>
-        <div className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+        <div className="mt-12 grid gap-10 md:grid-cols-4 md:gap-6">
           {STEPS.map((step, index) => (
             <motion.div
               key={step.number}
-              className={index === 1 ? "md:mt-10" : index === 2 ? "md:mt-20" : ""}
+              className={OFFSETS[index]}
               initial={reduceMotion ? false : { opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.6, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="flex items-center gap-4">
                 <span className="font-display text-display-md text-accent">
@@ -54,7 +58,7 @@ export function HowItWorks() {
                     initial={reduceMotion ? false : { width: 0 }}
                     whileInView={{ width: "100%" }}
                     viewport={{ once: true, amount: 0.4 }}
-                    transition={{ duration: 0.8, delay: index * 0.12 + 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.8, delay: index * 0.1 + 0.2, ease: [0.16, 1, 0.3, 1] }}
                   />
                 </span>
               </div>
@@ -65,6 +69,10 @@ export function HowItWorks() {
             </motion.div>
           ))}
         </div>
+        <p className="mt-16 text-body-sm text-muted">
+          Just want the design? The editor is free to use, with no order
+          required.
+        </p>
       </Container>
     </Section>
   );

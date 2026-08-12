@@ -5,6 +5,13 @@ import { Container } from "@/components/layout/Container";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/lib/auth/actions";
 
+const NAV_LINKS = [
+  { href: "/products", label: "Create" },
+  { href: "/inspiration", label: "Inspiration" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#business", label: "Business" },
+] as const;
+
 export async function SiteHeader() {
   const supabase = await createClient();
   const {
@@ -14,24 +21,36 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
       <Container>
-        <div className="flex h-16 items-center justify-between gap-4 md:h-18">
+        <div className="flex h-16 items-center justify-between gap-6 md:h-18">
           <Wordmark />
-          <Link
-            href="/#how-it-works"
-            className="hidden text-body text-muted transition-colors hover:text-foreground md:inline"
-          >
-            How it works
-          </Link>
+          <nav className="hidden items-center gap-8 md:flex">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-body text-muted transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
           <div className="flex items-center gap-4">
-            {user && (
+            {user ? (
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="text-body text-muted transition-colors hover:text-foreground"
+                  className="hidden text-body text-muted transition-colors hover:text-foreground sm:inline"
                 >
                   Log out
                 </button>
               </form>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden text-body text-muted transition-colors hover:text-foreground sm:inline"
+              >
+                Sign in
+              </Link>
             )}
             <Button href={user ? "/products" : "/signup"} variant="primary">
               {user ? "Browse shirts" : "Start designing"}

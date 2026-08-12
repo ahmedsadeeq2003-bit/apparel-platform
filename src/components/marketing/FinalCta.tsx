@@ -26,12 +26,12 @@ export function FinalCta() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <h2 className="font-display text-display-xl uppercase text-foreground">
-            Your design. Your shirt.
+            Stop wearing ordinary.
           </h2>
           <p className="max-w-md text-body-lg text-muted">
             The editor is free to use. You only pay when you order.
           </p>
-          <Button href="/signup" variant="primary">
+          <Button href="/products" variant="primary">
             Start designing
           </Button>
         </motion.div>

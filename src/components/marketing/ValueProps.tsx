@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import {
   DownloadSimple,
@@ -11,11 +10,17 @@ import {
 } from "@phosphor-icons/react";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
+import { TShirtMockup } from "@/components/apparel/TShirtMockup";
+import { TemplatePreview } from "@/components/apparel/TemplatePreview";
 
 const CELL_BASE =
   "group relative overflow-hidden rounded-sm border border-border bg-surface transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-accent/50";
 
-export function ValueProps() {
+export function ValueProps({
+  preview,
+}: {
+  preview: { canvasJson: object; hex: string; side: "front" | "back" };
+}) {
   const reduceMotion = useReducedMotion();
 
   const reveal = (delay: number) => ({
@@ -36,12 +41,12 @@ export function ValueProps() {
             {...reveal(0)}
             className={`${CELL_BASE} p-8 md:col-span-2 md:row-span-2 md:col-start-1 md:row-start-1`}
           >
-            <div className="absolute inset-0">
-              <Image
-                src="https://picsum.photos/seed/stitch-garment-texture/900/900"
-                alt=""
-                fill
-                className="object-cover opacity-25 grayscale contrast-125 transition-transform duration-500 group-hover:scale-105"
+            <div className="absolute inset-0" aria-hidden="true">
+              <TShirtMockup
+                hex="#A8A69F"
+                side="front"
+                crop="full"
+                className="absolute -right-[10%] -top-[8%] h-[120%] w-[80%] opacity-20 transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/85 to-surface/40" />
             </div>
@@ -62,15 +67,15 @@ export function ValueProps() {
             className={`${CELL_BASE} md:col-start-3 md:row-start-1`}
           >
             <div className="relative aspect-[4/3] overflow-hidden">
-              <Image
-                src="https://picsum.photos/seed/stitch-mockup-preview/500/375"
-                alt=""
-                fill
-                className="object-cover grayscale contrast-125 transition-transform duration-500 group-hover:scale-105"
+              <TemplatePreview
+                canvasJson={preview.canvasJson}
+                hex={preview.hex}
+                side={preview.side}
+                label="Live design preview on a T-shirt"
+                className="h-full w-full transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-accent mix-blend-color opacity-20" />
               <Eye
-                className="absolute right-3 top-3 h-5 w-5 text-foreground drop-shadow"
+                className="absolute right-3 top-3 z-10 h-5 w-5 text-foreground drop-shadow"
                 weight="duotone"
                 aria-hidden
               />

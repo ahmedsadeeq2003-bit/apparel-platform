@@ -66,7 +66,6 @@ export function useStaticFabricPreview(
         canvas.renderAll();
       })
       .catch((error) => {
-        // eslint-disable-next-line no-console -- surfaces template content bugs during development
         console.error("useStaticFabricPreview: loadFromJSON failed", error);
       });
 
