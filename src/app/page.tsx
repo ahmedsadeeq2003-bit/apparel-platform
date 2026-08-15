@@ -25,7 +25,7 @@ export default async function Home() {
     };
   };
 
-  const heroShirts = ["streetwear", "graduation", "events"]
+  const heroShirts = ["streetwear", "graduation", "events", "funny", "football"]
     .map(toPreview)
     .filter((shirt): shirt is HeroShirt => shirt !== null);
 

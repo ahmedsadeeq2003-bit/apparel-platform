@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
+import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
@@ -43,6 +44,19 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-border">
       <Container>
+        <div className="flex flex-col gap-6 border-b border-border py-10 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-display-md uppercase text-foreground">
+              Ready to design yours?
+            </h2>
+            <p className="mt-1 text-body-sm text-muted">
+              Free to design. You only pay when you order.
+            </p>
+          </div>
+          <Button href="/signup" variant="primary" className="self-start sm:self-auto">
+            Start design
+          </Button>
+        </div>
         <div className="grid gap-10 py-16 sm:grid-cols-2 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <div className="flex flex-col gap-3">
             <Wordmark />

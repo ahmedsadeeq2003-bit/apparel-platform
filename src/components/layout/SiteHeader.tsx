@@ -34,12 +34,12 @@ export async function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             {user ? (
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="hidden text-body text-muted transition-colors hover:text-foreground sm:inline"
+                  className="text-body text-muted transition-colors hover:text-foreground"
                 >
                   Log out
                 </button>
@@ -47,13 +47,13 @@ export async function SiteHeader() {
             ) : (
               <Link
                 href="/login"
-                className="hidden text-body text-muted transition-colors hover:text-foreground sm:inline"
+                className="text-body text-muted transition-colors hover:text-foreground"
               >
-                Sign in
+                Log in
               </Link>
             )}
             <Button href={user ? "/products" : "/signup"} variant="primary">
-              {user ? "Browse shirts" : "Start designing"}
+              {user ? "Browse shirts" : "Sign up"}
             </Button>
           </div>
         </div>

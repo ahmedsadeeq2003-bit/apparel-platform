@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
+import { HalftoneBurst } from "@/components/marketing/GraffitiMark";
 import { BRAND_NAME } from "@/lib/brand";
 
 export function FinalCta() {
@@ -17,6 +18,7 @@ export function FinalCta() {
       >
         {BRAND_NAME}
       </span>
+      <HalftoneBurst className="pointer-events-none absolute -left-10 bottom-0 -z-0 h-40 w-40 text-accent/15 md:h-56 md:w-56" />
       <Container>
         <motion.div
           className="relative flex flex-col items-center gap-6 text-center"
