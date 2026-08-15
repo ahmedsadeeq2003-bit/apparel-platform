@@ -5,7 +5,7 @@ import { TextT, Image as ImageIcon, PaintBucket, Crosshair } from "@phosphor-ico
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
-import { TemplatePreview } from "@/components/apparel/TemplatePreview";
+import { CampaignGarment } from "@/components/apparel/CampaignGarment";
 
 const CAPABILITIES = [
   { icon: TextT, label: "Text, in any font on the shirt" },
@@ -24,28 +24,39 @@ export function DesignYourWay({
   return (
     <Section tone="raised">
       <Container>
-        <div className="grid items-center gap-12 md:grid-cols-2">
+        <div className="grid items-center gap-16 md:grid-cols-[1.1fr_0.9fr]">
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="mx-auto w-full max-w-[420px]"
+            className="relative mx-auto w-full max-w-[420px]"
           >
-            <TemplatePreview
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[80%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-3xl"
+              style={{
+                background:
+                  "radial-gradient(circle, color-mix(in oklab, var(--color-accent) 16%, transparent) 0%, transparent 70%)",
+              }}
+            />
+            <CampaignGarment
               canvasJson={preview.canvasJson}
               hex={preview.hex}
               side={preview.side}
               label={preview.label}
+              className="relative mx-auto w-[78%]"
+              shadowIntensity={1.3}
             />
           </motion.div>
           <div className="flex flex-col gap-6">
             <h2 className="font-display text-display-xl uppercase text-foreground">
-              Design it your way.
+              The canvas is the shirt itself.
             </h2>
             <p className="max-w-md text-body-lg text-muted">
-              A real design canvas, right in your browser. No software to
-              install, no design skill required to start.
+              A real design canvas, right in your browser. Text, artwork and
+              photos sit on the actual garment, not a preview stitched
+              together after the fact.
             </p>
             <ul className="flex flex-col gap-3">
               {CAPABILITIES.map(({ icon: Icon, label }) => (

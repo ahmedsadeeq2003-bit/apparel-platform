@@ -7,27 +7,32 @@ import { Section } from "@/components/layout/Section";
 const STEPS = [
   {
     number: "1",
-    title: "Design",
-    description: "Create your T-shirt online, with text, art, or photos.",
+    title: "Create",
+    description: "Start from a blank shirt or a gallery template.",
   },
   {
     number: "2",
+    title: "Customize",
+    description: "Add text, artwork or photos, in any color.",
+  },
+  {
+    number: "3",
     title: "Preview",
     description: "See exactly how your design looks on the shirt.",
   },
   {
-    number: "3",
-    title: "Order",
-    description: "Choose your color, size, and quantity.",
+    number: "4",
+    title: "Print",
+    description: "Choose your size and quantity, then order.",
   },
   {
-    number: "4",
-    title: "Print & deliver",
+    number: "5",
+    title: "Deliver",
     description: "We produce your shirt and get it to your door.",
   },
 ] as const;
 
-const OFFSETS = ["", "md:mt-8", "md:mt-16", "md:mt-24"] as const;
+const OFFSETS = ["", "md:mt-6", "md:mt-12", "md:mt-16", "md:mt-24"] as const;
 
 export function HowItWorks() {
   const reduceMotion = useReducedMotion();
@@ -38,7 +43,7 @@ export function HowItWorks() {
         <h2 className="font-display text-display-xl uppercase text-foreground">
           How it works
         </h2>
-        <div className="mt-12 grid gap-10 md:grid-cols-4 md:gap-6">
+        <div className="mt-12 grid gap-10 md:grid-cols-5 md:gap-6">
           {STEPS.map((step, index) => (
             <motion.div
               key={step.number}

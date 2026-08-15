@@ -26,7 +26,21 @@ const BACK_NECKLINE =
 export const PRINT_AREA = { x: 140, y: 168, width: 120, height: 150 } as const;
 
 const VIEW_BOX_FULL = "0 0 400 480";
-const VIEW_BOX_PRINT_AREA = "70 60 260 260";
+const PRINT_CROP = { x: 70, y: 60, width: 260, height: 260 } as const;
+const VIEW_BOX_PRINT_AREA = `${PRINT_CROP.x} ${PRINT_CROP.y} ${PRINT_CROP.width} ${PRINT_CROP.height}`;
+
+/**
+ * The print-area crop region expressed as a percentage of the full 400x480
+ * viewBox -- lets a full-crop garment (e.g. in a campaign composition) host
+ * an artwork overlay positioned/sized in plain CSS percentages that line up
+ * with where `crop="print-area"` renders that same artwork.
+ */
+export const PRINT_OVERLAY_PCT = {
+  left: (PRINT_CROP.x / 400) * 100,
+  top: (PRINT_CROP.y / 480) * 100,
+  width: (PRINT_CROP.width / 400) * 100,
+  height: (PRINT_CROP.height / 480) * 100,
+} as const;
 
 export function TShirtMockup({
   hex,
@@ -65,6 +79,10 @@ export function TShirtMockup({
           <stop offset="35%" stopColor={hex} stopOpacity={0} />
           <stop offset="100%" stopColor={shadow} stopOpacity={0.45} />
         </linearGradient>
+        <radialGradient id={`${gradientId}-sheen`} cx="32%" cy="18%" r="55%">
+          <stop offset="0%" stopColor={highlight} stopOpacity={0.4} />
+          <stop offset="100%" stopColor={highlight} stopOpacity={0} />
+        </radialGradient>
         <radialGradient id={`${gradientId}-vignette`} cx="50%" cy="30%" r="75%">
           <stop offset="55%" stopColor="#000000" stopOpacity={0} />
           <stop offset="100%" stopColor="#000000" stopOpacity={0.18} />
@@ -72,10 +90,12 @@ export function TShirtMockup({
       </defs>
 
       <path d={path} fill={hex} stroke={outline} strokeWidth={3} strokeLinejoin="round" />
+      <path d={path} fill={`url(#${gradientId}-sheen)`} />
       <path d={path} fill={`url(#${gradientId}-shade)`} />
       <path d={path} fill={`url(#${gradientId}-vignette)`} />
 
-      {/* Fold hints under each sleeve cap, suggesting fabric drape */}
+      {/* Fold hints -- sleeve drape, torso creases, and hem bunching, giving
+          the flat silhouette a sense of hanging fabric volume. */}
       <path
         d="M108,180 C120,192 128,206 130,222"
         fill="none"
@@ -89,6 +109,46 @@ export function TShirtMockup({
         fill="none"
         stroke={shadow}
         strokeOpacity={0.4}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <path
+        d="M118,240 C110,300 108,352 114,404"
+        fill="none"
+        stroke={shadow}
+        strokeOpacity={0.22}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <path
+        d="M282,240 C290,300 292,352 286,404"
+        fill="none"
+        stroke={shadow}
+        strokeOpacity={0.22}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <path
+        d="M188,150 C184,230 186,320 190,404"
+        fill="none"
+        stroke={shadow}
+        strokeOpacity={0.16}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+      <path
+        d="M96,398 C130,412 160,418 168,418"
+        fill="none"
+        stroke={shadow}
+        strokeOpacity={0.3}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <path
+        d="M304,398 C270,412 240,418 232,418"
+        fill="none"
+        stroke={shadow}
+        strokeOpacity={0.3}
         strokeWidth={2}
         strokeLinecap="round"
       />

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { relativeLuminance, shadeHex } from "./color";
+import { pickContrastHex, relativeLuminance, shadeHex } from "./color";
 
 describe("shadeHex", () => {
   it("darkens a color toward black with a negative percent", () => {
@@ -31,5 +31,19 @@ describe("relativeLuminance", () => {
 
   it("rates a dark color lower than a light color", () => {
     expect(relativeLuminance("#0b0b0c")).toBeLessThan(relativeLuminance("#f4f2ec"));
+  });
+});
+
+describe("pickContrastHex", () => {
+  it("picks the darkest of several colors", () => {
+    expect(pickContrastHex(["#f4f2ec", "#a8a69f", "#0b0b0c"])).toBe("#0b0b0c");
+  });
+
+  it("returns the only color when there's just one", () => {
+    expect(pickContrastHex(["#d7ff3e"])).toBe("#d7ff3e");
+  });
+
+  it("falls back to near-black when the list is empty", () => {
+    expect(pickContrastHex([])).toBe("#0B0B0C");
   });
 });

@@ -1,7 +1,6 @@
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
 import { InspirationGrid } from "@/components/marketing/InspirationGrid";
-import { SpraySplatter } from "@/components/marketing/GraffitiMark";
 import { getFeaturedTemplates } from "@/lib/templates/queries";
 
 export async function InspirationSection() {
@@ -12,15 +11,14 @@ export async function InspirationSection() {
   }
 
   return (
-    <Section className="relative overflow-hidden">
-      <SpraySplatter className="pointer-events-none absolute -right-6 top-8 -z-0 h-24 w-24 text-accent/20 md:h-32 md:w-32" />
+    <Section tone="raised">
       <Container>
-        <h2 className="relative font-display text-display-xl uppercase text-foreground">
-          Borrow the idea. Make it yours.
+        <h2 className="font-display text-display-xl uppercase text-foreground">
+          The design gallery.
         </h2>
         <p className="mt-3 max-w-md text-body text-muted">
-          Not sure what to design? Explore real designs across every style,
-          then customize one in the editor. Not a designer? No problem.
+          A curated look at what people make here, not a catalog to shop.
+          Borrow an idea, then make it yours in the editor.
         </p>
         <div className="mt-12">
           <InspirationGrid featured={featured} />

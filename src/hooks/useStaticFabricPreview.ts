@@ -50,6 +50,13 @@ export function useStaticFabricPreview(
       height: size,
       renderOnAddRemove: true,
     });
+    // Fabric's constructor sets inline width/height styles on the canvas
+    // element to match the drawing-buffer size in CSS pixels too. Inline
+    // styles beat any `w-full h-full` class regardless of stylesheet order,
+    // which silently breaks every caller that scales the canvas via CSS to
+    // fit a container smaller than `size` -- put it back to responsive.
+    canvasEl.style.width = "100%";
+    canvasEl.style.height = "100%";
 
     let cancelled = false;
 

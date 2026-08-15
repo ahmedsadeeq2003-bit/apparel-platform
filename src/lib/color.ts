@@ -39,3 +39,17 @@ export function relativeLuminance(hex: string): number {
 
   return 0.299 * r + 0.587 * g + 0.114 * b;
 }
+
+/**
+ * Picks the darkest color from a template's color list. Seeded templates
+ * often list a cream/white garment first, which is fine against the app's
+ * old dark theme but disappears against the light editorial homepage --
+ * this keeps garment silhouettes visible without hardcoding per-template
+ * overrides everywhere a template's colors are rendered.
+ */
+export function pickContrastHex(colors: string[]): string {
+  if (colors.length === 0) return "#0B0B0C";
+  return colors.reduce((darkest, candidate) =>
+    relativeLuminance(candidate) < relativeLuminance(darkest) ? candidate : darkest,
+  );
+}

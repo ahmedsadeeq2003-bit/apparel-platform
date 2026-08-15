@@ -49,3 +49,24 @@
   /* Spacing */
   --spacing-section: clamp(4rem, 8vw, 7rem);
 }
+
+/**
+ * Homepage-only "editorial" theme -- warm light palette for the fashion-
+ * campaign homepage redesign. Scoped to `.theme-editorial` rather than
+ * flipping the root tokens: the design editor and dark product/auth pages
+ * keep their existing (separately contrast-tuned) dark theme untouched.
+ * Every component already styles itself via `bg-background`/`text-foreground`/
+ * etc., so overriding these custom properties here re-themes the whole
+ * subtree with no component changes required.
+ */
+.theme-editorial {
+  color-scheme: light;
+  --color-background: #f4f2ec; /* Ivory */
+  --color-surface: #e9e4d8; /* Putty — alternate section background */
+  --color-foreground: #16140f; /* Ink — near-black, not pure black */
+  --color-muted: #5c564c; /* Warm grey */
+  --color-accent: #b4202f; /* Controlled editorial crimson */
+  --color-accent-foreground: #f4f2ec;
+  --color-border: rgba(22, 20, 15, 0.12);
+  --color-danger: #9b1c1c;
+}

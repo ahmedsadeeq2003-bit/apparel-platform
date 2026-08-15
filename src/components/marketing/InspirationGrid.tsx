@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
-import { TemplatePreview } from "@/components/apparel/TemplatePreview";
+import { CampaignGarment } from "@/components/apparel/CampaignGarment";
+import { pickContrastHex } from "@/lib/color";
 import type { DesignTemplate, TemplateCategory } from "@/lib/templates/queries";
+
+const TILE_ROTATIONS = ["-2deg", "1.5deg", "-1deg", "2deg", "-1.5deg"] as const;
 
 export function InspirationGrid({
   featured,
@@ -14,7 +17,7 @@ export function InspirationGrid({
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-5">
+    <div className="grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-4 md:grid-cols-5">
       {featured.map(({ category, template }, index) => (
         <motion.div
           key={category.id}
@@ -25,14 +28,16 @@ export function InspirationGrid({
           transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link href={`/inspiration/${category.slug}`} className="group flex flex-col gap-3">
-            <TemplatePreview
+            <CampaignGarment
               canvasJson={template.canvas_json}
-              hex={template.colors[0] ?? "#F4F2EC"}
+              hex={pickContrastHex(template.colors)}
               side={template.print_area === "back" ? "back" : "front"}
               label={`${template.name}, ${category.name} template`}
-              className="transition-colors group-hover:border-accent/50"
+              className="mx-auto w-[85%] transition-transform group-hover:scale-[1.03]"
+              style={{ transform: `rotate(${TILE_ROTATIONS[index % TILE_ROTATIONS.length]})` }}
+              shadowIntensity={0.75}
             />
-            <span className="flex items-center gap-1 text-body-sm text-muted transition-colors group-hover:text-foreground">
+            <span className="flex items-center justify-center gap-1 text-body-sm text-muted transition-colors group-hover:text-foreground">
               {category.name}
               <ArrowUpRight
                 className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100"
