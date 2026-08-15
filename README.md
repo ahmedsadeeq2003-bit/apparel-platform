@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Apparel Platform
 
-## Getting Started
+Custom apparel design & printing platform. Customers design a T-shirt in-browser, order it, and pay via Paystack; businesses request uniform quotes; admin drives orders through a manual print-supplier workflow.
 
-First, run the development server:
+Stack: Next.js (App Router) + TypeScript + React + Tailwind CSS + Supabase (Postgres/Auth/Storage) + Fabric.js (design editor) + Paystack (payments, Nigeria).
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.local.example .env.local   # fill in Supabase keys, see below
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.local.example` to `.env.local` and fill in:
 
-## Learn More
+| Variable | Where to find it | Exposure |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase dashboard → Project Settings → API | Browser-exposed |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase dashboard → Project Settings → API | Browser-exposed |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase dashboard → Project Settings → API | **Server-only** — never expose to the client |
+| `NEXT_PUBLIC_SITE_URL` | The app's own URL (`http://localhost:3000` locally, the production domain when deployed) | Browser-exposed |
 
-To learn more about Next.js, take a look at the following resources:
+`NEXT_PUBLIC_*` variables are bundled into client JS. Everything else stays server-only, enforced via the `server-only` package for the handful of paths that touch the service-role key.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Schema and seed data live in `supabase/migrations/` and `supabase/seed.sql`. Apply migrations with the Supabase CLI (`supabase db push`) or via the Supabase dashboard's SQL editor for a hosted project.
 
-## Deploy on Vercel
+## Testing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm test    # Vitest — business logic in src/lib/
+pnpm lint    # ESLint
+pnpm build   # production build / type-check
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment (Vercel)
+
+This is a standard Next.js App Router project — Vercel auto-detects the build (`pnpm build`) and output. Steps:
+
+1. Import the GitHub repo into a new Vercel project.
+2. Add the four environment variables above in the Vercel project's **Settings → Environment Variables** (set `NEXT_PUBLIC_SITE_URL` to the assigned `*.vercel.app` domain, or a custom domain once attached).
+3. In the Supabase dashboard, add the deployed URL to **Authentication → URL Configuration** (Site URL and Redirect URLs) so auth callbacks (`/auth/callback`) resolve correctly in production.
+4. Deploy. Paystack keys aren't required yet — payments aren't wired up until a later milestone.
