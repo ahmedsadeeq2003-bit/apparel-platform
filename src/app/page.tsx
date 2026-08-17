@@ -1,6 +1,6 @@
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { Hero, type HeroShirt } from "@/components/marketing/Hero";
+import { Hero } from "@/components/marketing/Hero";
 import { WhatIsStitch } from "@/components/marketing/WhatIsStitch";
 import { DesignYourWay } from "@/components/marketing/DesignYourWay";
 import { MakeItYours } from "@/components/marketing/MakeItYours";
@@ -52,16 +52,6 @@ export default async function Home() {
     };
   };
 
-  // Explicit overrides for the hero rail specifically: bone, sage, charcoal,
-  // one terracotta pop -- a deliberately varied light/dark mix rather than
-  // the default map's slightly heavier palette.
-  const heroShirts = [
-    toPreview("streetwear", "#F7F4EC"),
-    toPreview("graduation", "#8B9574"),
-    toPreview("couples", "#26221E"),
-    toPreview("events", "#C1623A"),
-  ].filter((shirt): shirt is HeroShirt => shirt !== null);
-
   const howItWorksPreview = toPreview("minimal");
   const designYourWayPreview = toPreview("couples");
   const businessUniform = toPreview("business");
@@ -85,7 +75,7 @@ export default async function Home() {
       <GrainOverlay />
       <SiteHeader />
       <main className="flex-1 overflow-x-hidden">
-        <Hero shirts={heroShirts} />
+        <Hero />
         <WhatIsStitch />
         {designYourWayPreview && <DesignYourWay preview={designYourWayPreview} />}
         {makeItYoursExamples.length > 0 && <MakeItYours examples={makeItYoursExamples} />}
