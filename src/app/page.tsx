@@ -30,6 +30,8 @@ const FRESH_OFF_THE_PRESS_FALLBACK: { slug: string }[] = [
   { slug: "motivational" },
   { slug: "events" },
   { slug: "business" },
+  { slug: "couples" },
+  { slug: "funny" },
 ];
 
 export default async function Home() {
