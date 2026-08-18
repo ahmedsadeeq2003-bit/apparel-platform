@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "id": "graffiti-wildstyle-riot",
+  "name": "Wildstyle Riot",
+  "category": "graffiti",
+  "description": "Interlocking wildstyle mark stacked with a spray-tag accent and bold condensed word mark.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/graffiti/wildstyle-mark.svg",
+      "left": 600,
+      "top": 420,
+      "scale": 0.9,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "svg",
+      "src": "/assets/designs/graffiti/graffiti-tag-02.svg",
+      "left": 260,
+      "top": 840,
+      "scale": 0.5,
+      "angle": -6,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "RIOT",
+      "left": 780,
+      "top": 900,
+      "fontSize": 150,
+      "fontFamily": "Anton",
+      "letterSpacing": 6,
+      "angle": 4,
+      "fill": "#0a0a0a",
+      "fontStyle": "normal",
+      "fontWeight": "700",
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "graffiti",
+    "streetwear",
+    "bold",
+    "urban"
+  ]
+}

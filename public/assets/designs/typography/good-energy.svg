@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+  <defs>
+    <style>
+      .word { font-family: 'Fredoka', 'Arial Rounded MT Bold', sans-serif; font-weight: 700; fill: #0a0a0a; }
+    </style>
+  </defs>
+
+  <!-- GOOD, each letter given a slight independent rotation for hand-set imperfection -->
+  <g>
+    <text class="word" x="150" y="380" font-size="220" transform="rotate(-3 220 300)">G</text>
+    <text class="word" x="320" y="368" font-size="220" transform="rotate(2 400 300)">O</text>
+    <text class="word" x="500" y="380" font-size="220" transform="rotate(-2 580 300)">O</text>
+    <text class="word" x="700" y="370" font-size="220" transform="rotate(3 760 300)">D</text>
+  </g>
+
+  <!-- abstract sun / spark symbol, hand-drawn radiating burst -->
+  <g transform="translate(985,255)">
+    <path d="M 0,-70 C 4,-45 -4,-20 0,-2" stroke="#0a0a0a" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <path d="M 45,-48 C 30,-32 18,-14 5,-3" stroke="#0a0a0a" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M 68,4 C 44,3 22,3 5,7" stroke="#0a0a0a" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M 48,52 C 32,36 15,20 4,10" stroke="#0a0a0a" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M -46,-42 C -28,-28 -12,-14 -3,-4" stroke="#0a0a0a" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M -68,10 C -44,7 -22,5 -4,4" stroke="#0a0a0a" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M -40,55 C -26,38 -12,20 -3,8" stroke="#0a0a0a" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- irregular center blob, hand-drawn, not a perfect circle -->
+    <path d="M -20,-4 C -18,-20 2,-24 16,-14 C 28,-6 26,14 12,20 C -2,26 -22,14 -20,-4 Z" fill="#0a0a0a"/>
+  </g>
+
+  <!-- ENERGY, larger, anchoring the bottom, slight baseline wave for imperfection -->
+  <g>
+    <text class="word" x="130" y="840" font-size="215" transform="rotate(-1.5 220 760)">E</text>
+    <text class="word" x="290" y="828" font-size="215" transform="rotate(1 400 760)">N</text>
+    <text class="word" x="470" y="845" font-size="215" transform="rotate(-2 560 760)">E</text>
+    <text class="word" x="625" y="820" font-size="215" transform="rotate(2.5 720 760)">R</text>
+    <text class="word" x="800" y="840" font-size="215" transform="rotate(-1 880 760)">G</text>
+    <text class="word" x="985" y="825" font-size="215" transform="rotate(2 1050 760)">Y</text>
+  </g>
+
+  <!-- loose hand-drawn underline swoosh beneath ENERGY -->
+  <path d="M 140,905 C 340,935 640,895 900,925 C 970,933 1010,918 1040,905"
+        fill="none" stroke="#0a0a0a" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- small ink-dot imperfections scattered for texture -->
+  <circle cx="110" cy="965" r="6" fill="#0a0a0a"/>
+  <circle cx="145" cy="990" r="4" fill="#0a0a0a"/>
+  <circle cx="1085" cy="150" r="5" fill="#0a0a0a"/>
+</svg>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { anton, archivo } from "@/lib/fonts";
+import { anton, archivo, bebasNeue, caveat, permanentMarker, playfairDisplay } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${anton.variable} ${archivo.variable} h-full antialiased`}
+      className={`${anton.variable} ${archivo.variable} ${playfairDisplay.variable} ${permanentMarker.variable} ${caveat.variable} ${bebasNeue.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

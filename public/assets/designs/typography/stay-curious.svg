@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+  <defs>
+    <style>
+      .word { font-family: 'Anton', 'Arial Narrow', sans-serif; font-weight: 400; fill: #0a0a0a; }
+    </style>
+  </defs>
+
+  <!-- STAY -->
+  <g class="word">
+    <text x="600" y="500" text-anchor="middle" font-size="230" letter-spacing="6">
+      <tspan>ST</tspan><tspan dy="-16">A</tspan><tspan dy="16">Y</tspan>
+    </text>
+  </g>
+
+  <!-- experimental broken rule between words -->
+  <rect x="150" y="545" width="560" height="7" fill="#0a0a0a" transform="skewX(-10)"/>
+  <rect x="760" y="545" width="290" height="7" fill="#0a0a0a" transform="skewX(-10)"/>
+
+  <!-- CURIOUS -->
+  <g class="word">
+    <text x="600" y="800" text-anchor="middle" font-size="150" letter-spacing="10">CURIOUS</text>
+  </g>
+
+  <!-- small geometric accent: hollow triangle, set apart top right -->
+  <path d="M 955 190 L 995 260 L 915 260 Z" fill="none" stroke="#0a0a0a" stroke-width="8"/>
+
+  <!-- tiny solid square accent -->
+  <rect x="188" y="878" width="28" height="28" fill="#0a0a0a"/>
+</svg>

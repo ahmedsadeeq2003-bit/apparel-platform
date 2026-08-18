@@ -75,6 +75,42 @@ export async function getTemplatesByCategory(
   };
 }
 
+/** Every active template, grouped by category, for the editor's Templates
+ * panel (unlike getFeaturedTemplates, which caps at one per category). */
+export async function getAllTemplatesGrouped(): Promise<
+  { category: TemplateCategory; templates: DesignTemplate[] }[]
+> {
+  const supabase = await createClient();
+
+  const { data: categories, error: categoryError } = await supabase
+    .from("template_categories")
+    .select(CATEGORY_SELECT)
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+
+  if (categoryError) {
+    throw categoryError;
+  }
+
+  const { data: templates, error: templatesError } = await supabase
+    .from("design_templates")
+    .select(TEMPLATE_SELECT)
+    .eq("is_active", true);
+
+  if (templatesError) {
+    throw templatesError;
+  }
+
+  return ((categories ?? []) as TemplateCategory[])
+    .map((category) => ({
+      category,
+      templates: ((templates ?? []) as DesignTemplate[]).filter(
+        (template) => template.category_id === category.id,
+      ),
+    }))
+    .filter((group) => group.templates.length > 0);
+}
+
 /** One template per category, for the homepage inspiration section. */
 export async function getFeaturedTemplates(): Promise<
   { category: TemplateCategory; template: DesignTemplate }[]

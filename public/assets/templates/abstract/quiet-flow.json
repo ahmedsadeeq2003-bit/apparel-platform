@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "id": "abstract-quiet-flow",
+  "name": "Quiet Flow",
+  "category": "abstract",
+  "description": "Organic wave and fluid line forms layered for a calm, contemporary composition.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/abstract/fluid-lines.svg",
+      "left": 560,
+      "top": 420,
+      "scale": 0.85,
+      "angle": -4,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "svg",
+      "src": "/assets/designs/abstract/organic-wave.svg",
+      "left": 620,
+      "top": 760,
+      "scale": 0.75,
+      "angle": 4,
+      "opacity": 0.85,
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "abstract",
+    "organic",
+    "minimal",
+    "poster"
+  ]
+}

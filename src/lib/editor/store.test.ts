@@ -61,4 +61,38 @@ describe("editor store", () => {
     expect(state.selectedObjectIds).toEqual([]);
     expect(state.isDirty).toBe(false);
   });
+
+  it("setActiveTool opens a tool, and clicking the same tool again closes it", () => {
+    useEditorStore.getState().setActiveTool("templates");
+    expect(useEditorStore.getState().activeTool).toBe("templates");
+
+    useEditorStore.getState().setActiveTool("templates");
+    expect(useEditorStore.getState().activeTool).toBeNull();
+  });
+
+  it("setActiveTool switches directly between two different tools", () => {
+    useEditorStore.getState().setActiveTool("templates");
+    useEditorStore.getState().setActiveTool("elements");
+    expect(useEditorStore.getState().activeTool).toBe("elements");
+  });
+
+  it("setZoom clamps to the 0.5-2 range", () => {
+    useEditorStore.getState().setZoom(5);
+    expect(useEditorStore.getState().zoom).toBe(2);
+
+    useEditorStore.getState().setZoom(0.1);
+    expect(useEditorStore.getState().zoom).toBe(0.5);
+  });
+
+  it("setHistoryFlags updates canUndo/canRedo", () => {
+    useEditorStore.getState().setHistoryFlags(true, false);
+    expect(useEditorStore.getState().canUndo).toBe(true);
+    expect(useEditorStore.getState().canRedo).toBe(false);
+  });
+
+  it("bumpCanvasVersion increments monotonically", () => {
+    const before = useEditorStore.getState().canvasVersion;
+    useEditorStore.getState().bumpCanvasVersion();
+    expect(useEditorStore.getState().canvasVersion).toBe(before + 1);
+  });
 });

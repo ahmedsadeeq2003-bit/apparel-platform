@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+  <defs>
+    <style>
+      .black { font-family: 'Oswald', 'Arial Narrow', sans-serif; font-weight: 700; fill: #0a0a0a; }
+      .outline { font-family: 'Oswald', 'Arial Narrow', sans-serif; font-weight: 700; fill: #0a0a0a; stroke: #f2ede4; stroke-width: 3; paint-order: stroke; }
+    </style>
+  </defs>
+
+  <!-- off-white rough backing patch behind MAKE, hand-drawn wobble via irregular polygon -->
+  <path d="M 150,300 C 250,283 470,288 545,306 C 562,345 558,410 540,438 C 430,452 250,448 175,430 C 148,398 145,335 150,300 Z"
+        fill="#f2ede4"/>
+
+  <!-- MAKE -->
+  <text class="black" x="175" y="420" font-size="150" letter-spacing="0">MAKE</text>
+
+  <!-- hand-drawn underline scribble beneath MAKE -->
+  <path d="M 165,460 C 280,478 400,448 500,466 C 530,472 420,486 330,478 C 270,472 210,478 165,462"
+        fill="none" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- SOMETHING, slightly rotated for hand-set imperfection -->
+  <g transform="rotate(-2.2 600 700)">
+    <text class="outline" x="120" y="720" font-size="128" letter-spacing="0">SOMETHING</text>
+    <!-- imperfect hand-drawn circle accent, orbiting the O in SOME -->
+    <path d="M 300,650
+             C 340,627 385,633 402,660
+             C 420,689 405,725 365,733
+             C 326,741 290,719 288,687
+             C 287,669 292,655 300,650 Z"
+          fill="none" stroke="#0a0a0a" stroke-width="6" opacity="0.75"/>
+  </g>
+
+  <!-- off-white patch under SOMETHING for contrast -->
+  <rect x="100" y="820" width="1000" height="120" fill="#f2ede4" opacity="0"/>
+
+  <!-- hand-drawn asterisk mark, contemporary label motif -->
+  <g transform="translate(980,760) scale(1.1)">
+    <path d="M 0,-30 L 6,25" stroke="#0a0a0a" stroke-width="7" stroke-linecap="round"/>
+    <path d="M -26,-14 L 30,9" stroke="#0a0a0a" stroke-width="7" stroke-linecap="round"/>
+    <path d="M -25,10 L 28,-16" stroke="#0a0a0a" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- small ink-spatter dots for texture / imperfection -->
+  <circle cx="150" cy="960" r="5" fill="#0a0a0a"/>
+  <circle cx="180" cy="978" r="3" fill="#0a0a0a"/>
+  <circle cx="1080" cy="330" r="4" fill="#0a0a0a"/>
+
+  <!-- loose hand-drawn diagonal strike accent -->
+  <path d="M 850,900 C 895,930 940,960 970,995" fill="none" stroke="#0a0a0a" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <line x1="200" y1="150" x2="200" y2="330" stroke="#0a0a0a" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 200,150 C 178,140 165,118 170,95 C 173,78 190,65 200,65
+           C 210,65 227,78 230,95 C 235,118 222,140 200,150 Z" fill="#0a0a0a"/>
+  <path d="M 200,95 C 190,105 186,118 192,128 C 196,120 200,110 200,95 Z" fill="#c9622f"/>
+</svg>

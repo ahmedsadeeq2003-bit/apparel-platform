@@ -52,21 +52,37 @@
 
 /**
  * Homepage-only "editorial" theme -- warm light palette for the fashion-
- * campaign homepage redesign. Scoped to `.theme-editorial` rather than
- * flipping the root tokens: the design editor and dark product/auth pages
- * keep their existing (separately contrast-tuned) dark theme untouched.
- * Every component already styles itself via `bg-background`/`text-foreground`/
- * etc., so overriding these custom properties here re-themes the whole
- * subtree with no component changes required.
+ * studio homepage direction (Figma reference: STITCH atelier concept).
+ * Scoped to `.theme-editorial` rather than flipping the root tokens: the
+ * design editor and dark product/auth pages keep their existing
+ * (separately contrast-tuned) dark theme untouched until they're brought
+ * into this system in a later pass. Every component already styles itself
+ * via `bg-background`/`text-foreground`/etc., so overriding these custom
+ * properties here re-themes the whole subtree with no component changes
+ * required. `--font-display` is also overridden here (serif, vs. the
+ * root's condensed sans) -- any component using `font-display` picks up
+ * the editorial serif automatically inside this scope.
  */
 .theme-editorial {
   color-scheme: light;
-  --color-background: #f4f2ec; /* Ivory */
-  --color-surface: #e9e4d8; /* Putty — alternate section background */
-  --color-foreground: #16140f; /* Ink — near-black, not pure black */
-  --color-muted: #5c564c; /* Warm grey */
-  --color-accent: #b4202f; /* Controlled editorial crimson */
-  --color-accent-foreground: #f4f2ec;
-  --color-border: rgba(22, 20, 15, 0.12);
-  --color-danger: #9b1c1c;
+  --color-background: #f5f1e8; /* Ivory */
+  --color-surface: #ede6d8; /* Putty — alternate section background */
+  --color-foreground: #1b1815; /* Ink — near-black, not pure black */
+  --color-muted: #6b6459; /* Warm grey */
+  --color-accent: #c1623a; /* Terracotta */
+  --color-accent-foreground: #f5f1e8;
+  --color-border: rgba(27, 24, 21, 0.12);
+  --color-danger: #9b3226;
+
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+
+  --text-display-2xl: clamp(2.75rem, 5.5vw, 5rem);
+  --text-display-2xl--line-height: 1.05;
+  --text-display-2xl--letter-spacing: -0.01em;
+
+  --text-display-xl: clamp(2.25rem, 4vw, 3.5rem);
+  --text-display-xl--line-height: 1.08;
+
+  --text-display-md: clamp(1.5rem, 2.5vw, 2rem);
+  --text-display-md--line-height: 1.1;
 }

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <path d="M 60,200 L 140,120 L 170,150 L 130,190 L 200,190 L 230,150
+           L 200,120 L 280,200 L 200,280 L 170,250 L 210,210 L 140,210
+           L 110,250 L 140,280 Z"
+        fill="#0a0a0a" stroke="#0a0a0a" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M 320,90 L 340,90 L 340,310 L 320,310 Z" fill="#e2622b" opacity="0.85"/>
+</svg>

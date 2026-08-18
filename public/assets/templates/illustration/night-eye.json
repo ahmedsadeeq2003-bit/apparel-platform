@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "id": "illustration-night-eye",
+  "name": "Night Eye",
+  "category": "illustration",
+  "description": "Celestial eye line art with tracked-out editorial caption text.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#0a0a0a"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/illustration/celestial-eye.svg",
+      "left": 600,
+      "top": 480,
+      "scale": 1.0,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "SEE BEYOND",
+      "left": 600,
+      "top": 820,
+      "fontSize": 60,
+      "fontFamily": "Oswald",
+      "letterSpacing": 14,
+      "angle": 0,
+      "fill": "#ffffff",
+      "fontStyle": "normal",
+      "fontWeight": "700",
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "illustration",
+    "tattoo",
+    "mystic",
+    "minimal"
+  ]
+}

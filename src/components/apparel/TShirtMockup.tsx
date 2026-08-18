@@ -42,6 +42,19 @@ export const PRINT_OVERLAY_PCT = {
   height: (PRINT_CROP.height / 480) * 100,
 } as const;
 
+/**
+ * The true printable region (`PRINT_AREA`) expressed as a percentage of the
+ * `crop="print-area"` viewBox itself (not the full garment) -- the editor
+ * canvas renders that crop edge-to-edge, so this is what a guide overlay or
+ * a placement-clamp inside the editor's canvas needs to line up with.
+ */
+export const PRINT_AREA_WITHIN_CROP_PCT = {
+  left: ((PRINT_AREA.x - PRINT_CROP.x) / PRINT_CROP.width) * 100,
+  top: ((PRINT_AREA.y - PRINT_CROP.y) / PRINT_CROP.height) * 100,
+  width: (PRINT_AREA.width / PRINT_CROP.width) * 100,
+  height: (PRINT_AREA.height / PRINT_CROP.height) * 100,
+} as const;
+
 export function TShirtMockup({
   hex,
   side,

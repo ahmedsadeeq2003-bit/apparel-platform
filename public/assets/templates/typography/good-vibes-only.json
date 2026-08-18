@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "id": "typography-good-vibes-only",
+  "name": "Good Vibes Only",
+  "category": "typography",
+  "description": "The GOOD ENERGY word mark used as a full playful standalone composition.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/typography/good-energy.svg",
+      "left": 600,
+      "top": 600,
+      "scale": 1.0,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "typography",
+    "playful",
+    "streetwear"
+  ]
+}

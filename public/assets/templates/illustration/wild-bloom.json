@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "id": "illustration-wild-bloom",
+  "name": "Wild Bloom",
+  "category": "illustration",
+  "description": "Layered wildflower and botanical line art with a small editorial word mark.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/illustration/wild-flower.svg",
+      "left": 430,
+      "top": 470,
+      "scale": 0.95,
+      "angle": -4,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "svg",
+      "src": "/assets/designs/illustration/botanical-flower.svg",
+      "left": 760,
+      "top": 640,
+      "scale": 0.7,
+      "angle": 8,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "GROW",
+      "left": 600,
+      "top": 980,
+      "fontSize": 90,
+      "fontFamily": "Playfair Display",
+      "letterSpacing": 10,
+      "angle": 0,
+      "fill": "#0a0a0a",
+      "fontStyle": "italic",
+      "fontWeight": "500",
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "illustration",
+    "floral",
+    "line-art",
+    "editorial"
+  ]
+}

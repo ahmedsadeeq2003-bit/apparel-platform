@@ -46,14 +46,14 @@ export function SiteFooter() {
       <Container>
         <div className="flex flex-col gap-6 border-b border-border py-10 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-display text-display-md uppercase text-foreground">
+            <h2 className="font-display text-display-md text-foreground">
               Ready to design yours?
             </h2>
             <p className="mt-1 text-body-sm text-muted">
               Free to design. You only pay when you order.
             </p>
           </div>
-          <Button href="/signup" variant="primary" className="self-start sm:self-auto">
+          <Button href="/signup" variant="dark" className="self-start sm:self-auto">
             Start design
           </Button>
         </div>

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "id": "minimal-northbound",
+  "name": "Northbound",
+  "category": "minimal",
+  "description": "Compass and mountain marks paired with tracked caption text for a small sleeve or chest print.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/minimal/compass-symbol.svg",
+      "left": 520,
+      "top": 440,
+      "scale": 0.5,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "svg",
+      "src": "/assets/designs/minimal/simple-mountain.svg",
+      "left": 680,
+      "top": 460,
+      "scale": 0.45,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "NORTHBOUND",
+      "left": 600,
+      "top": 600,
+      "fontSize": 36,
+      "fontFamily": "Oswald",
+      "letterSpacing": 12,
+      "angle": 0,
+      "fill": "#0a0a0a",
+      "fontStyle": "normal",
+      "fontWeight": "700",
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "minimal",
+    "travel",
+    "chest-print",
+    "subtle"
+  ]
+}

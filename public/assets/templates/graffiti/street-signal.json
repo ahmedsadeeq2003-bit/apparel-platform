@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "id": "graffiti-street-signal",
+  "name": "Street Signal",
+  "category": "graffiti",
+  "description": "Distorted glitch-poster typography paired with a jagged street-lightning accent.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#1a1a1a"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/typography/no-signal.svg",
+      "left": 600,
+      "top": 560,
+      "scale": 0.85,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "svg",
+      "src": "/assets/designs/graffiti/street-lightning.svg",
+      "left": 940,
+      "top": 940,
+      "scale": 0.35,
+      "angle": -8,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "graffiti",
+    "streetwear",
+    "glitch",
+    "typography"
+  ]
+}

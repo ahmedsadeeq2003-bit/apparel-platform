@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1.0",
+  "id": "typography-own-it",
+  "name": "Own It",
+  "category": "typography",
+  "description": "The CREATE YOUR OWN serif word mark paired with a small lucky-star accent.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/typography/create-your-own.svg",
+      "left": 600,
+      "top": 560,
+      "scale": 0.9,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "svg",
+      "src": "/assets/designs/illustration/lucky-star.svg",
+      "left": 990,
+      "top": 990,
+      "scale": 0.3,
+      "angle": 8,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "typography",
+    "serif",
+    "editorial"
+  ]
+}

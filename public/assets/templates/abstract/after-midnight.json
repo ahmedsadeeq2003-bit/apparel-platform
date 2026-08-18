@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "id": "abstract-after-midnight",
+  "name": "After Midnight",
+  "category": "abstract",
+  "description": "Dark distorted-circle form with a tracked condensed caption for a moody, editorial mood.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#0a0a0a"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/abstract/distorted-circle.svg",
+      "left": 600,
+      "top": 460,
+      "scale": 1.0,
+      "angle": 6,
+      "opacity": 0.95,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "AFTER MIDNIGHT",
+      "left": 600,
+      "top": 840,
+      "fontSize": 56,
+      "fontFamily": "Oswald",
+      "letterSpacing": 10,
+      "angle": 0,
+      "fill": "#ffffff",
+      "fontStyle": "normal",
+      "fontWeight": "700",
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "abstract",
+    "dark",
+    "poster",
+    "editorial"
+  ]
+}

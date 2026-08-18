@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "id": "typography-off-duty",
+  "name": "Off Duty",
+  "category": "typography",
+  "description": "The complete OFF THE CLOCK word mark used as a standalone full-front composition.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/typography/off-the-clock.svg",
+      "left": 600,
+      "top": 600,
+      "scale": 1.0,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "typography",
+    "streetwear",
+    "editorial"
+  ]
+}

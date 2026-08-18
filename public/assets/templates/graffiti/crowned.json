@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "id": "graffiti-crowned",
+  "name": "Crowned",
+  "category": "graffiti",
+  "description": "Hand-drawn street crown motif anchoring a single condensed word mark.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#0a0a0a"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/graffiti/hand-drawn-crown.svg",
+      "left": 600,
+      "top": 420,
+      "scale": 1.0,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "ROYALTY",
+      "left": 600,
+      "top": 780,
+      "fontSize": 130,
+      "fontFamily": "Anton",
+      "letterSpacing": 8,
+      "angle": 0,
+      "fill": "#ffffff",
+      "fontStyle": "normal",
+      "fontWeight": "700",
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "svg",
+      "src": "/assets/designs/graffiti/scribble-burst.svg",
+      "left": 970,
+      "top": 970,
+      "scale": 0.3,
+      "angle": 10,
+      "opacity": 0.8,
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "graffiti",
+    "streetwear",
+    "crown",
+    "bold"
+  ]
+}

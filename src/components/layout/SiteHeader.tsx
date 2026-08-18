@@ -52,7 +52,7 @@ export async function SiteHeader() {
                 Log in
               </Link>
             )}
-            <Button href={user ? "/products" : "/signup"} variant="primary">
+            <Button href={user ? "/products" : "/signup"} variant="dark">
               {user ? "Browse shirts" : "Sign up"}
             </Button>
           </div>

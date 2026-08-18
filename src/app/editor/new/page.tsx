@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getProductBySlug } from "@/lib/products/queries";
+import { getAllTemplatesGrouped } from "@/lib/templates/queries";
 import { EditorShellLoader } from "@/components/editor/EditorShellLoader";
 
 export default async function NewDesignPage({
@@ -34,9 +35,11 @@ export default async function NewDesignPage({
     notFound();
   }
 
+  const templateGroups = await getAllTemplatesGrouped();
+
   return (
-    <main className="flex min-h-screen flex-col bg-background">
-      <EditorShellLoader product={product} initialColor={initialColor} />
+    <main className="theme-editorial flex min-h-screen flex-col bg-background">
+      <EditorShellLoader product={product} initialColor={initialColor} templateGroups={templateGroups} />
     </main>
   );
 }

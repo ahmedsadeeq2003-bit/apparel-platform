@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+  <defs>
+    <style>
+      .serif { font-family: 'Playfair Display', 'EB Garamond', Georgia, serif; font-weight: 500; fill: #0a0a0a; }
+      .serif-italic { font-family: 'Playfair Display', 'EB Garamond', Georgia, serif; font-weight: 500; font-style: italic; fill: #0a0a0a; }
+    </style>
+  </defs>
+
+  <!-- small abstract typographic detail: an oversized, isolated quotation mark / comma-form -->
+  <text class="serif-italic" x="440" y="330" font-size="220" text-anchor="middle">&#8221;</text>
+
+  <!-- hairline rule under the mark -->
+  <line x1="560" y1="300" x2="1040" y2="300" stroke="#0a0a0a" stroke-width="2"/>
+
+  <!-- CREATE -->
+  <text class="serif" x="150" y="560" font-size="140" letter-spacing="2">Create</text>
+
+  <!-- YOUR, set smaller and indented for editorial hierarchy -->
+  <text class="serif-italic" x="150" y="700" font-size="110" letter-spacing="1">your</text>
+
+  <!-- OWN, largest, anchoring the base -->
+  <text class="serif" x="150" y="900" font-size="180" letter-spacing="1">Own</text>
+
+  <!-- long hairline rule beneath, editorial masthead style -->
+  <line x1="150" y1="960" x2="1050" y2="960" stroke="#0a0a0a" stroke-width="2"/>
+
+  <!-- tiny abstract mark: a single thin diagonal serif-stroke accent, bottom right -->
+  <text class="serif" x="1040" y="1050" font-size="70" text-anchor="end" letter-spacing="8">&#8212;</text>
+</svg>

@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { CampaignGarment } from "@/components/apparel/CampaignGarment";
-import { pickContrastHex } from "@/lib/color";
+import { EDITORIAL_GARMENT_COLORS } from "@/lib/templates/garmentColors";
+import { designTypeLabel } from "@/lib/templates/designType";
 import type { DesignTemplate, TemplateCategory } from "@/lib/templates/queries";
-
-const TILE_ROTATIONS = ["-2deg", "1.5deg", "-1deg", "2deg", "-1.5deg"] as const;
 
 export function InspirationGrid({
   featured,
@@ -17,33 +15,39 @@ export function InspirationGrid({
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-4 md:grid-cols-5">
+    <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4">
       {featured.map(({ category, template }, index) => (
         <motion.div
           key={category.id}
-          className={index === 0 ? "col-span-2 row-span-2" : ""}
           initial={reduceMotion ? false : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Link href={`/inspiration/${category.slug}`} className="group flex flex-col gap-3">
-            <CampaignGarment
-              canvasJson={template.canvas_json}
-              hex={pickContrastHex(template.colors)}
-              side={template.print_area === "back" ? "back" : "front"}
-              label={`${template.name}, ${category.name} template`}
-              className="mx-auto w-[85%] transition-transform group-hover:scale-[1.03]"
-              style={{ transform: `rotate(${TILE_ROTATIONS[index % TILE_ROTATIONS.length]})` }}
-              shadowIntensity={0.75}
-            />
-            <span className="flex items-center justify-center gap-1 text-body-sm text-muted transition-colors group-hover:text-foreground">
-              {category.name}
-              <ArrowUpRight
-                className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100"
-                aria-hidden
+          <Link href={`/inspiration/${category.slug}`} className="group flex flex-col gap-4">
+            <div
+              className="relative aspect-square overflow-hidden rounded-sm"
+              style={{
+                background:
+                  "linear-gradient(160deg, color-mix(in oklab, var(--color-background) 70%, white) 0%, var(--color-background) 100%)",
+              }}
+            >
+              <span className="absolute left-3 top-3 z-10 rounded-full bg-background px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-foreground shadow-sm">
+                {designTypeLabel(template.design_type)}
+              </span>
+              <CampaignGarment
+                canvasJson={template.canvas_json}
+                hex={EDITORIAL_GARMENT_COLORS[category.slug] ?? "#EDEADF"}
+                side={template.print_area === "back" ? "back" : "front"}
+                label={`${template.name}, ${category.name} template`}
+                className="absolute left-1/2 top-[8%] w-[72%] -translate-x-1/2 transition-transform group-hover:scale-[1.03]"
+                shadowIntensity={0.8}
               />
-            </span>
+            </div>
+            <div>
+              <h3 className="font-display text-body-lg text-foreground">{template.name}</h3>
+              <p className="mt-1 text-body-sm text-muted">From the STITCH library</p>
+            </div>
           </Link>
         </motion.div>
       ))}

@@ -21,8 +21,11 @@ export function BusinessSection({
     <Section id="business" tone="raised">
       <Container>
         <div className="flex flex-col gap-6 md:max-w-xl">
-          <h2 className="font-display text-display-xl uppercase text-foreground">
-            Custom uniforms for your team.
+          <span className="text-label font-semibold uppercase tracking-[0.18em] text-accent">
+            For teams and organizations
+          </span>
+          <h2 className="font-display text-display-xl text-foreground">
+            Custom Uniforms for Your Team
           </h2>
           <p className="text-body-lg text-muted">
             From a team of five to an entire organization, create branded
@@ -30,7 +33,7 @@ export function BusinessSection({
             yours.
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            <Button href="/products" variant="primary">
+            <Button href="/products" variant="primary" className="uppercase tracking-wide text-body-sm font-semibold">
               Design for your team
             </Button>
             <span className="text-body-sm text-muted">Request bulk order</span>

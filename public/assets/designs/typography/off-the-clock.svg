@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+  <defs>
+    <style>
+      .word { font-family: 'Anton', 'Arial Narrow', sans-serif; font-weight: 400; fill: #0a0a0a; }
+      .small { font-family: 'Anton', 'Arial Narrow', sans-serif; font-weight: 400; fill: #0a0a0a; }
+      .accent { stroke: #b5572f; fill: none; }
+    </style>
+  </defs>
+
+  <!-- OFF -->
+  <text class="word" x="150" y="400" font-size="240" letter-spacing="4">OFF</text>
+
+  <!-- hand-drawn clock symbol, placed beside OFF as small accent detail -->
+  <g transform="translate(940,300)">
+    <!-- imperfect wobbly circle -->
+    <path d="M 0,-78
+             C 44,-80 80,-46 80,-2
+             C 81,42 45,79 0,80
+             C -45,81 -80,44 -79,0
+             C -78,-43 -43,-77 0,-78 Z"
+          fill="none" stroke="#0a0a0a" stroke-width="7"/>
+    <!-- tick marks -->
+    <line x1="0" y1="-78" x2="0" y2="-62" stroke="#0a0a0a" stroke-width="6"/>
+    <line x1="0" y1="62" x2="0" y2="78" stroke="#0a0a0a" stroke-width="5"/>
+    <line x1="-79" y1="0" x2="-63" y2="0" stroke="#0a0a0a" stroke-width="5"/>
+    <line x1="63" y1="0" x2="80" y2="0" stroke="#0a0a0a" stroke-width="5"/>
+    <!-- clock hands, hand-drawn, set off the hour (accent color) -->
+    <line x1="0" y1="4" x2="-34" y2="-30" stroke="#b5572f" stroke-width="8" stroke-linecap="round"/>
+    <line x1="0" y1="4" x2="38" y2="34" stroke="#b5572f" stroke-width="8" stroke-linecap="round"/>
+    <!-- center pin -->
+    <circle cx="0" cy="4" r="6" fill="#0a0a0a"/>
+  </g>
+
+  <!-- THE, editorial small-caps treatment flanked by hairline rules -->
+  <g transform="translate(600,600)">
+    <line x1="-320" y1="0" x2="-90" y2="0" stroke="#0a0a0a" stroke-width="2"/>
+    <text class="small" x="0" y="26" font-size="88" letter-spacing="18" text-anchor="middle">THE</text>
+    <line x1="95" y1="0" x2="320" y2="0" stroke="#0a0a0a" stroke-width="2"/>
+  </g>
+
+  <!-- CLOCK -->
+  <text class="word" x="150" y="920" font-size="230" letter-spacing="2">CLOCK</text>
+
+  <!-- small accent-color dot, subtle punctuation echoing the clock hand color -->
+  <circle cx="1055" cy="855" r="14" fill="#b5572f"/>
+</svg>

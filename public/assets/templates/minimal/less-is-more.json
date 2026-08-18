@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "id": "minimal-less-is-more",
+  "name": "Less Is More",
+  "category": "minimal",
+  "description": "A single minimal cross mark with a small serif caption beneath it.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/minimal/minimal-cross.svg",
+      "left": 600,
+      "top": 440,
+      "scale": 0.6,
+      "angle": 0,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "Less is more",
+      "left": 600,
+      "top": 600,
+      "fontSize": 46,
+      "fontFamily": "Playfair Display",
+      "letterSpacing": 1,
+      "angle": 0,
+      "fill": "#0a0a0a",
+      "fontStyle": "italic",
+      "fontWeight": "500",
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "minimal",
+    "chest-print",
+    "serif",
+    "subtle"
+  ]
+}

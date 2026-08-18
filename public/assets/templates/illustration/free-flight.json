@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "id": "illustration-free-flight",
+  "name": "Free Flight",
+  "category": "illustration",
+  "description": "A single flying bird mark paired with an elegant serif word mark.",
+  "canvas": {
+    "width": 1200,
+    "height": 1200,
+    "suggestedGarmentColor": "#f2ede4"
+  },
+  "objects": [
+    {
+      "type": "svg",
+      "src": "/assets/designs/illustration/flying-bird.svg",
+      "left": 700,
+      "top": 420,
+      "scale": 0.9,
+      "angle": -6,
+      "opacity": 1.0,
+      "originX": "center",
+      "originY": "center"
+    },
+    {
+      "type": "text",
+      "text": "Wander",
+      "left": 480,
+      "top": 760,
+      "fontSize": 150,
+      "fontFamily": "Playfair Display",
+      "letterSpacing": 1,
+      "angle": 0,
+      "fill": "#0a0a0a",
+      "fontStyle": "italic",
+      "fontWeight": "500",
+      "originX": "center",
+      "originY": "center"
+    }
+  ],
+  "tags": [
+    "illustration",
+    "bird",
+    "serif",
+    "editorial"
+  ]
+}

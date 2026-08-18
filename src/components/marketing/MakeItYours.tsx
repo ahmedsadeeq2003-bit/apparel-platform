@@ -21,8 +21,11 @@ export function MakeItYours({ examples }: { examples: Example[] }) {
   return (
     <Section>
       <Container>
-        <h2 className="font-display text-display-xl uppercase text-foreground">
-          Make it yours.
+        <span className="text-label font-semibold uppercase tracking-[0.18em] text-muted">
+          Endless combinations
+        </span>
+        <h2 className="mt-3 font-display text-display-xl text-foreground">
+          Make It Yours
         </h2>
         <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-14 md:grid-cols-4">
           {examples.map((example, index) => (
