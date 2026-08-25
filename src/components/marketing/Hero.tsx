@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { Container } from "@/components/layout/Container";
-import { TShirtMockup, PRINT_OVERLAY_PCT } from "@/components/apparel/TShirtMockup";
 import { MarkerTag } from "@/components/marketing/EditorialMarks";
 import { MagneticButton } from "@/components/marketing/MagneticButton";
+import { shirtAssets } from "@/lib/assets/manifest";
 
 /** The site's standard "premium, not bouncy" ease -- reused literally from
  * every other entrance animation on this page rather than introducing a
@@ -29,9 +30,20 @@ export type HeroShirt = {
   label: string;
 };
 
-/** Real Classic Tee color from `product_colors` (see supabase/seed.sql) --
- * black for the strongest silhouette against the warm ivory backdrop. */
-const BLANK_TEE_HEX = "#0B0B0C";
+/** The one real photographed Classic Tee color so far (see
+ * src/lib/assets/manifest.ts -- shirtAssets.classicTee.black), used here
+ * instead of the flat hand-drawn TShirtMockup SVG so the hero garment reads
+ * as an actual physical product. Black also gives the strongest silhouette
+ * against the warm ivory backdrop, same reasoning as before. */
+const HERO_SHIRT = shirtAssets.classicTee.black.front;
+const HERO_SHIRT_ASPECT = { width: 784, height: 1168 };
+
+/** Chest print-area position as a percentage of the real photo -- eyeballed
+ * from the photo itself (collar, shoulder seams, natural chest-print
+ * placement), not derived from TShirtMockup's PRINT_OVERLAY_PCT, which is
+ * specific to that SVG's own viewBox geometry and has no relationship to
+ * this image's actual proportions. */
+const PHOTO_PRINT_AREA_PCT = { left: 33, top: 29, width: 34 };
 
 type HeadlineSegment = { text: string; italic?: boolean; dir: -1 | 1 };
 
@@ -199,9 +211,9 @@ const AMBIENT_MARKS: Mark[] = [
   },
 ];
 
-/** Positioned as a percentage of the shirt's own wrapper -- same
- * PRINT_OVERLAY_PCT math CampaignGarment uses -- so it lands accurately
- * inside the print-safe area, not just eyeballed onto the garment. */
+/** Lands inside PHOTO_PRINT_AREA_PCT, the real photo's estimated chest
+ * print area (see below), not just eyeballed onto an arbitrary point on the
+ * garment. */
 const SETTLING_MARK = {
   path: "/assets/designs/graffiti/hand-drawn-crown.svg",
   from: { x: 0, y: -110, rotate: -35, scale: 0.35 },
@@ -351,12 +363,13 @@ export function Hero() {
                   className="relative"
                   style={{ filter: "drop-shadow(0 28px 40px rgba(22,20,15,0.28)) drop-shadow(0 6px 10px rgba(22,20,15,0.18))" }}
                 >
-                  <TShirtMockup
-                    hex={BLANK_TEE_HEX}
-                    side="front"
-                    crop="full"
-                    label="Blank Classic Tee, ready to design"
-                    className="h-full w-full"
+                  <Image
+                    src={HERO_SHIRT.path}
+                    alt="Blank Classic Tee, ready to design"
+                    width={HERO_SHIRT_ASPECT.width}
+                    height={HERO_SHIRT_ASPECT.height}
+                    priority
+                    className="h-auto w-full"
                   />
                   <motion.img
                     src={SETTLING_MARK.path}
@@ -364,9 +377,9 @@ export function Hero() {
                     aria-hidden
                     className="pointer-events-none absolute"
                     style={{
-                      left: `${PRINT_OVERLAY_PCT.left + PRINT_OVERLAY_PCT.width * 0.18}%`,
-                      top: `${PRINT_OVERLAY_PCT.top + PRINT_OVERLAY_PCT.height * 0.1}%`,
-                      width: `${PRINT_OVERLAY_PCT.width * 0.64}%`,
+                      left: `${PHOTO_PRINT_AREA_PCT.left}%`,
+                      top: `${PHOTO_PRINT_AREA_PCT.top}%`,
+                      width: `${PHOTO_PRINT_AREA_PCT.width}%`,
                       // The library SVG is drawn in near-black (#0a0a0a);
                       // invert renders it white so it actually reads against
                       // the black tee, like a real white stencil print.

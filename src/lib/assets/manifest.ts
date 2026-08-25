@@ -70,7 +70,13 @@ export const shirtAssets = {
    * `product_colors` rows exactly. */
   classicTee: {
     white: shirtColor("classic-tee", "white"),
-    black: shirtColor("classic-tee", "black"),
+    // The one real photographed color so far -- landing-page hero only.
+    // .jpg (not the shirtColor() helper's default .png) because that's the
+    // real file's actual encoding.
+    black: {
+      front: { path: "/assets/shirts/classic-tee/front/classic-tee-black-front.jpg", available: true },
+      back: { path: "/assets/shirts/classic-tee/back/classic-tee-black-back.jpg", available: true },
+    },
     ashGrey: shirtColor("classic-tee", "ash-grey"),
     voltGreen: shirtColor("classic-tee", "volt-green"),
   },

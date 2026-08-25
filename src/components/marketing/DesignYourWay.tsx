@@ -1,12 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { ImageIcon, TextAa, UploadSimple } from "@phosphor-icons/react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
 import { CampaignGarment } from "@/components/apparel/CampaignGarment";
-import { TShirtMockup } from "@/components/apparel/TShirtMockup";
+import { shirtAssets } from "@/lib/assets/manifest";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -59,7 +60,16 @@ function StartingPoints({ template }: { template: Preview }) {
   const reduceMotion = useReducedMotion();
   const items = [
     <span key="blank" className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-border bg-background">
-      <TShirtMockup hex="#F4F2EC" side="front" crop="print-area" label="Blank shirt" className="h-full w-full" />
+      <Image
+        src={shirtAssets.classicTee.black.front.path}
+        alt="Blank shirt"
+        width={784}
+        height={1168}
+        // Zoomed into a clean stretch of fabric (below the collar, above any
+        // print placement) so this tiny 64px icon reads as fabric texture,
+        // not a whole tiny garment.
+        className="h-full w-full scale-[2.6] object-cover object-[50%_38%]"
+      />
     </span>,
     <span key="template" className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-border bg-background">
       <CampaignGarment canvasJson={template.canvasJson} hex={template.hex} side={template.side} label={template.label} className="w-[85%]" shadowIntensity={0} />
