@@ -1,0 +1,75 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
+import { Container } from "@/components/layout/Container";
+import { MagneticButton } from "@/components/marketing/MagneticButton";
+import { CampaignGarment } from "@/components/apparel/CampaignGarment";
+import type { CustomerSubmission } from "@/components/marketing/FreshOffThePress";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+/**
+ * No public "customer designs" data source exists anywhere in this codebase
+ * -- the `designs` table (src/lib/editor/actions.ts) stores private,
+ * per-user saved designs with no opt-in-to-share flag and no public query,
+ * matching FreshOffThePress's own documented reasoning on the homepage.
+ * `submissions` is always `[]` from the page today; this section is built
+ * to render real work the moment that data exists, but never fabricates a
+ * customer, a design, or a handle to fill the gap in the meantime.
+ */
+export function CustomerDesignsSection({ submissions }: { submissions: CustomerSubmission[] }) {
+  const reduceMotion = useReducedMotion();
+  const hasReal = submissions.length > 0;
+
+  return (
+    <section id="customer-designs" className="scroll-mt-24 py-section">
+      <Container>
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.5, ease: EASE }}
+          className="flex flex-col gap-2"
+        >
+          <span className="text-label font-semibold uppercase tracking-[0.18em] text-accent">Customer designs</span>
+          <h2 className="font-display text-display-xl text-foreground">See what others made.</h2>
+        </motion.div>
+
+        {hasReal ? (
+          <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4">
+            {submissions.slice(0, 8).map((submission) => (
+              <CampaignGarment
+                key={submission.id}
+                canvasJson={submission.canvasJson}
+                hex={submission.hex}
+                side={submission.side}
+                label={submission.designName}
+                className="w-full"
+                shadowIntensity={0.9}
+              />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.6, delay: reduceMotion ? 0 : 0.15, ease: EASE }}
+            className="mt-12 flex flex-col items-center gap-6 rounded-sm border border-dashed border-border py-20 text-center"
+          >
+            <h3 className="font-display text-display-md text-foreground">Your design could be next.</h3>
+            <p className="max-w-sm text-body text-muted">
+              No customer designs to show here yet -- be one of the first to make something and wear it.
+            </p>
+            <MagneticButton
+              href="/products"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-7 text-body-sm font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
+            >
+              Start designing
+            </MagneticButton>
+          </motion.div>
+        )}
+      </Container>
+    </section>
+  );
+}
