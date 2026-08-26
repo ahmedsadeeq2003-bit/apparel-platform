@@ -177,7 +177,24 @@ export function SignUpForm() {
         <h2 className="font-display text-display-md text-foreground">Create your account</h2>
       </motion.div>
 
-      <motion.form variants={ITEM} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+      {/* method="post" is a deliberate defense-in-depth fallback, not
+          decorative -- this form submits via onSubmit/handleSubmit (which
+          calls preventDefault()), so the browser's native submission never
+          normally runs. But if that JS handler somehow doesn't attach in
+          time (slow network, an extension, or -- confirmed while testing
+          this -- a dev-mode Fast Refresh recompile mid-interaction), an
+          unset method defaults to GET, which would put the password in the
+          URL (browser history, server logs). Same safety net React itself
+          auto-adds to the OAuth forms below (their action={fn} prop gets a
+          `javascript:throw` fallback for exactly this reason); this form
+          uses onSubmit instead of action, so it needs its own. */}
+      <motion.form
+        variants={ITEM}
+        method="post"
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+        noValidate
+      >
         <SignupField
           label="Full name"
           autoComplete="name"

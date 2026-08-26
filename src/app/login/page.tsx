@@ -1,26 +1,25 @@
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { Container } from "@/components/layout/Container";
-import { Section } from "@/components/layout/Section";
-import { LoginForm } from "@/components/auth/LoginForm";
+import Link from "next/link";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { LoginExperience } from "@/components/auth/LoginExperience";
 
+/** Same bespoke-chrome pattern as /signup (no SiteHeader/SiteFooter) for
+ * the same reason: this is meant to read as a focused moment, not another
+ * marketing page. GrainOverlay lives inside LoginVisual (desktop-only)
+ * rather than here, since /signup renders it site-wide across its whole
+ * page -- this page's grain is scoped to the visual panel specifically. */
 export default function LoginPage() {
   return (
-    <>
-      <SiteHeader />
-      <main className="flex-1">
-        <Section>
-          <Container>
-            <h1 className="font-display text-display-xl uppercase text-foreground">
-              Log in
-            </h1>
-            <div className="mt-8">
-              <LoginForm />
-            </div>
-          </Container>
-        </Section>
-      </main>
-      <SiteFooter />
-    </>
+    <div className="theme-editorial flex min-h-screen flex-col bg-background text-foreground">
+      <header className="flex items-center justify-between px-6 py-5 md:px-10">
+        <Wordmark />
+        <Link
+          href="/signup"
+          className="text-body-sm font-medium text-muted transition-colors hover:text-foreground"
+        >
+          Sign up
+        </Link>
+      </header>
+      <LoginExperience />
+    </div>
   );
 }
