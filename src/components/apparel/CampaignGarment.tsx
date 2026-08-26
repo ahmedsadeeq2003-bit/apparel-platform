@@ -5,16 +5,27 @@ import Image from "next/image";
 import { useStaticFabricPreview } from "@/hooks/useStaticFabricPreview";
 import { CANVAS_SIZE } from "@/lib/editor/constants";
 import { shirtAssets } from "@/lib/assets/manifest";
+import { nearestHex } from "@/lib/color";
 
-/** The one real photographed Classic Tee color today (see
- * src/lib/assets/manifest.ts -- shirtAssets.classicTee.black). Every
- * marketing use of this component renders that real photo now instead of
- * the flat hand-drawn TShirtMockup SVG, front or back per `side`. `hex`
- * stays in the prop type (every call site still passes the template's
- * curated color) but no longer tints anything -- there's nothing to tint
- * once the base is a photo, not an SVG path -- kept so call sites don't all
- * need editing again the moment a second real color exists. */
-const SHIRT_PHOTO = { front: shirtAssets.classicTee.black.front, back: shirtAssets.classicTee.black.back };
+/** The four real photographed Classic Tee front colors (see
+ * src/lib/assets/manifest.ts -- shirtAssets.classicTee), matching the real
+ * `product_colors` hexes exactly. Every marketing use of this component
+ * renders one of these real photos now instead of the flat hand-drawn
+ * TShirtMockup SVG. `hex` (the template's curated color, e.g. terracotta or
+ * sage -- not itself a photographed color) picks whichever real photo reads
+ * closest via nearestHex, so different templates still land on visibly
+ * different real garments instead of all defaulting to one. */
+const REAL_COLOR_HEX = { white: "#F4F2EC", black: "#0B0B0C", ashGrey: "#A8A69F", voltGreen: "#D7FF3E" };
+const FRONT_PHOTO_BY_COLOR = {
+  white: shirtAssets.classicTee.white.front,
+  black: shirtAssets.classicTee.black.front,
+  ashGrey: shirtAssets.classicTee.ashGrey.front,
+  voltGreen: shirtAssets.classicTee.voltGreen.front,
+};
+// Only black has a real photographed back (the other three source photos
+// were front-only shoots) -- every back-side render falls back to it rather
+// than inventing a back photo that doesn't exist.
+const BACK_PHOTO = shirtAssets.classicTee.black.back;
 const PHOTO_ASPECT = { width: 784, height: 1168 };
 
 /** The canvas overlay's position as a percentage of the real photo --
@@ -36,7 +47,6 @@ const PHOTO_OVERLAY_PCT = { left: 21, top: 17, width: 58, height: 44 };
  */
 export function CampaignGarment({
   canvasJson,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- kept in the prop type for every call site (see SHIRT_PHOTO comment above); genuinely unused now that the base is a photo, not a tintable SVG path
   hex,
   side = "front",
   label,
@@ -65,7 +75,7 @@ export function CampaignGarment({
     .filter(Boolean)
     .join(" ");
 
-  const photo = SHIRT_PHOTO[side];
+  const photo = side === "back" ? BACK_PHOTO : FRONT_PHOTO_BY_COLOR[nearestHex(hex, REAL_COLOR_HEX)];
 
   return (
     <div

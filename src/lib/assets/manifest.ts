@@ -58,6 +58,7 @@ function templateEntry(category: TemplateCategory, slug: string): AssetEntry {
 export type ShirtSide = "front" | "back";
 export type ShirtColorAssets = Record<ShirtSide, AssetEntry>;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- every classicTee color now has at least a real front photo (see shirtColorFrontOnly below), but this fully-pending helper is still the right one to reach for the next time a genuinely new color/style with zero real photos gets declared here
 function shirtColor(styleSlug: string, colorSlug: string): ShirtColorAssets {
   return {
     front: pending(`/assets/shirts/${styleSlug}/front/${styleSlug}-${colorSlug}-front.png`),
@@ -65,20 +66,31 @@ function shirtColor(styleSlug: string, colorSlug: string): ShirtColorAssets {
   };
 }
 
+/** A color with a real photographed front but no real back yet -- .jpg (not
+ * shirtColor()'s default .png) because that's the real files' actual
+ * encoding. `back` stays `pending()` until a real back photo exists. */
+function shirtColorFrontOnly(colorSlug: string): ShirtColorAssets {
+  return {
+    front: { path: `/assets/shirts/classic-tee/front/classic-tee-${colorSlug}-front.jpg`, available: true },
+    back: pending(`/assets/shirts/classic-tee/back/classic-tee-${colorSlug}-back.png`),
+  };
+}
+
 export const shirtAssets = {
   /** Real product (`products.slug = "classic-tee"`); colors match the real
-   * `product_colors` rows exactly. */
+   * `product_colors` rows exactly. Every color has a real photographed
+   * front now; black is the only one with a real back too (the other three
+   * source photos were front-only shoots), so CampaignGarment falls back to
+   * black's back photo for any non-black color's back-side render rather
+   * than inventing one. */
   classicTee: {
-    white: shirtColor("classic-tee", "white"),
-    // The one real photographed color so far -- landing-page hero only.
-    // .jpg (not the shirtColor() helper's default .png) because that's the
-    // real file's actual encoding.
+    white: shirtColorFrontOnly("white"),
     black: {
       front: { path: "/assets/shirts/classic-tee/front/classic-tee-black-front.jpg", available: true },
       back: { path: "/assets/shirts/classic-tee/back/classic-tee-black-back.jpg", available: true },
     },
-    ashGrey: shirtColor("classic-tee", "ash-grey"),
-    voltGreen: shirtColor("classic-tee", "volt-green"),
+    ashGrey: shirtColorFrontOnly("ash-grey"),
+    voltGreen: shirtColorFrontOnly("volt-green"),
   },
   /** Not yet real products in the database (no `products` row, no colors).
    * Folder structure is prepared under public/assets/shirts/, but no
