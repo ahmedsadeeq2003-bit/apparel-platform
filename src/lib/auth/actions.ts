@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { translateAuthError } from "@/lib/auth/errors";
 import { safeNext } from "@/lib/auth/redirect";
@@ -17,7 +18,28 @@ import {
   type SignUpInput,
 } from "@/lib/auth/schemas";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+/** The origin every auth redirect URL is built against. `NEXT_PUBLIC_SITE_URL`
+ * is a Next.js `NEXT_PUBLIC_*` var, inlined at *build* time -- if a
+ * deployment (e.g. a Vercel project) never has it set as a Production
+ * environment variable, every `${siteUrl}/auth/callback` silently becomes
+ * the literal string `"undefined/auth/callback"`. Supabase can't honor that
+ * as a `redirectTo`, so it falls back to the project's configured Site URL
+ * instead -- which is exactly how a successful Google sign-in was landing
+ * back on `/` instead of reaching `/auth/callback`. Deriving the origin
+ * from the incoming request's own Host header is correct in every
+ * environment (local, preview, production) without needing that env var
+ * configured per-deployment at all, and matches how `/auth/callback`
+ * itself already derives `origin` from `request.url`. The env var is kept
+ * only as a last-resort fallback for the rare case headers() has nothing. */
+async function resolveSiteUrl(): Promise<string> {
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
+  if (host) {
+    const proto = headersList.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+}
 
 export async function signUpWithPassword(
   input: SignUpInput,
@@ -38,7 +60,7 @@ export async function signUpWithPassword(
         phone: parsed.data.phone,
         is_designer: parsed.data.isDesigner === "yes",
       },
-      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
+      emailRedirectTo: `${await resolveSiteUrl()}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
     },
   });
 
@@ -72,7 +94,7 @@ export async function resendVerificationEmail(
     type: "signup",
     email,
     options: {
-      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
+      emailRedirectTo: `${await resolveSiteUrl()}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
     },
   });
 
@@ -97,7 +119,7 @@ export async function signInWithOAuth(
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
+      redirectTo: `${await resolveSiteUrl()}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
       skipBrowserRedirect: true,
     },
   });
@@ -140,7 +162,7 @@ export async function signInWithMagicLink(
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}` },
+    options: { emailRedirectTo: `${await resolveSiteUrl()}/auth/callback?next=${encodeURIComponent(safeNext(next))}` },
   });
 
   if (error) {
@@ -166,7 +188,7 @@ export async function requestPasswordReset(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
+    redirectTo: `${await resolveSiteUrl()}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
   });
 
   if (error) {
