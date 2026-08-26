@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { GrainOverlay } from "@/components/marketing/GrainOverlay";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
 import { ProductDesignSection } from "@/components/products/ProductDesignSection";
 import { getProductBySlug } from "@/lib/products/queries";
 
+/** Same `.theme-editorial` treatment as /products and the homepage (see
+ * tokens.css). */
 export default async function ProductDetailPage({
   params,
 }: {
@@ -19,7 +22,8 @@ export default async function ProductDetailPage({
   }
 
   return (
-    <>
+    <div className="theme-editorial bg-background text-foreground">
+      <GrainOverlay />
       <SiteHeader />
       <main className="flex-1">
         <Section>
@@ -29,6 +33,6 @@ export default async function ProductDetailPage({
         </Section>
       </main>
       <SiteFooter />
-    </>
+    </div>
   );
 }
