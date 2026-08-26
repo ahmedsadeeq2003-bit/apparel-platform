@@ -2,50 +2,26 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { translateAuthError } from "@/lib/auth/errors";
+import { safeNext } from "@/lib/auth/redirect";
 import {
+  forgotPasswordSchema,
   loginSchema,
   magicLinkSchema,
+  resetPasswordSchema,
   signUpSchema,
+  type ForgotPasswordInput,
   type LoginInput,
   type MagicLinkInput,
+  type ResetPasswordInput,
   type SignUpInput,
 } from "@/lib/auth/schemas";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
-/** Supabase's own error strings are accurate but not something to show a
- * customer verbatim (wording varies by SDK version, references internal
- * concepts like "provider"). Maps the common cases to clean copy; anything
- * unrecognized still gets a safe, honest fallback rather than the raw
- * message. */
-function translateAuthError(message: string): string {
-  const lower = message.toLowerCase();
-  if (lower.includes("already registered") || lower.includes("already exists")) {
-    return "That email is already registered. Try logging in instead.";
-  }
-  if (lower.includes("password")) {
-    return "Choose a stronger password and try again.";
-  }
-  if (lower.includes("rate limit") || lower.includes("too many")) {
-    return "Too many attempts. Wait a moment and try again.";
-  }
-  if (lower.includes("invalid login credentials")) {
-    return "That email or password isn't right.";
-  }
-  if (lower.includes("email") && lower.includes("invalid")) {
-    return "That doesn't look like a valid email address.";
-  }
-  if (lower.includes("provider is not enabled") || lower.includes("unsupported provider")) {
-    return "That sign-in method isn't set up yet -- try email instead.";
-  }
-  if (lower.includes("network") || lower.includes("fetch failed")) {
-    return "Network error. Check your connection and try again.";
-  }
-  return "Something went wrong. Please try again.";
-}
-
 export async function signUpWithPassword(
   input: SignUpInput,
+  next?: string,
 ): Promise<{ error: string } | { needsConfirmation: true }> {
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success) {
@@ -62,7 +38,7 @@ export async function signUpWithPassword(
         phone: parsed.data.phone,
         is_designer: parsed.data.isDesigner === "yes",
       },
-      emailRedirectTo: `${siteUrl}/auth/callback`,
+      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
     },
   });
 
@@ -80,23 +56,48 @@ export async function signUpWithPassword(
     return { needsConfirmation: true };
   }
 
-  redirect("/products");
+  redirect(safeNext(next));
 }
 
-/** Real Supabase OAuth call, not a placeholder -- if Google/Apple aren't
- * enabled for this project in the Supabase dashboard, this returns a real
+/** Re-sends the signup confirmation email -- the escape hatch for "it never
+ * arrived" or "the link expired," since `signUp` only sends it once.
+ * Deliberately doesn't reveal whether the address is registered (returns
+ * the same generic success either way) to avoid leaking account existence. */
+export async function resendVerificationEmail(
+  email: string,
+  next?: string,
+): Promise<{ error: string } | { success: true }> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
+    },
+  });
+
+  if (error) {
+    return { error: translateAuthError(error.message) };
+  }
+
+  return { success: true };
+}
+
+/** Real Supabase OAuth call, not a placeholder -- if Google isn't enabled
+ * for this project in the Supabase dashboard, this returns a real
  * "provider not enabled" error (translated above) rather than pretending to
  * sign the user in. `skipBrowserRedirect` + a server-side `redirect()` is
  * the correct pattern for a Server Action (the browser client's normal
  * `window.location` redirect isn't available here). */
 export async function signInWithOAuth(
-  provider: "google" | "apple",
+  provider: "google",
+  next?: string,
 ): Promise<{ error: string }> {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${siteUrl}/auth/callback`,
+      redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
       skipBrowserRedirect: true,
     },
   });
@@ -110,6 +111,7 @@ export async function signInWithOAuth(
 
 export async function signInWithPassword(
   input: LoginInput,
+  next?: string,
 ): Promise<{ error: string }> {
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success) {
@@ -123,11 +125,12 @@ export async function signInWithPassword(
     return { error: translateAuthError(error.message) };
   }
 
-  redirect("/products");
+  redirect(safeNext(next));
 }
 
 export async function signInWithMagicLink(
   input: MagicLinkInput,
+  next?: string,
 ): Promise<{ error: string } | { success: true }> {
   const parsed = magicLinkSchema.safeParse(input);
   if (!parsed.success) {
@@ -137,8 +140,57 @@ export async function signInWithMagicLink(
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo: `${siteUrl}/auth/callback` },
+    options: { emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNext(next))}` },
   });
+
+  if (error) {
+    return { error: translateAuthError(error.message) };
+  }
+
+  return { success: true };
+}
+
+/** Sends the reset-password email. Always returns the same generic success
+ * regardless of whether the address is registered, so this can't be used to
+ * probe which emails have accounts. Routes through the existing
+ * `/auth/callback` handler (rather than a bespoke recovery endpoint) with
+ * `next=/reset-password`, so the same PKCE code-exchange logic that already
+ * handles signup/magic-link/OAuth also establishes the recovery session. */
+export async function requestPasswordReset(
+  input: ForgotPasswordInput,
+): Promise<{ error: string } | { success: true }> {
+  const parsed = forgotPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: "Enter a valid email." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
+  });
+
+  if (error) {
+    return { error: translateAuthError(error.message) };
+  }
+
+  return { success: true };
+}
+
+/** Sets a new password for the currently-authenticated session. Only
+ * meaningful reached via the recovery-email link, which lands here already
+ * signed in to a short-lived recovery session (established by
+ * `/auth/callback` before the browser ever gets here) -- the page itself
+ * checks for that session and doesn't render this form without one. */
+export async function updatePassword(
+  input: ResetPasswordInput,
+): Promise<{ error: string } | { success: true }> {
+  const parsed = resetPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Check the fields above and try again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
 
   if (error) {
     return { error: translateAuthError(error.message) };

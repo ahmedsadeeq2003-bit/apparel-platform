@@ -16,7 +16,11 @@ export default async function NewDesignPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirect("/login");
+    const params = new URLSearchParams();
+    if (slug) params.set("product", slug);
+    if (colorId) params.set("color", colorId);
+    const query = params.toString();
+    redirect(`/login?next=${encodeURIComponent(`/editor/new${query ? `?${query}` : ""}`)}`);
   }
 
   if (!slug) {

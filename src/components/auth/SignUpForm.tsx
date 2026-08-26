@@ -6,9 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { AppleLogo, ArrowRight, Eye, EyeSlash, GoogleLogo } from "@phosphor-icons/react";
+import { ArrowRight, Eye, EyeSlash, GoogleLogo } from "@phosphor-icons/react";
 import { signUpSchema, type SignUpInput } from "@/lib/auth/schemas";
-import { signUpWithPassword, signInWithOAuth } from "@/lib/auth/actions";
+import { signUpWithPassword, signInWithOAuth, resendVerificationEmail } from "@/lib/auth/actions";
 import { DesignerToggle } from "@/components/auth/DesignerToggle";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -74,7 +74,7 @@ function OAuthButton({
   label,
   icon: Icon,
 }: {
-  provider: "google" | "apple";
+  provider: "google";
   label: string;
   icon: typeof GoogleLogo;
 }) {
@@ -114,6 +114,16 @@ function OAuthButton({
 
 function ConfirmationState({ email }: { email: string }) {
   const reduceMotion = useReducedMotion();
+  const [resendState, setResendState] = useState<"idle" | "sent" | "error">("idle");
+  const [isResending, setIsResending] = useState(false);
+
+  const handleResend = async () => {
+    setIsResending(true);
+    const result = await resendVerificationEmail(email);
+    setResendState("error" in result ? "error" : "sent");
+    setIsResending(false);
+  };
+
   return (
     <motion.div
       initial={reduceMotion ? false : { opacity: 0, y: 12 }}
@@ -127,9 +137,25 @@ function ConfirmationState({ email }: { email: string }) {
       </span>
       <h2 className="font-display text-display-md text-foreground">Check your inbox.</h2>
       <p className="text-body text-muted">
-        We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>.
+        We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>.{" "}
         Open it to activate your account -- then you&apos;re in.
       </p>
+      <p className="text-body-sm text-muted">
+        Didn&apos;t get it?{" "}
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={isResending || resendState === "sent"}
+          className="font-medium text-foreground underline underline-offset-4 hover:text-accent disabled:opacity-60"
+        >
+          {resendState === "sent" ? "Sent -- check again" : isResending ? "Sending…" : "Resend the link"}
+        </button>
+      </p>
+      {resendState === "error" && (
+        <p className="text-body-sm text-danger" role="alert">
+          Couldn&apos;t resend that. Try again in a moment.
+        </p>
+      )}
       <Link href="/login" className="mt-2 text-body-sm font-medium text-foreground underline underline-offset-4 hover:text-accent">
         Back to log in
       </Link>
@@ -267,9 +293,8 @@ export function SignUpForm() {
         <span className="h-px flex-1 bg-border" aria-hidden />
       </motion.div>
 
-      <motion.div variants={ITEM} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <motion.div variants={ITEM} className="grid grid-cols-1 gap-3">
         <OAuthButton provider="google" label="Continue with Google" icon={GoogleLogo} />
-        <OAuthButton provider="apple" label="Continue with Apple" icon={AppleLogo} />
       </motion.div>
 
       <motion.p variants={ITEM} className="text-body-sm text-muted">

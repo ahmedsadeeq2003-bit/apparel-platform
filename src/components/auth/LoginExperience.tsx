@@ -10,14 +10,14 @@ import { LoginForm } from "@/components/auth/LoginForm";
  * into page.tsx (a Server Component, can't hold state) or a full context
  * (only one boolean, one consumer pair; a context would be more machinery
  * than the problem needs). */
-export function LoginExperience() {
+export function LoginExperience({ next, initialError }: { next?: string; initialError?: string }) {
   const [formFocused, setFormFocused] = useState(false);
 
   return (
     <main className="grid flex-1 lg:grid-cols-2">
       <LoginVisual formFocused={formFocused} />
       <div className="flex items-center justify-center px-6 py-10 md:px-10 lg:px-16 xl:px-20">
-        <LoginForm onFocusChange={setFormFocused} />
+        <LoginForm onFocusChange={setFormFocused} next={next} initialError={initialError} />
       </div>
     </main>
   );

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { AppleLogo, ArrowRight, GoogleLogo } from "@phosphor-icons/react";
+import { ArrowRight, GoogleLogo } from "@phosphor-icons/react";
 import { loginSchema, magicLinkSchema, type LoginInput, type MagicLinkInput } from "@/lib/auth/schemas";
 import { signInWithMagicLink, signInWithOAuth, signInWithPassword } from "@/lib/auth/actions";
 
@@ -75,9 +75,19 @@ const LoginField = forwardRef<
  * /signup file). Calls the exact same signInWithOAuth server action;
  * Supabase OAuth doesn't distinguish "signing up" from "logging in", so
  * there's no separate login-flavored OAuth call to write. */
-function OAuthButton({ provider, label, icon: Icon }: { provider: "google" | "apple"; label: string; icon: typeof GoogleLogo }) {
+function OAuthButton({
+  provider,
+  label,
+  icon: Icon,
+  next,
+}: {
+  provider: "google";
+  label: string;
+  icon: typeof GoogleLogo;
+  next?: string;
+}) {
   const [state, formAction, isPending] = useActionState(
-    async () => signInWithOAuth(provider),
+    async () => signInWithOAuth(provider, next),
     null as { error: string } | null,
   );
 
@@ -105,10 +115,18 @@ function OAuthButton({ provider, label, icon: Icon }: { provider: "google" | "ap
   );
 }
 
-export function LoginForm({ onFocusChange }: { onFocusChange: (focused: boolean) => void }) {
+export function LoginForm({
+  onFocusChange,
+  next,
+  initialError,
+}: {
+  onFocusChange: (focused: boolean) => void;
+  next?: string;
+  initialError?: string;
+}) {
   const reduceMotion = useReducedMotion();
   const [mode, setMode] = useState<Mode>("password");
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(initialError ?? null);
   const [magicLinkSent, setMagicLinkSent] = useState<string | null>(null);
 
   const passwordForm = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
@@ -122,13 +140,13 @@ export function LoginForm({ onFocusChange }: { onFocusChange: (focused: boolean)
 
   const onPasswordSubmit = async (input: LoginInput) => {
     setFormError(null);
-    const result = await signInWithPassword(input);
+    const result = await signInWithPassword(input, next);
     if (result?.error) setFormError(result.error);
   };
 
   const onMagicLinkSubmit = async (input: MagicLinkInput) => {
     setFormError(null);
-    const result = await signInWithMagicLink(input);
+    const result = await signInWithMagicLink(input, next);
     if ("error" in result) {
       setFormError(result.error);
     } else {
@@ -204,6 +222,12 @@ export function LoginForm({ onFocusChange }: { onFocusChange: (focused: boolean)
             }}
             error={passwordForm.formState.errors.password?.message}
           />
+          <Link
+            href="/forgot-password"
+            className="-mt-2 self-end text-body-sm font-medium text-muted underline underline-offset-4 hover:text-foreground"
+          >
+            Forgot password?
+          </Link>
           {formError && (
             <motion.p
               initial={reduceMotion ? false : { opacity: 0, y: -4 }}
@@ -234,8 +258,8 @@ export function LoginForm({ onFocusChange }: { onFocusChange: (focused: boolean)
           className="text-body text-foreground"
           role="status"
         >
-          Check <span className="font-medium">{magicLinkSent}</span> for your
-          sign-in link.
+          Check <span className="font-medium">{magicLinkSent}</span>{" "}
+          for your sign-in link.
         </motion.p>
       ) : (
         <motion.form variants={ITEM} method="post" onSubmit={magicLinkForm.handleSubmit(onMagicLinkSubmit)} className="flex flex-col gap-4" noValidate>
@@ -281,9 +305,8 @@ export function LoginForm({ onFocusChange }: { onFocusChange: (focused: boolean)
         <span className="h-px flex-1 bg-border" aria-hidden />
       </motion.div>
 
-      <motion.div variants={ITEM} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <OAuthButton provider="google" label="Continue with Google" icon={GoogleLogo} />
-        <OAuthButton provider="apple" label="Continue with Apple" icon={AppleLogo} />
+      <motion.div variants={ITEM} className="grid grid-cols-1 gap-3">
+        <OAuthButton provider="google" label="Continue with Google" icon={GoogleLogo} next={next} />
       </motion.div>
 
       <motion.p variants={ITEM} className="text-body-sm text-muted">
