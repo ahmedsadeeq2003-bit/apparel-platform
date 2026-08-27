@@ -17,7 +17,18 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * to render real work the moment that data exists, but never fabricates a
  * customer, a design, or a handle to fill the gap in the meantime.
  */
-export function CustomerDesignsSection({ submissions }: { submissions: CustomerSubmission[] }) {
+export function CustomerDesignsSection({
+  submissions,
+  startDesigningHref = "/products",
+}: {
+  submissions: CustomerSubmission[];
+  /** Where "Start designing" goes in the empty state -- /inspiration (no
+   * prop passed) keeps its existing /products default; /design-hub passes
+   * a real editor href instead, since a CTA living inside the Design Hub
+   * page itself should never bounce back out to /products and skip the
+   * editor it's meant to lead into. */
+  startDesigningHref?: string;
+}) {
   const reduceMotion = useReducedMotion();
   const hasReal = submissions.length > 0;
 
@@ -62,7 +73,7 @@ export function CustomerDesignsSection({ submissions }: { submissions: CustomerS
               No customer designs to show here yet -- be one of the first to make something and wear it.
             </p>
             <MagneticButton
-              href="/products"
+              href={startDesigningHref}
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-7 text-body-sm font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
             >
               Start designing

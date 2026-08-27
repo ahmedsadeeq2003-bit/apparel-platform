@@ -33,8 +33,11 @@ const PHOTO_ASPECT = { width: 784, height: 1168 };
  * upper-back print placement), the same approach used for the hero's
  * settling mark in Hero.tsx. Not derived from TShirtMockup's
  * PRINT_OVERLAY_PCT, which is specific to that SVG's own viewBox geometry
- * and has no relationship to this image's actual proportions. */
-const PHOTO_OVERLAY_PCT = { left: 21, top: 17, width: 58, height: 44 };
+ * and has no relationship to this image's actual proportions. Exported so
+ * other real-photo compositions (e.g. Design Hub's artwork-on-garment
+ * demonstration) line up with the same print area instead of re-eyeballing
+ * their own, possibly-inconsistent numbers. */
+export const PHOTO_OVERLAY_PCT = { left: 21, top: 17, width: 58, height: 44 };
 
 /**
  * A garment rendered as a physical object in space rather than a UI card:
