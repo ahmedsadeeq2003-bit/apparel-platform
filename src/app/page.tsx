@@ -13,6 +13,7 @@ import { FinalCta } from "@/components/marketing/FinalCta";
 import { GrainOverlay } from "@/components/marketing/GrainOverlay";
 import { getFeaturedTemplates } from "@/lib/templates/queries";
 import { EDITORIAL_GARMENT_COLORS } from "@/lib/templates/garmentColors";
+import { createClient } from "@/lib/supabase/server";
 
 const MAKE_IT_YOURS_EXAMPLES: { slug: string; caption: string }[] = [
   { slug: "minimal", caption: "Clean typography" },
@@ -35,6 +36,16 @@ const FRESH_OFF_THE_PRESS_FALLBACK: { slug: string }[] = [
 ];
 
 export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // The homepage's "Start Designing" CTA is never a direct line into the
+  // editor -- authenticated customers go to the Design Hub, everyone else
+  // goes to /login first (which itself preserves ?next=/design-hub through
+  // the real auth flow, same as any other protected-route bounce).
+  const startDesigningHref = user ? "/design-hub" : `/login?next=${encodeURIComponent("/design-hub")}`;
+
   const featured = await getFeaturedTemplates();
   const bySlug = new Map(featured.map((f) => [f.category.slug, f.template]));
 
@@ -77,7 +88,7 @@ export default async function Home() {
       <GrainOverlay />
       <SiteHeader />
       <main className="flex-1 overflow-x-hidden">
-        <Hero />
+        <Hero startDesigningHref={startDesigningHref} />
         <WhatIsStitch />
         {designYourWayPreview && <DesignYourWay preview={designYourWayPreview} />}
         {makeItYoursExamples.length > 0 && <MakeItYours examples={makeItYoursExamples} />}
@@ -86,7 +97,7 @@ export default async function Home() {
         <FreshOffThePress submissions={realSubmissions} fallback={freshOffThePressFallback} />
         {businessUniform && <BusinessSection uniform={businessUniform} />}
         <ValueProps />
-        <FinalCta />
+        <FinalCta startDesigningHref={startDesigningHref} />
       </main>
       <SiteFooter />
     </div>

@@ -246,7 +246,7 @@ function AtmosphereBackground() {
   );
 }
 
-export function Hero() {
+export function Hero({ startDesigningHref }: { startDesigningHref: string }) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -293,7 +293,7 @@ export function Hero() {
               className="flex flex-wrap items-center gap-5 pt-2"
             >
               <MagneticButton
-                href="/products"
+                href={startDesigningHref}
                 className="inline-flex min-h-12 items-center justify-center rounded-full border px-7 text-body-sm font-semibold uppercase tracking-wide text-foreground backdrop-blur-md transition-colors hover:text-accent"
                 style={{
                   background: "color-mix(in oklab, var(--color-background) 45%, transparent)",

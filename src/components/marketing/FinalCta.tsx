@@ -19,7 +19,7 @@ const CONVERGING_MARKS: { path: string; corner: string; width: string; rotate: n
   { path: "/assets/designs/graffiti/street-lightning.svg", corner: "right-[6%] bottom-[10%]", width: "6%", rotate: 8, from: { x: 60, y: 50 } },
 ];
 
-export function FinalCta() {
+export function FinalCta({ startDesigningHref }: { startDesigningHref: string }) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -65,7 +65,7 @@ export function FinalCta() {
             The editor is free to use. You only pay when you order.
           </p>
           <MagneticButton
-            href="/products"
+            href={startDesigningHref}
             className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 text-body font-medium text-accent-foreground uppercase tracking-wide text-body-sm font-semibold transition-colors hover:bg-accent/90"
           >
             Start designing

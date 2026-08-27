@@ -24,7 +24,7 @@ export default async function NewDesignPage({
   }
 
   if (!slug) {
-    redirect("/products");
+    redirect("/design-hub");
   }
 
   const product = await getProductBySlug(slug);

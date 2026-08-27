@@ -2,6 +2,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { requireSupabaseEnv } from "@/lib/supabase/env";
+import { toSessionCookieOptions } from "@/lib/supabase/sessionCookies";
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -20,7 +21,7 @@ export async function createClient() {
           // safe to ignore because the middleware refreshes the session.
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
+              cookieStore.set(name, value, toSessionCookieOptions(options)),
             );
           } catch {
             /* noop */

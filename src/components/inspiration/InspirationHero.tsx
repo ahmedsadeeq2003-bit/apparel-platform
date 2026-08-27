@@ -1,14 +1,16 @@
 "use client";
 
 import { motion, useReducedMotion, type Variants } from "motion/react";
+import { ArrowRight } from "@phosphor-icons/react";
 import { Container } from "@/components/layout/Container";
+import { MagneticButton } from "@/components/marketing/MagneticButton";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const OVERSHOOT = [0.34, 1.56, 0.64, 1] as const;
 
-type HeadlineLine = { text: string; italic?: boolean };
+export type HeadlineLine = { text: string; italic?: boolean };
 
-const HEADLINE: HeadlineLine[] = [{ text: "See it." }, { text: "Make it.", italic: true }];
+const DEFAULT_HEADLINE: HeadlineLine[] = [{ text: "See it." }, { text: "Make it.", italic: true }];
 
 const LINE_CONTAINER: Variants = {
   hidden: {},
@@ -94,7 +96,7 @@ const MARKS: Mark[] = [
   },
 ];
 
-function AtmosphereBackground() {
+function AtmosphereBackground({ backgroundLabel }: { backgroundLabel: string }) {
   const reduceMotion = useReducedMotion();
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -114,7 +116,7 @@ function AtmosphereBackground() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.3, ease: EASE }}
       >
-        INSPIRATION
+        {backgroundLabel}
       </motion.span>
     </div>
   );
@@ -130,13 +132,33 @@ function AtmosphereBackground() {
  * both the homepage Hero (garment-centered) and ProductsHero (no artwork at
  * all) so this page has its own visual identity while sharing the same
  * motion language (EASE/OVERSHOOT, ScribbleUnderline-style restraint).
+ *
+ * Also reused, unstyled-otherwise, as the Design Hub's hero: every prop is
+ * optional and defaults to the exact public-Inspiration copy/behavior
+ * below, so calling this with no props (as /inspiration does) is pixel-
+ * identical to before this became reusable. Design Hub passes its own
+ * eyebrow/headline/subcopy plus a `cta`, which this component doesn't have
+ * a default for (Inspiration's hero has never had a single hero-level CTA
+ * button -- its paths into the library are the cards below).
  */
-export function InspirationHero() {
+export function InspirationHero({
+  eyebrow = "The Inspiration studio",
+  headline = DEFAULT_HEADLINE,
+  subcopy = "Explore artwork, templates and designs made to spark your next one.",
+  backgroundLabel = "INSPIRATION",
+  cta,
+}: {
+  eyebrow?: string;
+  headline?: HeadlineLine[];
+  subcopy?: string;
+  backgroundLabel?: string;
+  cta?: { href: string; label: string };
+}) {
   const reduceMotion = useReducedMotion();
 
   return (
     <section className="relative overflow-hidden pb-8 pt-16 md:pt-24">
-      <AtmosphereBackground />
+      <AtmosphereBackground backgroundLabel={backgroundLabel} />
 
       {!reduceMotion &&
         MARKS.map((mark) => (
@@ -166,12 +188,12 @@ export function InspirationHero() {
             transition={{ duration: 0.5, ease: EASE }}
             className="text-label font-semibold uppercase tracking-[0.18em] text-accent"
           >
-            The Inspiration studio
+            {eyebrow}
           </motion.span>
 
           <h1 className="mt-4 font-display text-display-2xl text-foreground">
             <motion.div initial={reduceMotion ? false : "hidden"} animate="show" variants={LINE_CONTAINER}>
-              {HEADLINE.map((line, index) => (
+              {headline.map((line, index) => (
                 <motion.span
                   key={line.text}
                   className={`block ${line.italic ? "italic" : ""}`}
@@ -189,9 +211,25 @@ export function InspirationHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: reduceMotion ? 0 : 0.55, ease: EASE }}
           >
-            Explore artwork, templates and designs made to spark your next
-            one.
+            {subcopy}
           </motion.p>
+
+          {cta && (
+            <motion.div
+              className="mt-8 flex justify-center"
+              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: reduceMotion ? 0 : 0.7, ease: EASE }}
+            >
+              <MagneticButton
+                href={cta.href}
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-accent px-8 text-body-sm font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
+              >
+                {cta.label}
+                <ArrowRight size={16} weight="bold" aria-hidden />
+              </MagneticButton>
+            </motion.div>
+          )}
         </div>
       </Container>
     </section>

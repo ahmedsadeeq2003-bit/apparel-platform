@@ -311,7 +311,10 @@ export function LoginForm({
 
       <motion.p variants={ITEM} className="text-body-sm text-muted">
         New here?{" "}
-        <Link href="/signup" className="text-foreground underline underline-offset-4 hover:text-accent">
+        <Link
+          href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}
+          className="text-foreground underline underline-offset-4 hover:text-accent"
+        >
           Create an account
         </Link>
       </motion.p>

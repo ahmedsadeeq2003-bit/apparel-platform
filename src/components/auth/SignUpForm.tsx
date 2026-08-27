@@ -73,10 +73,12 @@ function OAuthButton({
   provider,
   label,
   icon: Icon,
+  next,
 }: {
   provider: "google";
   label: string;
   icon: typeof GoogleLogo;
+  next?: string;
 }) {
   // useActionState (not a plain <form action={fn}>) because
   // signInWithOAuth's real failure path returns { error }, which a
@@ -84,7 +86,7 @@ function OAuthButton({
   // void-returning function, but this one has a meaningful result to show
   // (e.g. "provider not enabled") when it doesn't redirect.
   const [state, formAction, isPending] = useActionState(
-    async () => signInWithOAuth(provider),
+    async () => signInWithOAuth(provider, next),
     null as { error: string } | null,
   );
 
@@ -112,14 +114,14 @@ function OAuthButton({
   );
 }
 
-function ConfirmationState({ email }: { email: string }) {
+function ConfirmationState({ email, next }: { email: string; next?: string }) {
   const reduceMotion = useReducedMotion();
   const [resendState, setResendState] = useState<"idle" | "sent" | "error">("idle");
   const [isResending, setIsResending] = useState(false);
 
   const handleResend = async () => {
     setIsResending(true);
-    const result = await resendVerificationEmail(email);
+    const result = await resendVerificationEmail(email, next);
     setResendState("error" in result ? "error" : "sent");
     setIsResending(false);
   };
@@ -156,14 +158,17 @@ function ConfirmationState({ email }: { email: string }) {
           Couldn&apos;t resend that. Try again in a moment.
         </p>
       )}
-      <Link href="/login" className="mt-2 text-body-sm font-medium text-foreground underline underline-offset-4 hover:text-accent">
+      <Link
+        href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+        className="mt-2 text-body-sm font-medium text-foreground underline underline-offset-4 hover:text-accent"
+      >
         Back to log in
       </Link>
     </motion.div>
   );
 }
 
-export function SignUpForm() {
+export function SignUpForm({ next }: { next?: string }) {
   const reduceMotion = useReducedMotion();
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
@@ -177,7 +182,7 @@ export function SignUpForm() {
 
   const onSubmit = async (input: SignUpInput) => {
     setFormError(null);
-    const result = await signUpWithPassword(input);
+    const result = await signUpWithPassword(input, next);
     if (result && "error" in result) {
       setFormError(result.error);
     } else if (result && "needsConfirmation" in result) {
@@ -186,7 +191,7 @@ export function SignUpForm() {
   };
 
   if (confirmationEmail) {
-    return <ConfirmationState email={confirmationEmail} />;
+    return <ConfirmationState email={confirmationEmail} next={next} />;
   }
 
   return (
@@ -294,12 +299,15 @@ export function SignUpForm() {
       </motion.div>
 
       <motion.div variants={ITEM} className="grid grid-cols-1 gap-3">
-        <OAuthButton provider="google" label="Continue with Google" icon={GoogleLogo} />
+        <OAuthButton provider="google" label="Continue with Google" icon={GoogleLogo} next={next} />
       </motion.div>
 
       <motion.p variants={ITEM} className="text-body-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="text-foreground underline underline-offset-4 hover:text-accent">
+        <Link
+          href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+          className="text-foreground underline underline-offset-4 hover:text-accent"
+        >
           Log in
         </Link>
       </motion.p>
