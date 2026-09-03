@@ -16,8 +16,8 @@ import { getMyDesigns } from "@/lib/editor/queries";
 import { designAssets, type DesignCategory } from "@/lib/assets/manifest";
 import { ARTWORK_CATEGORY_LABELS, type ArtworkItem } from "@/lib/assets/artworkSearch";
 import { getGarmentPhoto } from "@/lib/products/garmentPhoto";
-import { EDITORIAL_GARMENT_COLORS } from "@/lib/templates/garmentColors";
-import { nearestHex } from "@/lib/color";
+import { nearestRealColorForCategory } from "@/lib/templates/garmentColors";
+import { buildEditorHref } from "@/lib/editor/initialContent";
 
 /** Curated for visual range across real categories and real colors -- every
  * slug/category here is a real, verified entry in designAssets. Resolved
@@ -30,10 +30,6 @@ const DEMO_ARTWORK: { category: DesignCategory; slug: string; colorName: string 
   { category: "illustration", slug: "botanical-flower", colorName: "Ash Grey" },
   { category: "graphic-art", slug: "retro-sun", colorName: "Volt Green" },
 ];
-
-function buildEditorHref(productSlug: string, colorId: string): string {
-  return `/editor/new?${new URLSearchParams({ product: productSlug, color: colorId }).toString()}`;
-}
 
 /**
  * The authenticated landing page STITCH's routing architecture sends every
@@ -72,26 +68,23 @@ export default async function DesignHubPage() {
     classicTee?.product_colors.find((color) => color.name === "Black") ?? classicTee?.product_colors[0];
   const editorHref = classicTee ? buildEditorHref(classicTee.slug, defaultColor?.id ?? "") : "/products";
 
-  // Every real product_color's own hex, keyed by its own id -- lets
-  // nearestHex() resolve straight to a real color id instead of a name,
-  // for any curated/curated-adjacent hex a card happens to be previewing.
-  const colorIdByHex: Record<string, string> =
-    classicTee && classicTee.product_colors.length > 0
-      ? Object.fromEntries(classicTee.product_colors.map((c) => [c.id, c.hex]))
-      : {};
-
+  // Same real color-mapping TemplatesShowcase's own preview already resolves
+  // to (nearestRealColorForCategory -- one shared implementation, see
+  // garmentColors.ts), so "Customize" opens the editor on the exact color
+  // the card shows, with the template itself carried through too.
   function colorCorrectTemplateHref(template: DesignTemplate, category: TemplateCategory): string {
-    if (!classicTee || Object.keys(colorIdByHex).length === 0) return editorHref;
-    const previewHex = EDITORIAL_GARMENT_COLORS[category.slug] ?? defaultColor?.hex ?? "#EDEADF";
-    const colorId = nearestHex(previewHex, colorIdByHex);
-    return buildEditorHref(classicTee.slug, colorId);
+    if (!classicTee) return editorHref;
+    const color = nearestRealColorForCategory(category.slug, classicTee.product_colors) ?? defaultColor;
+    if (!color) return editorHref;
+    return buildEditorHref(classicTee.slug, color.id, { template: template.id });
   }
 
-  // No per-item color exists for standalone artwork (see ArtworkLibrary's
-  // own comment) -- every card still resolves to the same default color,
-  // but through the same real product/color system as everything else on
-  // this page rather than a hardcoded string.
-  const artworkEditorHref = (_item: ArtworkItem) => editorHref;
+  // Artwork has no inherent garment color (see ArtworkLibrary's own
+  // comment) -- every card still resolves to the same default color, but
+  // now carries that specific artwork's id through so it actually arrives
+  // on the canvas rather than opening a blank editor.
+  const artworkEditorHref = (item: ArtworkItem) =>
+    classicTee ? buildEditorHref(classicTee.slug, defaultColor?.id ?? "", { artwork: item.id }) : editorHref;
 
   const demoPieces: GarmentDemoPiece[] = classicTee
     ? DEMO_ARTWORK.map(({ category, slug, colorName }) => {
@@ -106,7 +99,10 @@ export default async function DesignHubPage() {
           categoryLabel: ARTWORK_CATEGORY_LABELS[category],
           photoPath: photo.path,
           colorName: color.name,
-          editorHref: buildEditorHref(classicTee.slug, color.id),
+          // entry.id ?? entry.path matches ALL_ARTWORK's own id fallback
+          // exactly (artworkSearch.ts), so this always resolves back to the
+          // same real ArtworkItem via resolveArtworkParam().
+          editorHref: buildEditorHref(classicTee.slug, color.id, { artwork: entry.id ?? entry.path }),
         };
       }).filter((piece): piece is GarmentDemoPiece => piece !== null)
     : [];
@@ -140,7 +136,12 @@ export default async function DesignHubPage() {
         <ArtworkOnGarment pieces={demoPieces} />
         <TemplatesShowcase groups={templateGroups} buildEditorHref={colorCorrectTemplateHref} />
         <ArtworkLibrary editorHref={artworkEditorHref} />
-        <CustomerDesignsSection submissions={mySubmissions} startDesigningHref={editorHref} variant="authenticated" />
+        <CustomerDesignsSection
+          submissions={mySubmissions}
+          startDesigningHref={editorHref}
+          variant="authenticated"
+          editorHrefFor={(submission) => `/editor/new?${new URLSearchParams({ designId: submission.id }).toString()}`}
+        />
         <FinalCta startDesigningHref={editorHref} />
       </main>
       <SiteFooter />

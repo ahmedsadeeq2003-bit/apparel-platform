@@ -19,6 +19,7 @@ import { otherSide, type EditorSide } from "@/lib/editor/side";
 import type { ArtworkDef } from "@/lib/editor/artwork";
 import { EDITOR_FONTS } from "@/lib/editor/fonts";
 import { toCharSpacing } from "@/lib/editor/textSpacing";
+import type { InitialEditorContent } from "@/lib/editor/initialContent";
 import {
   canRedo as historyCanRedo,
   canUndo as historyCanUndo,
@@ -100,6 +101,25 @@ function ensureIds(canvas: Canvas) {
   });
 }
 
+/** Loads one side's serialized snapshot onto the live canvas -- the same
+ * "loadFromJSON if non-empty, else clear" shape `applyHistoryPresent` and
+ * `toggleSide` already use, factored out so the hydration effect below can
+ * share it without duplicating the logic a third time. Deliberately doesn't
+ * touch history/dirty/store state itself -- callers that need those (like
+ * `applyHistoryPresent`) still own that separately, since hydration
+ * specifically must NOT mark the editor dirty for content it didn't change. */
+async function loadJsonOntoCanvas(canvas: Canvas, json: object) {
+  canvas.discardActiveObject();
+  const parsed = json as { objects?: unknown[] };
+  if (parsed.objects && parsed.objects.length > 0) {
+    await canvas.loadFromJSON(parsed);
+  } else {
+    canvas.clear();
+  }
+  ensureIds(canvas);
+  canvas.requestRenderAll();
+}
+
 /**
  * Shape of a template JSON from the externally generated "STITCH artwork
  * library" package (public/assets/templates/**). This is NOT the same
@@ -165,6 +185,39 @@ const GENERATED_FONT_FAMILY_MAP: Record<string, string> = {
 
 function resolveGeneratedFontFamily(name: string): string {
   return GENERATED_FONT_FAMILY_MAP[name] ?? CANVAS_TEXT_FONT_FAMILY;
+}
+
+/** The DB-seeded `design_templates` rows (see supabase/seed.sql) store
+ * loose CSS-stack font strings ("Archivo, sans-serif", "Anton, sans-serif")
+ * rather than the actual next/font-generated family names Canvas 2D text
+ * needs to resolve the real curated typeface -- unlike the generated-JSON
+ * template path above, nothing previously remapped these before they hit
+ * the canvas, so applying a DB template silently rendered its text in
+ * whatever generic sans the browser falls back to. This is that same
+ * remap, for the same two strings actually used in the seed data. */
+const DB_TEMPLATE_FONT_FAMILY_MAP: Record<string, string> = {
+  "Archivo, sans-serif": EDITOR_FONTS.find((f) => f.id === "archivo")?.fabricFamily ?? CANVAS_TEXT_FONT_FAMILY,
+  "Anton, sans-serif": EDITOR_FONTS.find((f) => f.id === "anton")?.fabricFamily ?? CANVAS_TEXT_FONT_FAMILY,
+};
+
+/** Applied to a DB template's canvas_json (front and back) before it's ever
+ * loaded onto the canvas or written into history. Any text object's
+ * fontFamily that matches a known loose seed string gets the real curated
+ * family; anything unrecognized passes through untouched rather than being
+ * forced to a guess -- an unknown value can't crash Canvas 2D text (it just
+ * falls back to a generic sans), so leaving it alone is the safe default. */
+function remapTemplateFonts(canvasJson: object): object {
+  const parsed = canvasJson as { objects?: Array<Record<string, unknown>> };
+  if (!Array.isArray(parsed.objects)) return canvasJson;
+  return {
+    ...parsed,
+    objects: parsed.objects.map((object) => {
+      const fontFamily = object.fontFamily;
+      if (typeof fontFamily !== "string") return object;
+      const mapped = DB_TEMPLATE_FONT_FAMILY_MAP[fontFamily];
+      return mapped ? { ...object, fontFamily: mapped } : object;
+    }),
+  };
 }
 
 /** Caches the fetched *text* of a bundled SVG file (never the parsed Fabric
@@ -304,7 +357,12 @@ function buildArtworkObject(def: ArtworkDef): FabricObjectType {
   }
 }
 
-export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) {
+const BLANK_INITIAL_CONTENT: InitialEditorContent = { kind: "blank" };
+
+export function useDesignEditor(
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+  initialContent: InitialEditorContent = BLANK_INITIAL_CONTENT,
+) {
   const fabricCanvasRef = useRef<Canvas | null>(null);
   const historyRef = useRef<Record<EditorSide, History>>({
     front: createHistory(emptyCanvasSnapshot()),
@@ -317,6 +375,21 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
   const historyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const HISTORY_DEBOUNCE_MS = 400;
   const [isReady, setIsReady] = useState(false);
+  // True while a saved design/template/artwork is being loaded onto the
+  // canvas at mount -- false immediately for a blank session (the common
+  // case), since there's nothing to wait for. Guards Save/Add-to-cart from
+  // firing against a not-yet-fully-loaded canvas (see handleSave/
+  // handleConfirmAddToCart in EditorShell) and drives the loading overlay.
+  const [isHydrating, setIsHydrating] = useState(initialContent.kind !== "blank");
+  const [hydrationError, setHydrationError] = useState<string | null>(null);
+  // Guards the hydration effect below to run at most once per real mount --
+  // React Strict Mode's dev-only mount->cleanup->mount double-invoke would
+  // otherwise risk double-inserting artwork/applying a template twice; the
+  // `cancelled` flag inside the effect additionally guards against a
+  // still-in-flight async fetch from the first invocation applying its
+  // result after the second mount has already taken over (same pattern
+  // useStaticFabricPreview.ts already uses for the same class of problem).
+  const initializedRef = useRef(false);
 
   const syncHistoryFlags = (side: EditorSide) => {
     const h = historyRef.current[side];
@@ -431,6 +504,85 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount/unmount only, canvasRef identity is stable
   }, []);
 
+  /** Loads the resolved initial content (a saved design, a template, one
+   * piece of artwork, or nothing at all) onto the canvas exactly once, right
+   * after the canvas itself becomes ready -- not before (nothing to load
+   * onto yet) and not more than once (initializedRef + the Strict-Mode-safe
+   * `cancelled` flag). History is suppressed for the whole duration and then
+   * seeded directly via createHistory() rather than pushHistory(), so the
+   * loaded content becomes the starting `present` with an empty `past` --
+   * there is nothing to undo back to a blank canvas from, per the initial
+   * content, not "every setup step," being the starting state. */
+  useEffect(() => {
+    if (!isReady) return;
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const canvas = fabricCanvasRef.current;
+    if (!canvas || initialContent.kind === "blank") {
+      setIsHydrating(false);
+      return;
+    }
+
+    let cancelled = false;
+    suppressHistoryRef.current = true;
+
+    const finish = (frontJson: object, backJson: object | null, startSide: EditorSide) => {
+      if (cancelled) return;
+      historyRef.current.front = createHistory(JSON.stringify(frontJson));
+      historyRef.current.back = createHistory(JSON.stringify(backJson ?? { objects: [] }));
+      suppressHistoryRef.current = false;
+      useEditorStore.getState().setSide(startSide);
+      syncHistoryFlags(startSide);
+      setIsHydrating(false);
+    };
+
+    (async () => {
+      try {
+        if (initialContent.kind === "design") {
+          const front = initialContent.front ?? { objects: [] };
+          const back = initialContent.back ?? { objects: [] };
+          const startSide = initialContent.startSide;
+          await loadJsonOntoCanvas(canvas, startSide === "front" ? front : back);
+          if (cancelled) return;
+          finish(front, back, startSide);
+        } else if (initialContent.kind === "template") {
+          const front = remapTemplateFonts(initialContent.canvasJson);
+          const back = initialContent.backCanvasJson ? remapTemplateFonts(initialContent.backCanvasJson) : null;
+          await loadJsonOntoCanvas(canvas, front);
+          if (cancelled) return;
+          finish(front, back, "front");
+        } else if (initialContent.kind === "artwork") {
+          const node = await loadSvgAssetObject(initialContent.path);
+          if (cancelled) return;
+          if (node) {
+            canvas.add(node);
+            canvas.setActiveObject(node);
+            canvas.requestRenderAll();
+          }
+          finish(canvas.toObject(["id"]), null, "front");
+        }
+      } catch (error) {
+        console.error("Failed to load initial editor content", initialContent, error);
+        if (cancelled) return;
+        suppressHistoryRef.current = false;
+        setIsHydrating(false);
+        const message =
+          initialContent.kind === "design"
+            ? "Couldn't load your saved design"
+            : initialContent.kind === "template"
+              ? "Couldn't load that template"
+              : "Couldn't load that artwork";
+        setHydrationError(message);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per real mount by design (initializedRef guard); initialContent is fixed for the life of an editor session
+  }, [isReady]);
+
   const addText = () => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
@@ -464,22 +616,21 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     canvas.requestRenderAll();
   };
 
-  /** Inserts one real SVG file from the artwork library (public/assets/
-   * designs/**) as an editable, movable/resizable/rotatable canvas object --
-   * via Fabric's own SVG parser, same as the "svg" pieces inside a
-   * generated template. Kept separate from `insertArtwork` (which builds
-   * from this project's own hand-authored shape data, synchronously,
-   * no fetch) since loading an external file is inherently async. Shares
-   * fetchSvgText's cache with the generated-template loader above, so
-   * inserting the same piece twice in one session only fetches it once. */
-  const insertSvgAsset = async (path: string): Promise<void> => {
-    const canvas = fabricCanvasRef.current;
-    if (!canvas) return;
-
+  /** Fetches + parses one real SVG file from the artwork library
+   * (public/assets/designs/**) into a positioned, centered, appropriately
+   * scaled Fabric object -- via Fabric's own SVG parser, same as the "svg"
+   * pieces inside a generated template. Doesn't touch the canvas itself
+   * (no add/select/render), so both a manual "Use this" click
+   * (`insertSvgAsset` below) and the mount-time artwork-handoff hydration
+   * further down can share this one build step and each decide their own
+   * canvas/history/selection semantics around it. Shares fetchSvgText's
+   * cache with the generated-template loader above, so inserting the same
+   * piece twice in one session only fetches it once. */
+  const loadSvgAssetObject = async (path: string): Promise<FabricObjectType | null> => {
     const svgText = await fetchSvgText(path);
     const { objects: svgObjects } = await loadSVGFromString(svgText);
     const valid = svgObjects.filter((o): o is FabricObjectType => o != null);
-    if (valid.length === 0) return;
+    if (valid.length === 0) return null;
 
     const node = valid.length > 1 ? fabricUtil.groupSVGElements(valid) : valid[0];
     node.set({
@@ -493,6 +644,20 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     const bounds = node.getBoundingRect();
     const intrinsic = Math.max(bounds.width, bounds.height) || 1;
     node.scale(Math.min(1, maxDim / intrinsic));
+    return node;
+  };
+
+  /** Inserts one real SVG file from the artwork library as an editable,
+   * movable/resizable/rotatable canvas object. Kept separate from
+   * `insertArtwork` (which builds from this project's own hand-authored
+   * shape data, synchronously, no fetch) since loading an external file is
+   * inherently async. */
+  const insertSvgAsset = async (path: string): Promise<void> => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    const node = await loadSvgAssetObject(path);
+    if (!node) return;
 
     canvas.add(node);
     canvas.setActiveObject(node);
@@ -711,9 +876,15 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
    * back logo" arrives fully assembled. Objects stay fully editable
    * (text/shape/position/color), never flattened. */
   const applyTemplate = (template: { canvas_json: object; back_canvas_json: object | null }) => {
-    historyRef.current.front = pushHistory(historyRef.current.front, JSON.stringify(template.canvas_json));
+    historyRef.current.front = pushHistory(
+      historyRef.current.front,
+      JSON.stringify(remapTemplateFonts(template.canvas_json)),
+    );
     if (template.back_canvas_json) {
-      historyRef.current.back = pushHistory(historyRef.current.back, JSON.stringify(template.back_canvas_json));
+      historyRef.current.back = pushHistory(
+        historyRef.current.back,
+        JSON.stringify(remapTemplateFonts(template.back_canvas_json)),
+      );
     }
     const side = useEditorStore.getState().side;
     applyHistoryPresent(side, historyRef.current[side].present);
@@ -837,6 +1008,9 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
 
   return {
     isReady,
+    isHydrating,
+    hydrationError,
+    clearHydrationError: () => setHydrationError(null),
     isEditingText,
     addText,
     insertArtwork,

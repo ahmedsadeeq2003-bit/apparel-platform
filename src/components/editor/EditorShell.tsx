@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CircleNotch } from "@phosphor-icons/react";
 import { useDesignEditor } from "@/hooks/useDesignEditor";
 import { useIsDesktopViewport } from "@/hooks/useIsDesktopViewport";
 import { useEditorStore } from "@/lib/editor/store";
 import { useCartStore } from "@/lib/editor/cart";
 import { saveDesign } from "@/lib/editor/actions";
 import { getGarmentPhoto, hasGarmentPhoto } from "@/lib/products/garmentPhoto";
+import type { InitialEditorContent } from "@/lib/editor/initialContent";
 import { TopBar } from "./TopBar";
 import { LeftToolbar } from "./LeftToolbar";
 import { ToolPanel } from "./ToolPanel";
@@ -21,16 +23,27 @@ export function EditorShell({
   product,
   initialColor,
   templateGroups,
+  initialContent,
+  initialDesignId,
+  initialDesignName,
 }: {
   product: Product;
   initialColor: ProductColor;
   templateGroups: { category: TemplateCategory; templates: DesignTemplate[] }[];
+  initialContent: InitialEditorContent;
+  /** Set once this session is resuming a saved design (from `?designId=`)
+   * or after the first successful save of a brand-new one -- see
+   * handleSave. Present means "Save" updates this row; absent means it
+   * inserts a new one. */
+  initialDesignId: string | null;
+  initialDesignName: string | null;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const editor = useDesignEditor(canvasRef);
+  const editor = useDesignEditor(canvasRef, initialContent);
   const isDesktop = useIsDesktopViewport();
   const [selectedColor, setSelectedColor] = useState(initialColor);
-  const [designName, setDesignName] = useState(`My ${product.name}`);
+  const [designName, setDesignName] = useState(initialDesignName ?? `My ${product.name}`);
+  const [designId, setDesignId] = useState(initialDesignId);
   const [showAddToCart, setShowAddToCart] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -97,10 +110,19 @@ export function EditorShell({
     return () => clearTimeout(timer);
   }, [feedback]);
 
+  useEffect(() => {
+    if (!editor.hydrationError) return;
+    setFeedback(editor.hydrationError);
+    editor.clearHydrationError();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- clearHydrationError is a stable setState wrapper; only hydrationError's value should re-trigger this
+  }, [editor.hydrationError]);
+
   const handleSave = async () => {
+    if (editor.isHydrating) return;
     setIsSaving(true);
     const state = editor.exportState();
     const result = await saveDesign({
+      designId: designId ?? undefined,
       productId: product.id,
       productColorId: selectedColor.id,
       name: designName,
@@ -110,13 +132,25 @@ export function EditorShell({
     setIsSaving(false);
     if ("error" in result) {
       setFeedback(result.error);
-    } else {
-      useEditorStore.getState().markClean();
-      setFeedback("Design saved");
+      return;
+    }
+    useEditorStore.getState().markClean();
+    setFeedback("Design saved");
+    // First save of a brand-new design: this editor session now IS that
+    // design going forward -- subsequent saves update it instead of
+    // inserting another row. window.history.replaceState (not a Next.js
+    // router navigation) so the URL bar reflects it without re-running the
+    // page's Server Component or remounting this component/losing canvas
+    // state -- purely cosmetic, no navigation actually happens.
+    if (!designId) {
+      setDesignId(result.id);
+      const params = new URLSearchParams({ product: product.slug, color: selectedColor.id, designId: result.id });
+      window.history.replaceState(null, "", `/editor/new?${params.toString()}`);
     }
   };
 
   const handleConfirmAddToCart = (size: string, quantity: number) => {
+    if (editor.isHydrating) return;
     const state = editor.exportState();
     useCartStore.getState().addItem({
       productId: product.id,
@@ -228,7 +262,13 @@ export function EditorShell({
                 ))}
               </div>
             </div>
-            <div className={previewMode ? "pointer-events-none flex flex-1 flex-col" : "flex flex-1 flex-col"}>
+            <div
+              className={
+                previewMode
+                  ? "pointer-events-none relative flex flex-1 flex-col"
+                  : "relative flex flex-1 flex-col"
+              }
+            >
               <DesignCanvas
                 canvasRef={canvasRef}
                 photo={garmentPhoto}
@@ -237,6 +277,12 @@ export function EditorShell({
                 zoom={zoom}
                 showGuide={!previewMode}
               />
+              {(!editor.isReady || editor.isHydrating) && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-background/85 backdrop-blur-sm">
+                  <CircleNotch size={16} className="animate-spin text-muted" aria-hidden />
+                  <span className="text-body-sm font-medium text-muted">Loading your design...</span>
+                </div>
+              )}
             </div>
           </div>
           <CanvasControls

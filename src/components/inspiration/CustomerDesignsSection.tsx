@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { Container } from "@/components/layout/Container";
 import { MagneticButton } from "@/components/marketing/MagneticButton";
@@ -36,6 +37,7 @@ export function CustomerDesignsSection({
   submissions,
   startDesigningHref = "/products",
   variant = "public",
+  editorHrefFor,
 }: {
   submissions: CustomerSubmission[];
   /** Where "Start designing" goes in the empty state -- /inspiration (no
@@ -49,6 +51,17 @@ export function CustomerDesignsSection({
    * designs -- same layout/empty-state mechanics, copy reframed as the
    * signed-in customer's own workspace rather than other people's work. */
   variant?: "public" | "authenticated";
+  /** Makes each non-empty-state card open that exact design for editing
+   * (`/editor/new?designId=...`). Only ever passed for `variant:
+   * "authenticated"` -- these are always the current user's OWN designs
+   * there (RLS-scoped, see lib/editor/queries.ts's getMyDesigns), so
+   * deep-linking into the editor is safe. /inspiration's `public` variant
+   * never passes this: those submissions are, or will be, OTHER people's
+   * opted-in work, which must never be deep-linkable into an editing
+   * session -- RLS would block the load anyway (getDesignById only ever
+   * returns the caller's own rows), but the card itself simply isn't a
+   * link in that context, rather than relying on that as the only guard. */
+  editorHrefFor?: (submission: CustomerSubmission) => string;
 }) {
   const reduceMotion = useReducedMotion();
   const hasReal = submissions.length > 0;
@@ -70,17 +83,30 @@ export function CustomerDesignsSection({
 
         {hasReal ? (
           <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4">
-            {submissions.slice(0, 8).map((submission) => (
-              <CampaignGarment
-                key={submission.id}
-                canvasJson={submission.canvasJson}
-                hex={submission.hex}
-                side={submission.side}
-                label={submission.designName}
-                className="w-full"
-                shadowIntensity={0.9}
-              />
-            ))}
+            {submissions.slice(0, 8).map((submission) => {
+              const preview = (
+                <CampaignGarment
+                  canvasJson={submission.canvasJson}
+                  hex={submission.hex}
+                  side={submission.side}
+                  label={submission.designName}
+                  className="w-full transition-transform duration-300 group-hover:scale-[1.02]"
+                  shadowIntensity={0.9}
+                />
+              );
+              return editorHrefFor ? (
+                <Link
+                  key={submission.id}
+                  href={editorHrefFor(submission)}
+                  aria-label={`Continue editing ${submission.designName}`}
+                  className="group block"
+                >
+                  {preview}
+                </Link>
+              ) : (
+                <div key={submission.id}>{preview}</div>
+              );
+            })}
           </div>
         ) : (
           <motion.div
