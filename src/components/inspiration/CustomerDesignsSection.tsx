@@ -17,9 +17,25 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * to render real work the moment that data exists, but never fabricates a
  * customer, a design, or a handle to fill the gap in the meantime.
  */
+const COPY = {
+  public: {
+    eyebrow: "Customer designs",
+    heading: "See what others made.",
+    emptyHeading: "Your design could be next.",
+    emptyCopy: "No customer designs to show here yet -- be one of the first to make something and wear it.",
+  },
+  authenticated: {
+    eyebrow: "Your designs",
+    heading: "Your creative workspace.",
+    emptyHeading: "This is where your designs will live.",
+    emptyCopy: "Every design you save from the editor shows up here. Start your first one and it'll appear the moment you save it.",
+  },
+} as const;
+
 export function CustomerDesignsSection({
   submissions,
   startDesigningHref = "/products",
+  variant = "public",
 }: {
   submissions: CustomerSubmission[];
   /** Where "Start designing" goes in the empty state -- /inspiration (no
@@ -28,9 +44,15 @@ export function CustomerDesignsSection({
    * page itself should never bounce back out to /products and skip the
    * editor it's meant to lead into. */
   startDesigningHref?: string;
+  /** "public" (default, unchanged) is /inspiration's anonymous "customer
+   * designs" gallery framing. "authenticated" is Design Hub's own saved
+   * designs -- same layout/empty-state mechanics, copy reframed as the
+   * signed-in customer's own workspace rather than other people's work. */
+  variant?: "public" | "authenticated";
 }) {
   const reduceMotion = useReducedMotion();
   const hasReal = submissions.length > 0;
+  const copy = COPY[variant];
 
   return (
     <section id="customer-designs" className="scroll-mt-24 py-section">
@@ -42,8 +64,8 @@ export function CustomerDesignsSection({
           transition={{ duration: 0.5, ease: EASE }}
           className="flex flex-col gap-2"
         >
-          <span className="text-label font-semibold uppercase tracking-[0.18em] text-accent">Customer designs</span>
-          <h2 className="font-display text-display-xl text-foreground">See what others made.</h2>
+          <span className="text-label font-semibold uppercase tracking-[0.18em] text-accent">{copy.eyebrow}</span>
+          <h2 className="font-display text-display-xl text-foreground">{copy.heading}</h2>
         </motion.div>
 
         {hasReal ? (
@@ -68,10 +90,8 @@ export function CustomerDesignsSection({
             transition={{ duration: 0.6, delay: reduceMotion ? 0 : 0.15, ease: EASE }}
             className="mt-12 flex flex-col items-center gap-6 rounded-sm border border-dashed border-border py-20 text-center"
           >
-            <h3 className="font-display text-display-md text-foreground">Your design could be next.</h3>
-            <p className="max-w-sm text-body text-muted">
-              No customer designs to show here yet -- be one of the first to make something and wear it.
-            </p>
+            <h3 className="font-display text-display-md text-foreground">{copy.emptyHeading}</h3>
+            <p className="max-w-sm text-body text-muted">{copy.emptyCopy}</p>
             <MagneticButton
               href={startDesigningHref}
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-7 text-body-sm font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"

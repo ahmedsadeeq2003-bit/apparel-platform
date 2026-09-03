@@ -52,8 +52,12 @@ export async function SiteHeader() {
                 Log in
               </Link>
             )}
-            <Button href={user ? "/products" : "/signup"} variant="dark">
-              {user ? "Browse shirts" : "Sign up"}
+            {/* Signed-in customers land in the Design Hub (their creative
+                home, per the site's routing architecture), not /products --
+                repurposing this one CTA slot rather than adding a separate
+                nav item for it. Logged-out behavior is unchanged. */}
+            <Button href={user ? "/design-hub" : "/signup"} variant="dark">
+              {user ? "Design Hub" : "Sign up"}
             </Button>
           </div>
         </div>

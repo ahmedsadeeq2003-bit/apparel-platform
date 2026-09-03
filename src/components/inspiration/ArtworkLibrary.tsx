@@ -97,18 +97,31 @@ function ArtworkCard({ item, editorHref, index }: { item: ArtworkItem; editorHre
  * The full 67-piece STITCH artwork library (see src/lib/assets/manifest.ts
  * -- designAssets), browsable and filterable client-side. `editorHref` is
  * the same real `/editor/new?product=...&color=...` destination for every
- * card: there's no existing mechanism to pre-load a specific artwork onto
- * the canvas via URL (the editor's own Graphics panel already lists this
- * exact library for one-click insertion once there), so "Use this" opens a
- * real, correctly-seeded editor session rather than inventing new editor
- * plumbing for this task.
+ * card by default: there's no existing mechanism to pre-load a specific
+ * artwork onto the canvas via URL (the editor's own Graphics panel already
+ * lists this exact library for one-click insertion once there), so "Use
+ * this" opens a real, correctly-seeded editor session rather than inventing
+ * new editor plumbing for this task.
+ *
+ * `editorHref` also accepts a per-item resolver function -- artwork has no
+ * inherent garment color the way a template preview does, so every caller
+ * today still resolves to one shared destination, but the shape matches
+ * TemplatesShowcase's `buildEditorHref` so a future per-item destination
+ * (e.g. a color chosen for contrast against a specific piece) doesn't need
+ * a second prop shape invented later. Passing a plain string (as
+ * /inspiration does) is unchanged from before.
  */
-export function ArtworkLibrary({ editorHref }: { editorHref: string }) {
+export function ArtworkLibrary({
+  editorHref,
+}: {
+  editorHref: string | ((item: ArtworkItem) => string);
+}) {
   const reduceMotion = useReducedMotion();
   const [category, setCategory] = useState<DesignCategory | "all">("all");
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => filterArtwork(ALL_ARTWORK, { category, query }), [category, query]);
+  const hrefFor = (item: ArtworkItem) => (typeof editorHref === "function" ? editorHref(item) : editorHref);
 
   return (
     <section id="artwork" className="scroll-mt-24 py-section">
@@ -176,7 +189,7 @@ export function ArtworkLibrary({ editorHref }: { editorHref: string }) {
           >
             <AnimatePresence initial={false} mode="popLayout">
               {results.map((item, index) => (
-                <ArtworkCard key={item.id} item={item} editorHref={editorHref} index={index} />
+                <ArtworkCard key={item.id} item={item} editorHref={hrefFor(item)} index={index} />
               ))}
             </AnimatePresence>
           </motion.ul>

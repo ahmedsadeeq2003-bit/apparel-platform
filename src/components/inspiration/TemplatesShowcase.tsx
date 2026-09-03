@@ -33,8 +33,22 @@ const CARD: Variants = {
  * links into the existing `/inspiration/[category]` route (unchanged query,
  * unchanged schema) for the rest of that category, rather than duplicating
  * that browsing surface here.
+ *
+ * `buildEditorHref`, when passed, points each card straight at the editor
+ * instead -- pre-loaded with the same color its `CampaignGarment` preview
+ * actually renders, rather than /inspiration/[category]'s default of
+ * "browse this category first." Optional and unused unless a caller passes
+ * it, so /inspiration's own behavior (browse-first) is unchanged.
  */
-export function TemplatesShowcase({ groups }: { groups: TemplateGroup[] }) {
+export function TemplatesShowcase({
+  groups,
+  buildEditorHref,
+}: {
+  groups: TemplateGroup[];
+  /** Resolves a template+category to a real `/editor/new?product=...&color=...`
+   * destination matching the color its preview card actually shows. */
+  buildEditorHref?: (template: DesignTemplate, category: TemplateCategory) => string;
+}) {
   const reduceMotion = useReducedMotion();
 
   if (groups.length === 0) return null;
@@ -70,7 +84,7 @@ export function TemplatesShowcase({ groups }: { groups: TemplateGroup[] }) {
             return (
               <motion.div key={category.id} variants={CARD} className={isFeatured ? "sm:col-span-2 lg:col-span-1 lg:row-span-2" : ""}>
                 <Link
-                  href={`/inspiration/${category.slug}`}
+                  href={buildEditorHref ? buildEditorHref(template, category) : `/inspiration/${category.slug}`}
                   className="group flex h-full flex-col gap-5 rounded-sm border border-border bg-background p-6 transition-colors hover:border-accent"
                 >
                   <div
