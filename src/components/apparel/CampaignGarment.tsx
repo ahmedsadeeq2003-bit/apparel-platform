@@ -36,7 +36,13 @@ const PHOTO_ASPECT = { width: 784, height: 1168 };
  * and has no relationship to this image's actual proportions. Exported so
  * other real-photo compositions (e.g. Design Hub's artwork-on-garment
  * demonstration) line up with the same print area instead of re-eyeballing
- * their own, possibly-inconsistent numbers. */
+ * their own, possibly-inconsistent numbers.
+ *
+ * Kept as its own literal here (not imported) rather than sourced from
+ * `garmentPhoto.ts`'s identical `GARMENT_PRINT_AREA_PCT` -- this file
+ * already imports `CANVAS_SIZE` from `lib/editor/constants`, which imports
+ * `GARMENT_PRINT_AREA_PCT` from `garmentPhoto.ts`, so importing it here too
+ * would be circular. Keep both values in sync if this ever changes. */
 export const PHOTO_OVERLAY_PCT = { left: 21, top: 17, width: 58, height: 44 };
 
 /**

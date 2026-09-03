@@ -167,6 +167,36 @@ function resolveGeneratedFontFamily(name: string): string {
   return GENERATED_FONT_FAMILY_MAP[name] ?? CANVAS_TEXT_FONT_FAMILY;
 }
 
+/** Caches the fetched *text* of a bundled SVG file (never the parsed Fabric
+ * objects -- those are stateful/positioned instances that must stay
+ * independent per insertion, so `loadSVGFromString` still runs fresh every
+ * call). Module-level, not per-hook-instance, so it persists for the
+ * editor session regardless of how many times a design/template gets
+ * loaded: these are STITCH's own static, same-origin, immutable bundled
+ * assets (public/assets/designs/**, public/assets/templates/**'s "svg"
+ * pieces), so there's no invalidation concern to design for. Caching the
+ * in-flight Promise (not just the resolved string) also de-dupes
+ * concurrent requests for the same path; a failed fetch evicts itself so
+ * one transient failure doesn't permanently block a retry. */
+const svgTextCache = new Map<string, Promise<string>>();
+
+function fetchSvgText(path: string): Promise<string> {
+  const cached = svgTextCache.get(path);
+  if (cached) return cached;
+
+  const promise = fetch(path)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch asset: ${path} (${res.status})`);
+      return res.text();
+    })
+    .catch((error) => {
+      svgTextCache.delete(path);
+      throw error;
+    });
+  svgTextCache.set(path, promise);
+  return promise;
+}
+
 /** Converts one generated-template object into a real, positioned Fabric
  * object using Fabric's own SVG parser (`loadSVGFromString`) for `"svg"`
  * pieces -- the safe, existing import path, not a hand-rolled SVG parser --
@@ -180,10 +210,7 @@ async function buildGeneratedTemplateObject(
 ): Promise<FabricObjectType | null> {
   try {
     if (obj.type === "svg") {
-      const svgText = await fetch(obj.src).then((res) => {
-        if (!res.ok) throw new Error(`Failed to fetch ${obj.src}: ${res.status}`);
-        return res.text();
-      });
+      const svgText = await fetchSvgText(obj.src);
       const { objects: svgObjects } = await loadSVGFromString(svgText);
       const valid = svgObjects.filter((o): o is FabricObjectType => o != null);
       if (valid.length === 0) return null;
@@ -284,6 +311,11 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     back: createHistory(emptyCanvasSnapshot()),
   });
   const suppressHistoryRef = useRef(false);
+  // Pending debounced history push (property-panel edits only -- see
+  // pushSnapshotDebounced below), so a rapid slider/number-input drag
+  // doesn't spawn one MAX_HISTORY-eating undo step per intermediate value.
+  const historyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const HISTORY_DEBOUNCE_MS = 400;
   const [isReady, setIsReady] = useState(false);
 
   const syncHistoryFlags = (side: EditorSide) => {
@@ -299,6 +331,37 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     historyRef.current[side] = pushHistory(historyRef.current[side], snapshot);
     syncHistoryFlags(side);
     useEditorStore.getState().bumpCanvasVersion();
+  };
+
+  /** If a debounced history push is pending, commit it immediately instead
+   * of waiting out the timer. Anything that reads historyRef as "the
+   * current truth" (undo, redo, side-toggle, export for save/cart) must
+   * call this first -- otherwise a property change made just before one of
+   * those actions could still be sitting in the debounce window and never
+   * make it into history, which would both misalign undo (it would step
+   * past the unsaved change instead of past it) and silently drop the
+   * change from a Save/Add-to-cart taken in that same window. */
+  const flushPendingSnapshot = () => {
+    if (historyDebounceRef.current === null) return;
+    clearTimeout(historyDebounceRef.current);
+    historyDebounceRef.current = null;
+    pushSnapshot();
+  };
+
+  /** Same contract as pushSnapshot, but coalesces a burst of calls (e.g.
+   * every onChange tick while dragging a rotation/spacing slider) into one
+   * history entry recorded HISTORY_DEBOUNCE_MS after the burst settles,
+   * rather than one full canvas serialization per intermediate value. The
+   * live canvas/visual update itself is never debounced -- only when the
+   * result gets committed to undo history. Used by updateProps only;
+   * every other mutation path (canvas events, template apply, side
+   * toggle) keeps pushing synchronously via pushSnapshot. */
+  const pushSnapshotDebounced = () => {
+    if (historyDebounceRef.current !== null) clearTimeout(historyDebounceRef.current);
+    historyDebounceRef.current = setTimeout(() => {
+      historyDebounceRef.current = null;
+      pushSnapshot();
+    }, HISTORY_DEBOUNCE_MS);
   };
 
   useEffect(() => {
@@ -352,6 +415,10 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     syncHistoryFlags(useEditorStore.getState().side);
 
     return () => {
+      if (historyDebounceRef.current !== null) {
+        clearTimeout(historyDebounceRef.current);
+        historyDebounceRef.current = null;
+      }
       canvas.dispose();
       fabricCanvasRef.current = null;
       historyRef.current = {
@@ -402,15 +469,14 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
    * via Fabric's own SVG parser, same as the "svg" pieces inside a
    * generated template. Kept separate from `insertArtwork` (which builds
    * from this project's own hand-authored shape data, synchronously,
-   * no fetch) since loading an external file is inherently async. */
+   * no fetch) since loading an external file is inherently async. Shares
+   * fetchSvgText's cache with the generated-template loader above, so
+   * inserting the same piece twice in one session only fetches it once. */
   const insertSvgAsset = async (path: string): Promise<void> => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
 
-    const svgText = await fetch(path).then((res) => {
-      if (!res.ok) throw new Error(`Failed to fetch asset: ${path}`);
-      return res.text();
-    });
+    const svgText = await fetchSvgText(path);
     const { objects: svgObjects } = await loadSVGFromString(svgText);
     const valid = svgObjects.filter((o): o is FabricObjectType => o != null);
     if (valid.length === 0) return;
@@ -484,6 +550,30 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     canvas.requestRenderAll();
   };
 
+  /** Deletes one specific object by its custom id, independent of whatever
+   * is (or isn't) currently selected -- what the Layers panel's per-row
+   * trash icon actually needs, distinct from `deleteSelected` (the
+   * "Delete"/Backspace shortcut and the object-controls trash icon, both
+   * of which really do mean "delete whatever's selected"). Only clears the
+   * active selection if the deleted object was part of it; deleting an
+   * unselected layer leaves the current selection untouched. `canvas.
+   * remove()` fires "object:removed", which the canvas's own event
+   * listener already turns into a history snapshot -- no manual
+   * pushSnapshot() call needed here, same as deleteSelected above. */
+  const deleteObjectById = (id: string) => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    const target = canvas.getObjects().find((object) => objectId(object) === id);
+    if (!target) return;
+
+    if (canvas.getActiveObjects().includes(target)) {
+      canvas.discardActiveObject();
+    }
+    canvas.remove(target);
+    canvas.requestRenderAll();
+  };
+
   const duplicateSelected = async () => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
@@ -513,7 +603,7 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     target.setCoords();
     canvas.requestRenderAll();
     useEditorStore.getState().markDirty();
-    pushSnapshot();
+    pushSnapshotDebounced();
   };
 
   const selectLayer = (id: string) => {
@@ -664,6 +754,7 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
   };
 
   const undo = () => {
+    flushPendingSnapshot();
     const side = useEditorStore.getState().side;
     const h = historyRef.current[side];
     if (!historyCanUndo(h)) return;
@@ -673,6 +764,7 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
   };
 
   const redo = () => {
+    flushPendingSnapshot();
     const side = useEditorStore.getState().side;
     const h = historyRef.current[side];
     if (!historyCanRedo(h)) return;
@@ -685,6 +777,11 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
 
+    // Must happen before reading `current`/switching sides: a debounced
+    // snapshot that's still pending when the side flips would otherwise
+    // fire later against the *new* side's canvas content instead of the
+    // side the edit actually happened on.
+    flushPendingSnapshot();
     const current = useEditorStore.getState().side;
     const next = otherSide(current);
 
@@ -712,6 +809,7 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
 
   /** Serialized state for both sides, for Save/Preview/Add-to-cart. */
   const exportState = () => {
+    flushPendingSnapshot();
     const canvas = fabricCanvasRef.current;
     const side = useEditorStore.getState().side;
     if (canvas) {
@@ -748,6 +846,7 @@ export function useDesignEditor(canvasRef: RefObject<HTMLCanvasElement | null>) 
     applyGeneratedTemplate,
     updateProps,
     deleteSelected,
+    deleteObjectById,
     duplicateSelected,
     toggleSide,
     undo,

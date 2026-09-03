@@ -6,18 +6,26 @@ import type { EditorSide } from "@/lib/editor/side";
 export function CanvasControls({
   side,
   onSetSide,
+  canShowBack,
   zoom,
   onSetZoom,
 }: {
   side: EditorSide;
   onSetSide: (side: EditorSide) => void;
+  /** Whether a real photo exists for the currently selected color's back
+   * view. Classic Tee only has a real back photo for Black -- offering the
+   * "Back" toggle for a color with no real back photo would let a customer
+   * design against a garment photo that doesn't match their selection, so
+   * it's hidden rather than shown disabled or silently substituted. */
+  canShowBack: boolean;
   zoom: number;
   onSetZoom: (zoom: number) => void;
 }) {
+  const sides = canShowBack ? (["front", "back"] as const) : (["front"] as const);
   return (
     <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border bg-background px-4 py-3">
       <div className="flex gap-1 rounded-full border border-border p-1">
-        {(["front", "back"] as const).map((value) => (
+        {sides.map((value) => (
           <button
             key={value}
             type="button"

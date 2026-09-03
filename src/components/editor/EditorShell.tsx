@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useDesignEditor } from "@/hooks/useDesignEditor";
+import { useIsDesktopViewport } from "@/hooks/useIsDesktopViewport";
 import { useEditorStore } from "@/lib/editor/store";
 import { useCartStore } from "@/lib/editor/cart";
 import { saveDesign } from "@/lib/editor/actions";
+import { getGarmentPhoto, hasGarmentPhoto } from "@/lib/products/garmentPhoto";
 import { TopBar } from "./TopBar";
 import { LeftToolbar } from "./LeftToolbar";
 import { ToolPanel } from "./ToolPanel";
@@ -26,6 +28,7 @@ export function EditorShell({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editor = useDesignEditor(canvasRef);
+  const isDesktop = useIsDesktopViewport();
   const [selectedColor, setSelectedColor] = useState(initialColor);
   const [designName, setDesignName] = useState(`My ${product.name}`);
   const [showAddToCart, setShowAddToCart] = useState(false);
@@ -48,6 +51,19 @@ export function EditorShell({
 
   const activeObject = editor.getActiveObjectProps();
   const layers = editor.getLayers();
+
+  const garmentPhoto = getGarmentPhoto(product.slug, selectedColor.name, side);
+  const canShowBack = hasGarmentPhoto(product.slug, selectedColor.name, "back");
+
+  const handleColorChange = (color: ProductColor) => {
+    setSelectedColor(color);
+    // Only Black has a real back photo -- switching to a color with none
+    // while already viewing "back" would otherwise leave the customer
+    // designing against a photo that doesn't match their selection.
+    if (side === "back" && !hasGarmentPhoto(product.slug, color.name, "back")) {
+      editor.toggleSide();
+    }
+  };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -153,6 +169,7 @@ export function EditorShell({
       onUpdate={(props) => activeObject && editor.updateProps(activeObject.id, props)}
       onDuplicate={editor.duplicateSelected}
       onDelete={editor.deleteSelected}
+      onDeleteLayer={editor.deleteObjectById}
       onSelectLayer={editor.selectLayer}
       onToggleVisible={editor.setObjectVisibility}
       onReorder={editor.reorderLayer}
@@ -185,8 +202,8 @@ export function EditorShell({
           />
         )}
 
-        {!previewMode && panelContent && (
-          <div className="hidden border-r border-border md:block">{panelContent}</div>
+        {!previewMode && isDesktop && panelContent && (
+          <div className="border-r border-border">{panelContent}</div>
         )}
 
         <div className="flex min-h-0 flex-1 flex-col">
@@ -200,7 +217,7 @@ export function EditorShell({
                   <button
                     key={color.id}
                     type="button"
-                    onClick={() => setSelectedColor(color)}
+                    onClick={() => handleColorChange(color)}
                     aria-label={`Switch to ${color.name}`}
                     aria-pressed={color.id === selectedColor.id}
                     className={`h-6 w-6 rounded-full border-2 transition-colors ${
@@ -214,7 +231,7 @@ export function EditorShell({
             <div className={previewMode ? "pointer-events-none flex flex-1 flex-col" : "flex flex-1 flex-col"}>
               <DesignCanvas
                 canvasRef={canvasRef}
-                hex={selectedColor.hex}
+                photo={garmentPhoto}
                 side={side}
                 label={`${product.name}, ${selectedColor.name}, ${side}`}
                 zoom={zoom}
@@ -225,21 +242,22 @@ export function EditorShell({
           <CanvasControls
             side={side}
             onSetSide={(value) => (value !== side ? editor.toggleSide() : undefined)}
+            canShowBack={canShowBack}
             zoom={zoom}
             onSetZoom={(value) => useEditorStore.getState().setZoom(value)}
           />
         </div>
 
-        {!previewMode && <div className="hidden md:block">{rightPanelContent}</div>}
+        {!previewMode && isDesktop && rightPanelContent}
       </div>
 
-      {!previewMode && panelContent && (
-        <div className="fixed inset-x-0 bottom-0 z-40 max-h-[70vh] rounded-t-lg border-t border-border bg-background shadow-[0_-8px_30px_rgba(27,24,21,0.12)] md:hidden">
+      {!previewMode && !isDesktop && panelContent && (
+        <div className="fixed inset-x-0 bottom-0 z-40 max-h-[70vh] rounded-t-lg border-t border-border bg-background shadow-[0_-8px_30px_rgba(27,24,21,0.12)]">
           {panelContent}
         </div>
       )}
-      {!previewMode && !panelContent && activeObject && (
-        <div className="fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-lg border-t border-border bg-background shadow-[0_-8px_30px_rgba(27,24,21,0.12)] md:hidden">
+      {!previewMode && !isDesktop && !panelContent && activeObject && (
+        <div className="fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-lg border-t border-border bg-background shadow-[0_-8px_30px_rgba(27,24,21,0.12)]">
           {rightPanelContent}
         </div>
       )}

@@ -30,6 +30,25 @@ const PRODUCT_SLUG_TO_MANIFEST_KEY: Record<string, keyof typeof shirtAssets> = {
 export const GARMENT_PHOTO_ASPECT = { width: 784, height: 1168 } as const;
 
 /**
+ * The print-safe region on a classic-tee garment photo, as a percentage of
+ * the full photo -- where a design overlay (a finished composite, or a live
+ * Fabric canvas) should sit so it lines up with the chest area of the real
+ * garment. Verified directly against the photographed JPGs themselves
+ * (classic-tee-black-front, classic-tee-black-back, classic-tee-white-front):
+ * collar seam, shoulder span, and hem all land at consistent relative
+ * positions across colors and both sides, so this single box is reused for
+ * every color and for both `front` and `back` rather than defining separate
+ * bounds per side/color.
+ *
+ * This is the same box `CampaignGarment.tsx` uses (as its own
+ * `PHOTO_OVERLAY_PCT`, defined separately there rather than importing this
+ * constant, to avoid a circular import -- CampaignGarment already imports
+ * `CANVAS_SIZE` from `lib/editor/constants`, which imports this file). Keep
+ * both values in sync if this ever changes.
+ */
+export const GARMENT_PRINT_AREA_PCT = { left: 21, top: 17, width: 58, height: 44 } as const;
+
+/**
  * The real photographed garment for a DB product slug + color name + side,
  * or `null` if no real photo exists for that combination yet. Callers must
  * treat `null` as "don't render an image here" -- never fall back to a

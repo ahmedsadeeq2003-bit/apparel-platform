@@ -260,6 +260,7 @@ export function RightPanel({
   onUpdate,
   onDuplicate,
   onDelete,
+  onDeleteLayer,
   onSelectLayer,
   onToggleVisible,
   onReorder,
@@ -268,7 +269,15 @@ export function RightPanel({
   layers: LayerInfo[];
   onUpdate: (props: UpdatableProps) => void;
   onDuplicate: () => void;
+  /** Deletes whatever's currently selected -- the object-controls trash
+   * icon's contract. Deliberately NOT reused for the layers list below: a
+   * no-argument "delete selected" silently ignores the `id` a specific
+   * layer row would pass it, which is exactly the bug `onDeleteLayer`
+   * exists to avoid. */
   onDelete: () => void;
+  /** Deletes one specific object by id, regardless of what (if anything)
+   * is currently selected -- what each layer row's own trash icon needs. */
+  onDeleteLayer: (id: string) => void;
   onSelectLayer: (id: string) => void;
   onToggleVisible: (id: string, visible: boolean) => void;
   onReorder: (id: string, direction: "up" | "down") => void;
@@ -288,7 +297,7 @@ export function RightPanel({
         onSelect={onSelectLayer}
         onToggleVisible={onToggleVisible}
         onReorder={onReorder}
-        onDelete={onDelete}
+        onDelete={onDeleteLayer}
       />
     </div>
   );
