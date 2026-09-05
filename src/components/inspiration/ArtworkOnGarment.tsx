@@ -49,8 +49,10 @@ function cardVariants(index: number): Variants {
  * site (imported, not re-eyeballed). Deliberately not a Fabric canvas or
  * TShirtMockup: this is a plain, absolutely-positioned `<img>` over a real
  * photo -- honest about being a flat preview of a placement, not a live
- * design tool (that's the editor's job). Each card is a real "Use this"
- * entry point, same contract as ArtworkLibrary's cards below on this page.
+ * design tool (that's the editor's job). Each card is a real "Add to
+ * design" entry point, same contract as ArtworkLibrary's cards below on
+ * this page -- both artwork surfaces, so both use artwork's own action
+ * verb, distinct from a template's "Customize" (see TemplatesShowcase).
  */
 export function ArtworkOnGarment({ pieces }: { pieces: GarmentDemoPiece[] }) {
   const reduceMotion = useReducedMotion();
@@ -125,7 +127,7 @@ export function ArtworkOnGarment({ pieces }: { pieces: GarmentDemoPiece[] }) {
                     />
                   </div>
                   <span className="absolute right-3 top-3 flex translate-y-1 items-center gap-1 whitespace-nowrap rounded-full bg-accent px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-accent-foreground opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100">
-                    Use this
+                    Add to design
                     <ArrowUpRight size={11} weight="bold" aria-hidden />
                   </span>
                 </motion.div>

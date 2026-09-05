@@ -6,6 +6,7 @@ import { useStaticFabricPreview } from "@/hooks/useStaticFabricPreview";
 import { CANVAS_SIZE } from "@/lib/editor/constants";
 import { shirtAssets } from "@/lib/assets/manifest";
 import { nearestHex } from "@/lib/color";
+import { GarmentTextureOverlay } from "@/components/apparel/GarmentTextureOverlay";
 
 /** The four real photographed Classic Tee front colors (see
  * src/lib/assets/manifest.ts -- shirtAssets.classicTee), matching the real
@@ -115,6 +116,9 @@ export function CampaignGarment({
           height={CANVAS_SIZE}
           className="pointer-events-none absolute inset-0 h-full w-full"
         />
+        {/* Real fabric texture/shadow, printed-on-fabric realism -- see
+            GarmentTextureOverlay's own comment. */}
+        <GarmentTextureOverlay photoPath={photo.path} />
       </div>
     </div>
   );

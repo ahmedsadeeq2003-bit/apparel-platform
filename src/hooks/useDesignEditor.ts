@@ -19,6 +19,7 @@ import { otherSide, type EditorSide } from "@/lib/editor/side";
 import type { ArtworkDef } from "@/lib/editor/artwork";
 import { EDITOR_FONTS } from "@/lib/editor/fonts";
 import { toCharSpacing } from "@/lib/editor/textSpacing";
+import { remapTemplateFonts } from "@/lib/editor/templateFonts";
 import type { InitialEditorContent } from "@/lib/editor/initialContent";
 import {
   canRedo as historyCanRedo,
@@ -70,6 +71,15 @@ export type ActiveObjectProps = {
   angle: number;
   width: number;
   height: number;
+  /** Top-left of the object's axis-aligned bounding box, in canvas-space --
+   * unlike `left`/`top` (the object's own left/top, which for a
+   * center-origin object like most placed here is its *center*, but for a
+   * default-origin object is already its top-left), these two always mean
+   * the same thing regardless of the object's own origin setting. Used for
+   * positioning UI relative to where the object visually sits (the
+   * floating selection toolbar), not for anything that mutates the object. */
+  boundsLeft: number;
+  boundsTop: number;
   fill?: string;
   isText: boolean;
   text?: string;
@@ -120,117 +130,16 @@ async function loadJsonOntoCanvas(canvas: Canvas, json: object) {
   canvas.requestRenderAll();
 }
 
-/**
- * Shape of a template JSON from the externally generated "STITCH artwork
- * library" package (public/assets/templates/**). This is NOT the same
- * format as `design_templates.canvas_json` (a raw Fabric `canvas.toObject()`
- * snapshot) -- it's a template-level descriptor authored without knowledge
- * of this repo (1200x1200 canvas space, `type: "svg"` objects referencing a
- * file `src` rather than inline Fabric geometry, `letterSpacing` instead of
- * Fabric's `charSpacing`, no object `id`s). `buildGeneratedTemplateObjects`
- * below is the adapter that converts this into real Fabric objects; nothing
- * about the existing `design_templates`/`applyTemplate` path changes.
- */
-type GeneratedTemplateObject =
-  | {
-      type: "svg";
-      src: string;
-      left: number;
-      top: number;
-      scale: number;
-      angle: number;
-      opacity: number;
-      originX: "left" | "center" | "right";
-      originY: "top" | "center" | "bottom";
-    }
-  | {
-      type: "text";
-      text: string;
-      left: number;
-      top: number;
-      fontSize: number;
-      fontFamily: string;
-      letterSpacing?: number;
-      angle: number;
-      fill: string;
-      fontStyle?: string;
-      fontWeight?: string | number;
-      originX: "left" | "center" | "right";
-      originY: "top" | "center" | "bottom";
-    };
-
-type GeneratedTemplate = {
-  schemaVersion: string;
-  id: string;
-  name: string;
-  category: string;
-  description?: string;
-  canvas: { width: number; height: number; suggestedGarmentColor?: string };
-  objects: GeneratedTemplateObject[];
-  tags?: string[];
-};
-
-/** The generated templates reference font names by their plain CSS name
- * ("Anton", "Playfair Display", "Oswald"). Canvas 2D text can't resolve a
- * bare family name unless that exact string is what next/font registered,
- * so this maps each referenced name to one of this project's actually-
- * loaded curated fonts (see lib/editor/fonts.ts). Oswald isn't in our
- * curated set -- Bebas Neue (also a bold condensed sans) is the closest
- * loaded stand-in rather than silently falling back to the browser default. */
-const GENERATED_FONT_FAMILY_MAP: Record<string, string> = {
-  Anton: EDITOR_FONTS.find((f) => f.id === "anton")?.fabricFamily ?? CANVAS_TEXT_FONT_FAMILY,
-  "Playfair Display": EDITOR_FONTS.find((f) => f.id === "playfair")?.fabricFamily ?? CANVAS_TEXT_FONT_FAMILY,
-  Oswald: EDITOR_FONTS.find((f) => f.id === "bebas")?.fabricFamily ?? CANVAS_TEXT_FONT_FAMILY,
-};
-
-function resolveGeneratedFontFamily(name: string): string {
-  return GENERATED_FONT_FAMILY_MAP[name] ?? CANVAS_TEXT_FONT_FAMILY;
-}
-
-/** The DB-seeded `design_templates` rows (see supabase/seed.sql) store
- * loose CSS-stack font strings ("Archivo, sans-serif", "Anton, sans-serif")
- * rather than the actual next/font-generated family names Canvas 2D text
- * needs to resolve the real curated typeface -- unlike the generated-JSON
- * template path above, nothing previously remapped these before they hit
- * the canvas, so applying a DB template silently rendered its text in
- * whatever generic sans the browser falls back to. This is that same
- * remap, for the same two strings actually used in the seed data. */
-const DB_TEMPLATE_FONT_FAMILY_MAP: Record<string, string> = {
-  "Archivo, sans-serif": EDITOR_FONTS.find((f) => f.id === "archivo")?.fabricFamily ?? CANVAS_TEXT_FONT_FAMILY,
-  "Anton, sans-serif": EDITOR_FONTS.find((f) => f.id === "anton")?.fabricFamily ?? CANVAS_TEXT_FONT_FAMILY,
-};
-
-/** Applied to a DB template's canvas_json (front and back) before it's ever
- * loaded onto the canvas or written into history. Any text object's
- * fontFamily that matches a known loose seed string gets the real curated
- * family; anything unrecognized passes through untouched rather than being
- * forced to a guess -- an unknown value can't crash Canvas 2D text (it just
- * falls back to a generic sans), so leaving it alone is the safe default. */
-function remapTemplateFonts(canvasJson: object): object {
-  const parsed = canvasJson as { objects?: Array<Record<string, unknown>> };
-  if (!Array.isArray(parsed.objects)) return canvasJson;
-  return {
-    ...parsed,
-    objects: parsed.objects.map((object) => {
-      const fontFamily = object.fontFamily;
-      if (typeof fontFamily !== "string") return object;
-      const mapped = DB_TEMPLATE_FONT_FAMILY_MAP[fontFamily];
-      return mapped ? { ...object, fontFamily: mapped } : object;
-    }),
-  };
-}
-
 /** Caches the fetched *text* of a bundled SVG file (never the parsed Fabric
  * objects -- those are stateful/positioned instances that must stay
  * independent per insertion, so `loadSVGFromString` still runs fresh every
  * call). Module-level, not per-hook-instance, so it persists for the
- * editor session regardless of how many times a design/template gets
- * loaded: these are STITCH's own static, same-origin, immutable bundled
- * assets (public/assets/designs/**, public/assets/templates/**'s "svg"
- * pieces), so there's no invalidation concern to design for. Caching the
- * in-flight Promise (not just the resolved string) also de-dupes
- * concurrent requests for the same path; a failed fetch evicts itself so
- * one transient failure doesn't permanently block a retry. */
+ * editor session regardless of how many times a design gets loaded: these
+ * are STITCH's own static, same-origin, immutable bundled assets
+ * (public/assets/designs/**), so there's no invalidation concern to design
+ * for. Caching the in-flight Promise (not just the resolved string) also
+ * de-dupes concurrent requests for the same path; a failed fetch evicts
+ * itself so one transient failure doesn't permanently block a retry. */
 const svgTextCache = new Map<string, Promise<string>>();
 
 function fetchSvgText(path: string): Promise<string> {
@@ -248,55 +157,6 @@ function fetchSvgText(path: string): Promise<string> {
     });
   svgTextCache.set(path, promise);
   return promise;
-}
-
-/** Converts one generated-template object into a real, positioned Fabric
- * object using Fabric's own SVG parser (`loadSVGFromString`) for `"svg"`
- * pieces -- the safe, existing import path, not a hand-rolled SVG parser --
- * and a normal `IText` for `"text"` pieces so wording stays editable. `scale`
- * rescales from the template's 1200x1200 design space into this editor's
- * real CANVAS_SIZE. Returns `null` (rather than throwing) if a single piece
- * fails to load, so one bad asset can't take down an entire template. */
-async function buildGeneratedTemplateObject(
-  obj: GeneratedTemplateObject,
-  scale: number,
-): Promise<FabricObjectType | null> {
-  try {
-    if (obj.type === "svg") {
-      const svgText = await fetchSvgText(obj.src);
-      const { objects: svgObjects } = await loadSVGFromString(svgText);
-      const valid = svgObjects.filter((o): o is FabricObjectType => o != null);
-      if (valid.length === 0) return null;
-      const node = valid.length > 1 ? fabricUtil.groupSVGElements(valid) : valid[0];
-      node.set({
-        left: obj.left * scale,
-        top: obj.top * scale,
-        angle: obj.angle,
-        opacity: obj.opacity,
-        originX: obj.originX,
-        originY: obj.originY,
-      });
-      node.scale(obj.scale * scale);
-      return node;
-    }
-
-    const text = new IText(obj.text, {
-      left: obj.left * scale,
-      top: obj.top * scale,
-      fontSize: obj.fontSize * scale,
-      fontFamily: resolveGeneratedFontFamily(obj.fontFamily),
-      charSpacing: toCharSpacing(obj.letterSpacing, obj.fontSize),
-      angle: obj.angle,
-      fill: obj.fill,
-      fontWeight: obj.fontWeight ?? "400",
-      originX: obj.originX,
-      originY: obj.originY,
-    });
-    return text;
-  } catch (error) {
-    console.error("Failed to load generated-template object", obj, error);
-    return null;
-  }
 }
 
 function labelForObject(object: FabricObjectType): string {
@@ -840,6 +700,8 @@ export function useDesignEditor(
       angle: Math.round(object.angle ?? 0),
       width: Math.round(bounds.width),
       height: Math.round(bounds.height),
+      boundsLeft: Math.round(bounds.left),
+      boundsTop: Math.round(bounds.top),
       fill: typeof object.fill === "string" ? object.fill : undefined,
       isText,
       text: isText ? (object as IText).text : undefined,
@@ -888,40 +750,6 @@ export function useDesignEditor(
     }
     const side = useEditorStore.getState().side;
     applyHistoryPresent(side, historyRef.current[side].present);
-  };
-
-  /** Same "apply to the current side, fully editable afterward" contract as
-   * `applyTemplate`, for the externally generated STITCH artwork-library
-   * templates -- a different on-disk format (see GeneratedTemplate above),
-   * so it needs its own async loader, but it's additive: `applyTemplate`
-   * and the DB-backed template path are untouched. */
-  const applyGeneratedTemplate = async (templatePath: string): Promise<void> => {
-    const canvas = fabricCanvasRef.current;
-    if (!canvas) return;
-
-    const template = await fetch(templatePath).then((res) => {
-      if (!res.ok) throw new Error(`Failed to fetch template: ${templatePath}`);
-      return res.json() as Promise<GeneratedTemplate>;
-    });
-
-    const scale = CANVAS_SIZE / template.canvas.width;
-    const built = await Promise.all(
-      template.objects.map((obj) => buildGeneratedTemplateObject(obj, scale)),
-    );
-    const objects = built.filter((o): o is FabricObjectType => o !== null);
-    if (objects.length === 0) return;
-
-    suppressHistoryRef.current = true;
-    canvas.discardActiveObject();
-    canvas.clear();
-    objects.forEach((object) => canvas.add(object));
-    ensureIds(canvas);
-    canvas.requestRenderAll();
-    suppressHistoryRef.current = false;
-
-    useEditorStore.getState().setSelectedObjectIds([]);
-    useEditorStore.getState().markDirty();
-    pushSnapshot();
   };
 
   const undo = () => {
@@ -1017,7 +845,6 @@ export function useDesignEditor(
     insertSvgAsset,
     addImageFromFile,
     applyTemplate,
-    applyGeneratedTemplate,
     updateProps,
     deleteSelected,
     deleteObjectById,

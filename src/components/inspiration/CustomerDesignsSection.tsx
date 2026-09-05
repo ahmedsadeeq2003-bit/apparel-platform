@@ -37,7 +37,6 @@ export function CustomerDesignsSection({
   submissions,
   startDesigningHref = "/products",
   variant = "public",
-  editorHrefFor,
 }: {
   submissions: CustomerSubmission[];
   /** Where "Start designing" goes in the empty state -- /inspiration (no
@@ -47,25 +46,26 @@ export function CustomerDesignsSection({
    * editor it's meant to lead into. */
   startDesigningHref?: string;
   /** "public" (default, unchanged) is /inspiration's anonymous "customer
-   * designs" gallery framing. "authenticated" is Design Hub's own saved
-   * designs -- same layout/empty-state mechanics, copy reframed as the
-   * signed-in customer's own workspace rather than other people's work. */
+   * designs" gallery framing -- cards are never links into the editor:
+   * those submissions are, or will be, OTHER people's opted-in work, which
+   * must never be deep-linkable into an editing session (RLS would block
+   * the load anyway via getDesignById, but the card itself simply isn't a
+   * link here rather than relying on that as the only guard). "authenticated"
+   * is Design Hub's own saved designs -- always the current user's OWN
+   * designs (RLS-scoped, see lib/editor/queries.ts's getMyDesigns), so each
+   * card links to `/editor/new?designId=...` to resume it. Derived from
+   * this plain string rather than a passed-in function: this component's
+   * caller is a Server Component, and functions can't cross that boundary. */
   variant?: "public" | "authenticated";
-  /** Makes each non-empty-state card open that exact design for editing
-   * (`/editor/new?designId=...`). Only ever passed for `variant:
-   * "authenticated"` -- these are always the current user's OWN designs
-   * there (RLS-scoped, see lib/editor/queries.ts's getMyDesigns), so
-   * deep-linking into the editor is safe. /inspiration's `public` variant
-   * never passes this: those submissions are, or will be, OTHER people's
-   * opted-in work, which must never be deep-linkable into an editing
-   * session -- RLS would block the load anyway (getDesignById only ever
-   * returns the caller's own rows), but the card itself simply isn't a
-   * link in that context, rather than relying on that as the only guard. */
-  editorHrefFor?: (submission: CustomerSubmission) => string;
 }) {
   const reduceMotion = useReducedMotion();
   const hasReal = submissions.length > 0;
   const copy = COPY[variant];
+  const editorHrefFor =
+    variant === "authenticated"
+      ? (submission: CustomerSubmission) =>
+          `/editor/new?${new URLSearchParams({ designId: submission.id }).toString()}`
+      : null;
 
   return (
     <section id="customer-designs" className="scroll-mt-24 py-section">

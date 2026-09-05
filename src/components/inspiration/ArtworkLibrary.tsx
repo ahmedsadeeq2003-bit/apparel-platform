@@ -68,7 +68,7 @@ function ArtworkCard({ item, editorHref, index }: { item: ArtworkItem; editorHre
             mobile widths, an inline invisible badge was squeezing artwork
             names down to a single truncated character. */}
         <span className="pointer-events-none absolute right-4 top-4 z-10 flex translate-y-1 items-center gap-1 whitespace-nowrap rounded-full bg-accent px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-accent-foreground opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
-          Use this
+          Add to design
           <ArrowUpRight size={11} weight="bold" aria-hidden />
         </span>
 
@@ -96,32 +96,26 @@ function ArtworkCard({ item, editorHref, index }: { item: ArtworkItem; editorHre
 /**
  * The full 67-piece STITCH artwork library (see src/lib/assets/manifest.ts
  * -- designAssets), browsable and filterable client-side. `editorHref` is
- * the same real `/editor/new?product=...&color=...` destination for every
- * card by default: there's no existing mechanism to pre-load a specific
- * artwork onto the canvas via URL (the editor's own Graphics panel already
- * lists this exact library for one-click insertion once there), so "Use
- * this" opens a real, correctly-seeded editor session rather than inventing
- * new editor plumbing for this task.
- *
- * `editorHref` also accepts a per-item resolver function -- artwork has no
- * inherent garment color the way a template preview does, so every caller
- * today still resolves to one shared destination, but the shape matches
- * TemplatesShowcase's `buildEditorHref` so a future per-item destination
- * (e.g. a color chosen for contrast against a specific piece) doesn't need
- * a second prop shape invented later. Passing a plain string (as
- * /inspiration does) is unchanged from before.
+ * the base `/editor/new?product=...&color=...` destination -- a plain
+ * string, deliberately not a per-item function: this component (and its
+ * caller, a Server Component page) sit across the React Server/Client
+ * boundary, and functions aren't serializable across it. Each card appends
+ * its own `artwork=<id>` onto that base href client-side instead, which
+ * needs no server-side computation (artwork has no inherent garment color
+ * the way a template preview does, so every card shares the same base).
  */
-export function ArtworkLibrary({
-  editorHref,
-}: {
-  editorHref: string | ((item: ArtworkItem) => string);
-}) {
+export function ArtworkLibrary({ editorHref }: { editorHref: string }) {
   const reduceMotion = useReducedMotion();
   const [category, setCategory] = useState<DesignCategory | "all">("all");
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => filterArtwork(ALL_ARTWORK, { category, query }), [category, query]);
-  const hrefFor = (item: ArtworkItem) => (typeof editorHref === "function" ? editorHref(item) : editorHref);
+  const hrefFor = (item: ArtworkItem) => {
+    const [path, existingQuery] = editorHref.split("?");
+    const params = new URLSearchParams(existingQuery ?? "");
+    params.set("artwork", item.id);
+    return `${path}?${params.toString()}`;
+  };
 
   return (
     <section id="artwork" className="scroll-mt-24 py-section">

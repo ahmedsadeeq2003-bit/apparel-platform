@@ -10,13 +10,12 @@ import { TemplatesShowcase } from "@/components/inspiration/TemplatesShowcase";
 import { CustomerDesignsSection } from "@/components/inspiration/CustomerDesignsSection";
 import type { CustomerSubmission } from "@/components/marketing/FreshOffThePress";
 import { createClient } from "@/lib/supabase/server";
-import { getAllTemplatesGrouped, type DesignTemplate, type TemplateCategory } from "@/lib/templates/queries";
+import { getAllTemplatesGrouped } from "@/lib/templates/queries";
 import { getProductBySlug, type ProductColor } from "@/lib/products/queries";
 import { getMyDesigns } from "@/lib/editor/queries";
 import { designAssets, type DesignCategory } from "@/lib/assets/manifest";
-import { ARTWORK_CATEGORY_LABELS, type ArtworkItem } from "@/lib/assets/artworkSearch";
+import { ARTWORK_CATEGORY_LABELS } from "@/lib/assets/artworkSearch";
 import { getGarmentPhoto } from "@/lib/products/garmentPhoto";
-import { nearestRealColorForCategory } from "@/lib/templates/garmentColors";
 import { buildEditorHref } from "@/lib/editor/initialContent";
 
 /** Curated for visual range across real categories and real colors -- every
@@ -68,24 +67,6 @@ export default async function DesignHubPage() {
     classicTee?.product_colors.find((color) => color.name === "Black") ?? classicTee?.product_colors[0];
   const editorHref = classicTee ? buildEditorHref(classicTee.slug, defaultColor?.id ?? "") : "/products";
 
-  // Same real color-mapping TemplatesShowcase's own preview already resolves
-  // to (nearestRealColorForCategory -- one shared implementation, see
-  // garmentColors.ts), so "Customize" opens the editor on the exact color
-  // the card shows, with the template itself carried through too.
-  function colorCorrectTemplateHref(template: DesignTemplate, category: TemplateCategory): string {
-    if (!classicTee) return editorHref;
-    const color = nearestRealColorForCategory(category.slug, classicTee.product_colors) ?? defaultColor;
-    if (!color) return editorHref;
-    return buildEditorHref(classicTee.slug, color.id, { template: template.id });
-  }
-
-  // Artwork has no inherent garment color (see ArtworkLibrary's own
-  // comment) -- every card still resolves to the same default color, but
-  // now carries that specific artwork's id through so it actually arrives
-  // on the canvas rather than opening a blank editor.
-  const artworkEditorHref = (item: ArtworkItem) =>
-    classicTee ? buildEditorHref(classicTee.slug, defaultColor?.id ?? "", { artwork: item.id }) : editorHref;
-
   const demoPieces: GarmentDemoPiece[] = classicTee
     ? DEMO_ARTWORK.map(({ category, slug, colorName }) => {
         const entry = designAssets[category].find((asset) => asset.path.endsWith(`/${slug}.svg`));
@@ -134,14 +115,12 @@ export default async function DesignHubPage() {
       <main className="flex-1 overflow-x-hidden">
         <DesignHubHero editorHref={editorHref} />
         <ArtworkOnGarment pieces={demoPieces} />
-        <TemplatesShowcase groups={templateGroups} buildEditorHref={colorCorrectTemplateHref} />
-        <ArtworkLibrary editorHref={artworkEditorHref} />
-        <CustomerDesignsSection
-          submissions={mySubmissions}
-          startDesigningHref={editorHref}
-          variant="authenticated"
-          editorHrefFor={(submission) => `/editor/new?${new URLSearchParams({ designId: submission.id }).toString()}`}
+        <TemplatesShowcase
+          groups={templateGroups}
+          editorContext={classicTee ? { productSlug: classicTee.slug, colors: classicTee.product_colors } : undefined}
         />
+        <ArtworkLibrary editorHref={editorHref} />
+        <CustomerDesignsSection submissions={mySubmissions} startDesigningHref={editorHref} variant="authenticated" />
         <FinalCta startDesigningHref={editorHref} />
       </main>
       <SiteFooter />

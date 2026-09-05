@@ -16,6 +16,8 @@ import { RightPanel } from "./RightPanel";
 import { DesignCanvas } from "./DesignCanvas";
 import { CanvasControls } from "./CanvasControls";
 import { AddToCartDialog } from "./AddToCartDialog";
+import { SelectionToolbar } from "./SelectionToolbar";
+import { EmptyCanvasPrompt } from "./EmptyCanvasPrompt";
 import type { Product, ProductColor } from "@/lib/products/queries";
 import type { DesignTemplate, TemplateCategory } from "@/lib/templates/queries";
 
@@ -55,15 +57,21 @@ export function EditorShell({
   const canUndo = useEditorStore((s) => s.canUndo);
   const canRedo = useEditorStore((s) => s.canRedo);
   const isDirty = useEditorStore((s) => s.isDirty);
-  // Subscribing to these triggers a re-render whenever the imperative Fabric
-  // canvas mutates; the values themselves aren't read directly here because
+  // Subscribing to this triggers a re-render whenever the imperative Fabric
+  // canvas mutates; the value itself isn't read directly here because
   // getActiveObjectProps()/getLayers() below re-derive straight from the
   // canvas each render instead of duplicating that state into React.
   useEditorStore((s) => s.canvasVersion);
-  useEditorStore((s) => s.selectedObjectIds);
+  const selectedObjectIds = useEditorStore((s) => s.selectedObjectIds);
 
   const activeObject = editor.getActiveObjectProps();
   const layers = editor.getLayers();
+  // A Fabric ActiveSelection (multi-object selection) has no stamped .id of
+  // its own, so activeObject is null for it -- selectedObjectIds (which
+  // syncSelection populates from getActiveObjects(), independent of
+  // whether that's a single object or a selection) is what distinguishes
+  // "nothing selected" from "several things selected."
+  const multiSelectCount = !activeObject ? selectedObjectIds.length : 0;
 
   const garmentPhoto = getGarmentPhoto(product.slug, selectedColor.name, side);
   const canShowBack = hasGarmentPhoto(product.slug, selectedColor.name, "back");
@@ -172,13 +180,6 @@ export function EditorShell({
     useEditorStore.getState().setActiveTool(null);
   };
 
-  const handleApplyGeneratedTemplate = (path: string) => {
-    editor
-      .applyGeneratedTemplate(path)
-      .then(() => useEditorStore.getState().setActiveTool(null))
-      .catch(() => setFeedback("Couldn't load that template"));
-  };
-
   const handleInsertSvgAsset = (path: string) => {
     editor.insertSvgAsset(path).catch(() => setFeedback("Couldn't load that artwork"));
   };
@@ -188,7 +189,6 @@ export function EditorShell({
       activeTool={activeTool}
       templateGroups={templateGroups}
       onApplyTemplate={handleApplyTemplate}
-      onApplyGeneratedTemplate={handleApplyGeneratedTemplate}
       onInsertArtwork={editor.insertArtwork}
       onInsertSvgAsset={handleInsertSvgAsset}
       onUpload={(file) => editor.addImageFromFile(file)}
@@ -199,6 +199,8 @@ export function EditorShell({
   const rightPanelContent = (
     <RightPanel
       activeObject={activeObject}
+      multiSelectCount={multiSelectCount}
+      designLabel={`${product.name}, ${selectedColor.name}`}
       layers={layers}
       onUpdate={(props) => activeObject && editor.updateProps(activeObject.id, props)}
       onDuplicate={editor.duplicateSelected}
@@ -207,6 +209,9 @@ export function EditorShell({
       onSelectLayer={editor.selectLayer}
       onToggleVisible={editor.setObjectVisibility}
       onReorder={editor.reorderLayer}
+      onOpenTemplates={() => useEditorStore.getState().setActiveTool("templates")}
+      onOpenGraphics={() => useEditorStore.getState().setActiveTool("graphics")}
+      onAddText={editor.addText}
     />
   );
 
@@ -283,8 +288,26 @@ export function EditorShell({
                   <span className="text-body-sm font-medium text-muted">Loading your design...</span>
                 </div>
               )}
+              {editor.isReady && !editor.isHydrating && !previewMode && layers.length === 0 && (
+                <EmptyCanvasPrompt
+                  onOpenTemplates={() => useEditorStore.getState().setActiveTool("templates")}
+                  onOpenGraphics={() => useEditorStore.getState().setActiveTool("graphics")}
+                  onAddText={editor.addText}
+                  onOpenUpload={() => useEditorStore.getState().setActiveTool("upload")}
+                />
+              )}
             </div>
           </div>
+          {!previewMode && isDesktop && (
+            <SelectionToolbar
+              canvasRef={canvasRef}
+              activeObject={activeObject}
+              zoom={zoom}
+              onDuplicate={editor.duplicateSelected}
+              onBringForward={() => activeObject && editor.reorderLayer(activeObject.id, "up")}
+              onDelete={editor.deleteSelected}
+            />
+          )}
           <CanvasControls
             side={side}
             onSetSide={(value) => (value !== side ? editor.toggleSide() : undefined)}
@@ -302,7 +325,7 @@ export function EditorShell({
           {panelContent}
         </div>
       )}
-      {!previewMode && !isDesktop && !panelContent && activeObject && (
+      {!previewMode && !isDesktop && !panelContent && (activeObject || multiSelectCount > 1) && (
         <div className="fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-lg border-t border-border bg-background shadow-[0_-8px_30px_rgba(27,24,21,0.12)]">
           {rightPanelContent}
         </div>

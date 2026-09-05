@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
 import {
   ArrowsClockwise,
   CaretDown,
@@ -7,13 +8,35 @@ import {
   Copy,
   Eye,
   EyeSlash,
+  Image as ImageIcon,
+  SquaresFour,
+  Sparkle,
+  TextT,
   Trash,
 } from "@phosphor-icons/react";
 import { EDITOR_FONTS } from "@/lib/editor/fonts";
 import type { ActiveObjectProps, LayerInfo, UpdatableProps } from "@/hooks/useDesignEditor";
 
+const EASE = [0.16, 1, 0.3, 1] as const;
 const TEXT_ALIGN_OPTIONS = ["left", "center", "right"] as const;
 
+const PANEL_VARIANTS: Variants = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } },
+  exit: { opacity: 0, y: -4, transition: { duration: 0.14, ease: EASE } },
+};
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">{children}</span>;
+}
+
+/** Contextual controls for a single selected object -- what actually shows
+ * here depends on what kind of object it is: text gets typography controls,
+ * anything with a fill gets a color swatch, everything gets rotation. This
+ * is the "when text is selected / when artwork is selected" split the
+ * design brief asks for, driven by the object's own real properties
+ * (`active.isText`, `active.fill`) rather than a second type-tracking
+ * system. */
 function ObjectControls({
   active,
   onUpdate,
@@ -28,7 +51,8 @@ function ObjectControls({
   return (
     <div className="flex flex-col gap-5 border-b border-border p-4">
       <div className="flex items-center justify-between">
-        <span className="text-body-sm font-semibold text-foreground">
+        <span className="flex items-center gap-1.5 text-body-sm font-semibold text-foreground">
+          {active.isText ? <TextT size={14} className="text-accent" /> : <ImageIcon size={14} className="text-accent" />}
           {active.isText ? "Text" : "Object"}
         </span>
         <div className="flex items-center gap-1">
@@ -56,14 +80,14 @@ function ObjectControls({
       {active.isText && (
         <>
           <label className="flex flex-col gap-1.5">
-            <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Font</span>
+            <FieldLabel>Font</FieldLabel>
             <select
               value={EDITOR_FONTS.find((f) => f.fabricFamily === active.fontFamily)?.id ?? EDITOR_FONTS[0].id}
               onChange={(e) => {
                 const font = EDITOR_FONTS.find((f) => f.id === e.target.value);
                 if (font) onUpdate({ fontFamily: font.fabricFamily });
               }}
-              className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none focus-visible:border-accent"
+              className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
             >
               {EDITOR_FONTS.map((font) => (
                 <option key={font.id} value={font.id}>
@@ -75,22 +99,22 @@ function ObjectControls({
 
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5">
-              <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Size</span>
+              <FieldLabel>Size</FieldLabel>
               <input
                 type="number"
                 min={8}
                 max={200}
                 value={active.fontSize ?? 32}
                 onChange={(e) => onUpdate({ fontSize: Number(e.target.value) })}
-                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none focus-visible:border-accent"
+                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Weight</span>
+              <FieldLabel>Weight</FieldLabel>
               <select
                 value={String(active.fontWeight ?? "400")}
                 onChange={(e) => onUpdate({ fontWeight: e.target.value })}
-                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none focus-visible:border-accent"
+                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
               >
                 <option value="400">Regular</option>
                 <option value="600">Semibold</option>
@@ -101,7 +125,7 @@ function ObjectControls({
 
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1.5">
-              <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Letter spacing</span>
+              <FieldLabel>Letter spacing</FieldLabel>
               <input
                 type="number"
                 min={-100}
@@ -109,11 +133,11 @@ function ObjectControls({
                 step={10}
                 value={active.charSpacing ?? 0}
                 onChange={(e) => onUpdate({ charSpacing: Number(e.target.value) })}
-                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none focus-visible:border-accent"
+                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Line height</span>
+              <FieldLabel>Line height</FieldLabel>
               <input
                 type="number"
                 min={0.8}
@@ -121,13 +145,13 @@ function ObjectControls({
                 step={0.1}
                 value={active.lineHeight ?? 1.16}
                 onChange={(e) => onUpdate({ lineHeight: Number(e.target.value) })}
-                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none focus-visible:border-accent"
+                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
               />
             </label>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Align</span>
+            <FieldLabel>Align</FieldLabel>
             <div className="flex gap-1">
               {TEXT_ALIGN_OPTIONS.map((align) => (
                 <button
@@ -151,7 +175,7 @@ function ObjectControls({
 
       {active.fill && (
         <label className="flex items-center justify-between gap-3">
-          <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Color</span>
+          <FieldLabel>Color</FieldLabel>
           <input
             type="color"
             value={active.fill}
@@ -174,6 +198,93 @@ function ObjectControls({
           className="accent-accent"
         />
       </label>
+    </div>
+  );
+}
+
+/** Shown instead of ObjectControls when more than one object is selected
+ * (a Fabric ActiveSelection) -- these have no stamped .id of their own, so
+ * they never satisfy `activeObject`'s single-object contract; this reads
+ * the count already tracked in the store rather than inventing a second
+ * multi-select model. The two actions here (duplicate/delete) already
+ * operate on Fabric's own getActiveObjects() -- the whole selection -- with
+ * no change needed to make them "group-aware." */
+function MultiSelectControls({
+  count,
+  onDuplicate,
+  onDelete,
+}: {
+  count: number;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4 border-b border-border p-4">
+      <span className="text-body-sm font-semibold text-foreground">{count} objects selected</span>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onDuplicate}
+          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-sm border border-border text-body-sm font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
+        >
+          <Copy size={15} /> Duplicate
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-sm border border-border text-body-sm font-medium text-foreground transition-colors hover:border-danger hover:text-danger"
+        >
+          <Trash size={15} /> Delete
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Shown when nothing is selected at all -- rather than a blank void below
+ * the layers list, this gives the panel a real job: orient the customer
+ * (what they're designing) and offer the same quick-start actions the
+ * empty canvas prompt does, so the right panel stays useful throughout the
+ * session, not just once something's selected. */
+function IdleState({
+  designLabel,
+  onOpenTemplates,
+  onOpenGraphics,
+  onAddText,
+}: {
+  designLabel: string;
+  onOpenTemplates: () => void;
+  onOpenGraphics: () => void;
+  onAddText: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4 border-b border-border p-4">
+      <div className="flex flex-col gap-1">
+        <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">Designing</span>
+        <span className="text-body-sm font-semibold text-foreground">{designLabel}</span>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {[
+          { label: "Browse templates", icon: SquaresFour, onClick: onOpenTemplates },
+          { label: "Browse artwork", icon: ImageIcon, onClick: onOpenGraphics },
+          { label: "Add text", icon: TextT, onClick: onAddText },
+        ].map(({ label, icon: Icon, onClick }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={onClick}
+            className="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-body-sm text-foreground transition-colors hover:bg-surface"
+          >
+            <Icon size={15} className="text-accent" />
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-start gap-2 rounded-sm bg-surface p-3 text-[0.75rem] leading-relaxed text-muted">
+        <Sparkle size={13} className="mt-0.5 shrink-0 text-accent" weight="fill" />
+        Click anything on the shirt to select it -- font, size, color and
+        rotation all show up right here.
+      </div>
     </div>
   );
 }
@@ -201,7 +312,7 @@ function LayersPanel({
           {layers.map((layer) => (
             <li
               key={layer.id}
-              className={`group flex items-center gap-2 rounded-sm px-2 py-1.5 ${
+              className={`group flex items-center gap-2 rounded-sm px-2 py-1.5 transition-colors ${
                 layer.active ? "bg-surface" : "hover:bg-surface"
               }`}
             >
@@ -256,6 +367,8 @@ function LayersPanel({
 
 export function RightPanel({
   activeObject,
+  multiSelectCount,
+  designLabel,
   layers,
   onUpdate,
   onDuplicate,
@@ -264,8 +377,18 @@ export function RightPanel({
   onSelectLayer,
   onToggleVisible,
   onReorder,
+  onOpenTemplates,
+  onOpenGraphics,
+  onAddText,
 }: {
   activeObject: ActiveObjectProps | null;
+  /** Count of currently selected objects when it's more than one (a Fabric
+   * ActiveSelection) -- 0/1 when the contextual state should instead be
+   * driven by `activeObject`/the idle state. */
+  multiSelectCount: number;
+  /** "{Product}, {Color}" -- shown in the idle state so the panel still
+   * orients the customer even with nothing selected. */
+  designLabel: string;
   layers: LayerInfo[];
   onUpdate: (props: UpdatableProps) => void;
   onDuplicate: () => void;
@@ -281,17 +404,37 @@ export function RightPanel({
   onSelectLayer: (id: string) => void;
   onToggleVisible: (id: string, visible: boolean) => void;
   onReorder: (id: string, direction: "up" | "down") => void;
+  onOpenTemplates: () => void;
+  onOpenGraphics: () => void;
+  onAddText: () => void;
 }) {
+  const reduceMotion = useReducedMotion();
+  const stateKey = activeObject ? `object-${activeObject.id}` : multiSelectCount > 1 ? "multi" : "idle";
+
   return (
     <div className="flex h-full w-full flex-col overflow-y-auto md:w-80 md:border-l md:border-border">
-      {activeObject && (
-        <ObjectControls
-          active={activeObject}
-          onUpdate={onUpdate}
-          onDuplicate={onDuplicate}
-          onDelete={onDelete}
-        />
-      )}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={stateKey}
+          initial={reduceMotion ? false : "hidden"}
+          animate="show"
+          exit={reduceMotion ? undefined : "exit"}
+          variants={PANEL_VARIANTS}
+        >
+          {activeObject ? (
+            <ObjectControls active={activeObject} onUpdate={onUpdate} onDuplicate={onDuplicate} onDelete={onDelete} />
+          ) : multiSelectCount > 1 ? (
+            <MultiSelectControls count={multiSelectCount} onDuplicate={onDuplicate} onDelete={onDelete} />
+          ) : (
+            <IdleState
+              designLabel={designLabel}
+              onOpenTemplates={onOpenTemplates}
+              onOpenGraphics={onOpenGraphics}
+              onAddText={onAddText}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
       <LayersPanel
         layers={layers}
         onSelect={onSelectLayer}

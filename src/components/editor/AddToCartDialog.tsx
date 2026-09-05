@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 import { SIZES } from "@/lib/editor/cart";
@@ -16,13 +16,35 @@ export function AddToCartDialog({
 }) {
   const [size, setSize] = useState<string>("M");
   const [quantity, setQuantity] = useState(1);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
-      <div className="w-full max-w-sm rounded-sm border border-border bg-background p-6">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-to-cart-heading"
+        className="w-full max-w-sm rounded-sm border border-border bg-background p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-display-md text-foreground">Add to cart</h2>
+          <h2 id="add-to-cart-heading" className="font-display text-display-md text-foreground">
+            Add to cart
+          </h2>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="Close"

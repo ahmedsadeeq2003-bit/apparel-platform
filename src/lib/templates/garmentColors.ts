@@ -20,6 +20,19 @@ export const EDITORIAL_GARMENT_COLORS: Record<string, string> = {
   football: "#3F4A3D",
   business: "#A69C8C",
   events: "#8B3A2A",
+  // Phase 3 starter-template categories -- chosen (and the templates'
+  // own object fills chosen to match) so nearestHex reliably lands on a
+  // specific one of the 4 real photographed colors per category, not
+  // left to chance: vintage/illustration -> White, typography/retro/music
+  // -> Black, abstract -> Ash Grey, experimental/sport -> Volt Green.
+  vintage: "#EDEADF",
+  typography: "#0B0B0C",
+  abstract: "#9C9A93",
+  illustration: "#F4F2EC",
+  retro: "#1A1816",
+  experimental: "#D7FF3E",
+  music: "#0B0B0C",
+  sport: "#D7FF3E",
 };
 
 /**

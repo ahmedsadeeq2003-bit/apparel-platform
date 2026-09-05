@@ -49,6 +49,34 @@ export const GARMENT_PHOTO_ASPECT = { width: 784, height: 1168 } as const;
 export const GARMENT_PRINT_AREA_PCT = { left: 21, top: 17, width: 58, height: 44 } as const;
 
 /**
+ * Positions a *second*, full copy of the same garment photo so that,
+ * viewed only through the small print-area window (`overflow: hidden` at
+ * `GARMENT_PRINT_AREA_PCT`), it lines up pixel-for-pixel with the same
+ * region of the full photo sitting underneath -- the geometry for the
+ * "printed on fabric" treatment (see GarmentTextureOverlay.tsx): a real,
+ * low-opacity multiply-blended crop of the actual photograph's own fabric
+ * texture/folds/shadow, not a synthetic filter.
+ *
+ * Derived algebraically from GARMENT_PRINT_AREA_PCT rather than a second
+ * hand-eyeballed constant -- if `left/top` is where the print window
+ * starts within the full photo, and the window is `width/height`
+ * percent of the photo, then a full-size copy of the photo placed *inside*
+ * that window (whose own CSS percentage basis is the window's size, not
+ * the outer photo's) needs to be scaled up by `100/width` and shifted left
+ * by `left/width` (as fractions) to bring the same crop back into view --
+ * verified by hand: window-start (left% of photo) minus the window's own
+ * origin (also left% of photo, since window and overlay share the same
+ * left edge) always cancels to 0, i.e. the overlay's visible crop starts
+ * exactly where the base photo's own left% does.
+ */
+export const GARMENT_TEXTURE_OVERLAY_PCT = {
+  left: -(GARMENT_PRINT_AREA_PCT.left / GARMENT_PRINT_AREA_PCT.width) * 100,
+  top: -(GARMENT_PRINT_AREA_PCT.top / GARMENT_PRINT_AREA_PCT.height) * 100,
+  width: (100 / GARMENT_PRINT_AREA_PCT.width) * 100,
+  height: (100 / GARMENT_PRINT_AREA_PCT.height) * 100,
+} as const;
+
+/**
  * The real photographed garment for a DB product slug + color name + side,
  * or `null` if no real photo exists for that combination yet. Callers must
  * treat `null` as "don't render an image here" -- never fall back to a

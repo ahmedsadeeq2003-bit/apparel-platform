@@ -1,13 +1,16 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { ArrowRight } from "@phosphor-icons/react";
 import { Container } from "@/components/layout/Container";
 import { CampaignGarment } from "@/components/apparel/CampaignGarment";
-import { EDITORIAL_GARMENT_COLORS } from "@/lib/templates/garmentColors";
+import { EDITORIAL_GARMENT_COLORS, nearestRealColorForCategory } from "@/lib/templates/garmentColors";
 import { designTypeLabel } from "@/lib/templates/designType";
+import { buildEditorHref } from "@/lib/editor/initialContent";
 import type { DesignTemplate, TemplateCategory } from "@/lib/templates/queries";
+import type { ProductColor } from "@/lib/products/queries";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -25,31 +28,47 @@ const CARD: Variants = {
 
 /**
  * The DB-backed `design_templates` system (see src/lib/templates/queries.ts
- * -- the same real, already-live data the homepage and editor already use),
- * shown one representative per category so this reads as a set of complete
- * starting points rather than a dense catalog -- Artwork above is the dense
- * grid; Templates is deliberately the opposite rhythm (fewer, larger,
- * asymmetric cards) so the two sections don't blur together. Each card
- * links into the existing `/inspiration/[category]` route (unchanged query,
- * unchanged schema) for the rest of that category, rather than duplicating
- * that browsing surface here.
+ * -- the same real, already-live data the homepage and editor already use).
+ * Two browsing modes, chosen by a category filter row (the same pattern
+ * ArtworkLibrary already uses, reused rather than a second filter UI):
  *
- * `buildEditorHref`, when passed, points each card straight at the editor
- * instead -- pre-loaded with the same color its `CampaignGarment` preview
- * actually renders, rather than /inspiration/[category]'s default of
- * "browse this category first." Optional and unused unless a caller passes
- * it, so /inspiration's own behavior (browse-first) is unchanged.
+ * "All" (default) -- one representative per category, so this reads as a
+ * set of complete starting points, an overview across every style rather
+ * than a dense catalog. With 18 categories now (Phase 3 added 8 style-
+ * driven ones alongside the original 10 intent-driven ones), most holding
+ * only one or two templates, this overview is the "curated collection"
+ * framing Phase 4 asked for rather than 18 sparse single-card sections.
+ *
+ * A specific category -- every template in it, not just the first, so
+ * picking a style is a genuine "show me everything in this vein" browse
+ * instead of a dead end at one example. No database change: this is
+ * purely how the same `groups` data already passed in gets displayed.
  */
 export function TemplatesShowcase({
   groups,
-  buildEditorHref,
+  editorContext,
 }: {
   groups: TemplateGroup[];
-  /** Resolves a template+category to a real `/editor/new?product=...&color=...`
-   * destination matching the color its preview card actually shows. */
-  buildEditorHref?: (template: DesignTemplate, category: TemplateCategory) => string;
+  editorContext?: { productSlug: string; colors: ProductColor[] };
 }) {
   const reduceMotion = useReducedMotion();
+  const [categorySlug, setCategorySlug] = useState<string>("all");
+
+  function hrefFor(template: DesignTemplate, category: TemplateCategory): string {
+    if (!editorContext) return `/inspiration/${category.slug}`;
+    const color = nearestRealColorForCategory(category.slug, editorContext.colors) ?? editorContext.colors[0];
+    if (!color) return `/inspiration/${category.slug}`;
+    return buildEditorHref(editorContext.productSlug, color.id, { template: template.id });
+  }
+
+  const cards = useMemo(() => {
+    if (categorySlug === "all") {
+      return groups.map(({ category, templates }) => ({ category, template: templates[0], siblingCount: templates.length }));
+    }
+    const group = groups.find((g) => g.category.slug === categorySlug);
+    if (!group) return [];
+    return group.templates.map((template) => ({ category: group.category, template, siblingCount: 1 }));
+  }, [groups, categorySlug]);
 
   if (groups.length === 0) return null;
 
@@ -71,20 +90,53 @@ export function TemplatesShowcase({
           </p>
         </motion.div>
 
+        <div className="-mx-6 mt-8 flex gap-2 overflow-x-auto px-6 pb-1 md:mx-0 md:flex-wrap md:px-0 md:pb-0">
+          <button
+            type="button"
+            onClick={() => setCategorySlug("all")}
+            aria-pressed={categorySlug === "all"}
+            className={`shrink-0 rounded-full border px-4 py-2 text-body-sm font-medium uppercase tracking-wide transition-colors ${
+              categorySlug === "all"
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted hover:border-accent hover:text-foreground"
+            }`}
+          >
+            All styles
+          </button>
+          {groups.map(({ category }) => (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => setCategorySlug(category.slug)}
+              aria-pressed={categorySlug === category.slug}
+              className={`shrink-0 rounded-full border px-4 py-2 text-body-sm font-medium uppercase tracking-wide transition-colors ${
+                categorySlug === category.slug
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border text-muted hover:border-accent hover:text-foreground"
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+
         <motion.div
+          key={categorySlug}
           initial={reduceMotion ? false : "hidden"}
-          whileInView="show"
-          viewport={{ once: true, amount: 0.15 }}
+          animate="show"
           variants={CONTAINER}
-          className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {groups.map(({ category, templates }, index) => {
-            const template = templates[0];
-            const isFeatured = index === 0;
+          {cards.map(({ category, template, siblingCount }, index) => {
+            const isFeatured = categorySlug === "all" && index === 0;
             return (
-              <motion.div key={category.id} variants={CARD} className={isFeatured ? "sm:col-span-2 lg:col-span-1 lg:row-span-2" : ""}>
+              <motion.div
+                key={template.id}
+                variants={CARD}
+                className={isFeatured ? "sm:col-span-2 lg:col-span-1 lg:row-span-2" : ""}
+              >
                 <Link
-                  href={buildEditorHref ? buildEditorHref(template, category) : `/inspiration/${category.slug}`}
+                  href={hrefFor(template, category)}
                   className="group flex h-full flex-col gap-5 rounded-sm border border-border bg-background p-6 transition-colors hover:border-accent"
                 >
                   <div
@@ -112,7 +164,9 @@ export function TemplatesShowcase({
                     </span>
                     <h3 className="font-display text-display-md text-foreground">{template.name}</h3>
                     <p className="mt-1 text-body-sm text-muted">
-                      {templates.length} template{templates.length === 1 ? "" : "s"} in this category
+                      {categorySlug === "all"
+                        ? `${siblingCount} template${siblingCount === 1 ? "" : "s"} in this style`
+                        : "Editable template"}
                     </p>
                   </div>
                   <span className="inline-flex w-fit items-center gap-2 text-body-sm font-medium text-foreground transition-colors group-hover:text-accent">
