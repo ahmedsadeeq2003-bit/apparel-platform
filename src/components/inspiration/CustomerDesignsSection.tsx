@@ -98,6 +98,7 @@ export function CustomerDesignsSection({
                 <Link
                   key={submission.id}
                   href={editorHrefFor(submission)}
+                  prefetch={false}
                   aria-label={`Continue editing ${submission.designName}`}
                   className="group block"
                 >
@@ -120,6 +121,7 @@ export function CustomerDesignsSection({
             <p className="max-w-sm text-body text-muted">{copy.emptyCopy}</p>
             <MagneticButton
               href={startDesigningHref}
+              prefetch={false}
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-7 text-body-sm font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
             >
               Start designing

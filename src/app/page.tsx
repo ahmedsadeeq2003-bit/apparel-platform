@@ -12,6 +12,8 @@ import { ValueProps } from "@/components/marketing/ValueProps";
 import { FinalCta } from "@/components/marketing/FinalCta";
 import { GrainOverlay } from "@/components/marketing/GrainOverlay";
 import { getFeaturedTemplates } from "@/lib/templates/queries";
+import { getProductBySlug } from "@/lib/products/queries";
+import { buildEditorHref } from "@/lib/editor/initialContent";
 import { EDITORIAL_GARMENT_COLORS } from "@/lib/templates/garmentColors";
 import { createClient } from "@/lib/supabase/server";
 
@@ -45,6 +47,20 @@ export default async function Home() {
   // goes to /login first (which itself preserves ?next=/design-hub through
   // the real auth flow, same as any other protected-route bounce).
   const startDesigningHref = user ? "/design-hub" : `/login?next=${encodeURIComponent("/design-hub")}`;
+
+  // DesignYourWay's own "Explore the editor" button is the one homepage CTA
+  // that actually says "editor," so -- unlike startDesigningHref above --
+  // it should open the editor directly with a real product/color rather
+  // than routing through Design Hub first. Same resolution `/inspiration`
+  // already uses: prefer Black (real front+back photos), fall back to
+  // whatever color exists first; `/products` only if classic-tee itself
+  // can't be resolved.
+  const classicTee = await getProductBySlug("classic-tee");
+  const classicTeeDefaultColor =
+    classicTee?.product_colors.find((color) => color.name === "Black") ?? classicTee?.product_colors[0];
+  const designYourWayEditorHref = classicTee
+    ? buildEditorHref(classicTee.slug, classicTeeDefaultColor?.id ?? "")
+    : "/products";
 
   const featured = await getFeaturedTemplates();
   const bySlug = new Map(featured.map((f) => [f.category.slug, f.template]));
@@ -90,7 +106,9 @@ export default async function Home() {
       <main className="flex-1 overflow-x-hidden">
         <Hero startDesigningHref={startDesigningHref} />
         <WhatIsStitch />
-        {designYourWayPreview && <DesignYourWay preview={designYourWayPreview} />}
+        {designYourWayPreview && (
+          <DesignYourWay preview={designYourWayPreview} editorHref={designYourWayEditorHref} />
+        )}
         {makeItYoursExamples.length > 0 && <MakeItYours examples={makeItYoursExamples} />}
         <DesignLibrarySection />
         <HowItWorks preview={howItWorksPreview} />

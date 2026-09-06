@@ -66,6 +66,7 @@ export function FinalCta({ startDesigningHref }: { startDesigningHref: string })
           </p>
           <MagneticButton
             href={startDesigningHref}
+            prefetch={false}
             className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 text-body font-medium text-accent-foreground uppercase tracking-wide text-body-sm font-semibold transition-colors hover:bg-accent/90"
           >
             Start designing

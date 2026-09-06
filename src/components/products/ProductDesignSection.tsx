@@ -84,6 +84,7 @@ export function ProductDesignSection({ product }: { product: Product }) {
         <motion.div variants={ITEM}>
           <MagneticButton
             href={editorHref}
+            prefetch={false}
             className="inline-flex min-h-14 w-fit items-center justify-center gap-2 rounded-full bg-accent px-8 text-body-sm font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
           >
             Design yours

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { ArrowRight, GoogleLogo } from "@phosphor-icons/react";
+import { ArrowRight, Eye, EyeSlash, GoogleLogo } from "@phosphor-icons/react";
 import { loginSchema, magicLinkSchema, type LoginInput, type MagicLinkInput } from "@/lib/auth/schemas";
 import { signInWithMagicLink, signInWithOAuth, signInWithPassword } from "@/lib/auth/actions";
 
@@ -32,10 +32,23 @@ type Mode = "password" | "magic-link";
  * doesn't need. */
 const LoginField = forwardRef<
   HTMLInputElement,
-  InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }
->(function LoginField({ label, error, id, className = "", onFocus, onBlur, ...rest }, ref) {
+  InputHTMLAttributes<HTMLInputElement> & {
+    label: string;
+    error?: string;
+    /** When set, renders a show/hide eye button inside the field and lets
+     * this field's own `type` toggle between "password" and "text" --
+     * only the password field passes this, so email/magic-link fields stay
+     * untouched. */
+    isPasswordVisible?: boolean;
+    onTogglePasswordVisibility?: () => void;
+  }
+>(function LoginField(
+  { label, error, id, className = "", onFocus, onBlur, isPasswordVisible, onTogglePasswordVisibility, type, ...rest },
+  ref,
+) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
+  const hasRevealToggle = Boolean(onTogglePasswordVisibility);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -43,12 +56,13 @@ const LoginField = forwardRef<
         <input
           ref={ref}
           id={inputId}
+          type={hasRevealToggle ? (isPasswordVisible ? "text" : "password") : type}
           placeholder=" "
           onFocus={onFocus}
           onBlur={onBlur}
           className={`peer min-h-14 w-full rounded-sm border bg-background px-4 pt-5 pb-1.5 text-body text-foreground outline-none transition-colors focus-visible:outline-none ${
-            error ? "border-danger" : "border-border focus:border-foreground"
-          } ${className}`}
+            hasRevealToggle ? "pr-12" : ""
+          } ${error ? "border-danger" : "border-border focus:border-foreground"} ${className}`}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${inputId}-error` : undefined}
           {...rest}
@@ -59,6 +73,17 @@ const LoginField = forwardRef<
         >
           {label}
         </label>
+        {hasRevealToggle && (
+          <button
+            type="button"
+            onClick={onTogglePasswordVisibility}
+            aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+            aria-pressed={isPasswordVisible}
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            {isPasswordVisible ? <EyeSlash size={18} /> : <Eye size={18} />}
+          </button>
+        )}
         <span className="pointer-events-none absolute inset-x-4 bottom-0 h-px origin-left scale-x-0 bg-foreground transition-transform duration-300 ease-out peer-focus:scale-x-100" />
       </div>
       {error && (
@@ -128,6 +153,7 @@ export function LoginForm({
   const [mode, setMode] = useState<Mode>("password");
   const [formError, setFormError] = useState<string | null>(initialError ?? null);
   const [magicLinkSent, setMagicLinkSent] = useState<string | null>(null);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const passwordForm = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
   const magicLinkForm = useForm<MagicLinkInput>({ resolver: zodResolver(magicLinkSchema) });
@@ -212,7 +238,6 @@ export function LoginForm({
           />
           <LoginField
             label="Password"
-            type="password"
             autoComplete="current-password"
             onFocus={handleFocus}
             {...passwordField}
@@ -221,6 +246,8 @@ export function LoginForm({
               onFocusChange(false);
             }}
             error={passwordForm.formState.errors.password?.message}
+            isPasswordVisible={isPasswordVisible}
+            onTogglePasswordVisibility={() => setIsPasswordVisible((v) => !v)}
           />
           <Link
             href="/forgot-password"

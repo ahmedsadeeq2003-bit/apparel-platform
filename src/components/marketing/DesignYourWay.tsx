@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { ImageIcon, TextAa, UploadSimple } from "@phosphor-icons/react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { Button } from "@/components/ui/Button";
+import { MagneticButton } from "@/components/marketing/MagneticButton";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
 import { CampaignGarment } from "@/components/apparel/CampaignGarment";
@@ -112,7 +112,18 @@ function StartingPoints({ template }: { template: Preview }) {
   );
 }
 
-export function DesignYourWay({ preview }: { preview: Preview }) {
+export function DesignYourWay({
+  preview,
+  editorHref,
+}: {
+  preview: Preview;
+  /** A real `/editor/new?product=...&color=...` destination (falls back to
+   * `/products` only if no real product/color could be resolved server-side
+   * -- see page.tsx) -- unlike Hero/FinalCta's "Start designing" (which
+   * deliberately routes through Design Hub first), this button's own copy
+   * says "explore the editor," so it should actually open the editor. */
+  editorHref: string;
+}) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -183,9 +194,13 @@ export function DesignYourWay({ preview }: { preview: Preview }) {
               actually yours.
             </motion.p>
             <StartingPoints template={preview} />
-            <Button href="/products" variant="secondary" className="mt-2 w-fit uppercase tracking-wide text-body-sm font-semibold">
+            <MagneticButton
+              href={editorHref}
+              prefetch={false}
+              className="mt-2 inline-flex min-h-11 w-fit items-center justify-center rounded-full border border-border px-6 text-body font-medium uppercase tracking-wide text-body-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-accent"
+            >
               Explore the editor
-            </Button>
+            </MagneticButton>
           </div>
         </div>
       </Container>

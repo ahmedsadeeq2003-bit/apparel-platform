@@ -57,7 +57,20 @@ export function DesignCanvas({
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="flex w-full items-center justify-center overflow-auto p-6 md:p-10">
+    // `flex-1 min-h-0` is the same idiom EditorShell.tsx's own chain of
+    // flex-col containers uses at every other level to receive a definite
+    // height from its flex parent -- this specific div was the one link
+    // missing it. Without it, this div (a flex-col item, no flex-basis
+    // override) sizes to its own content instead of filling the height its
+    // parent (EditorShell's "relative flex flex-1 flex-col" canvas-area
+    // div) actually offers, so the photo frame below -- which asks for
+    // `h-full`, 100% of *this* div -- has nothing definite to resolve
+    // against and collapses to a near-zero box (confirmed via runtime
+    // measurement: photoFrame reported ~2x3px). `min-h-0` keeps the
+    // flex-grow result from being overridden by this item's default
+    // content-based minimum height, same reason it's paired with `flex-1`
+    // everywhere else in this file's ancestor chain.
+    <div className="flex w-full flex-1 min-h-0 items-center justify-center overflow-auto p-6 md:p-10">
       <motion.div
         className="relative mx-auto h-full max-h-[70vh] w-auto shrink-0 overflow-hidden rounded-sm border border-border bg-surface shadow-sm"
         style={{

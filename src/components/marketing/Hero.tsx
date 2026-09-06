@@ -294,6 +294,7 @@ export function Hero({ startDesigningHref }: { startDesigningHref: string }) {
             >
               <MagneticButton
                 href={startDesigningHref}
+                prefetch={false}
                 className="inline-flex min-h-12 items-center justify-center rounded-full border px-7 text-body-sm font-semibold uppercase tracking-wide text-foreground backdrop-blur-md transition-colors hover:text-accent"
                 style={{
                   background: "color-mix(in oklab, var(--color-background) 45%, transparent)",

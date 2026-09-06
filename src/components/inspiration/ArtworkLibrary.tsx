@@ -41,6 +41,7 @@ function ArtworkCard({ item, editorHref, index }: { item: ArtworkItem; editorHre
     >
       <Link
         href={editorHref}
+        prefetch={false}
         aria-label={`Use ${item.name} (${ARTWORK_CATEGORY_LABELS[item.category]}) on a shirt`}
         className="group relative flex aspect-square flex-col overflow-hidden rounded-sm border border-border bg-surface p-6 transition-colors duration-300 hover:border-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >

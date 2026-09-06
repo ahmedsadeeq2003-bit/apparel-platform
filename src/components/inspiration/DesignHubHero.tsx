@@ -164,6 +164,7 @@ export function DesignHubHero({ editorHref }: { editorHref: string }) {
           >
             <MagneticButton
               href={editorHref}
+              prefetch={false}
               className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-accent px-8 text-body-sm font-semibold uppercase tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
             >
               Start designing

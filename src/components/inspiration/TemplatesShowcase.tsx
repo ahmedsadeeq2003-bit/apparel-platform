@@ -137,6 +137,7 @@ export function TemplatesShowcase({
               >
                 <Link
                   href={hrefFor(template, category)}
+                  prefetch={false}
                   className="group flex h-full flex-col gap-5 rounded-sm border border-border bg-background p-6 transition-colors hover:border-accent"
                 >
                   <div

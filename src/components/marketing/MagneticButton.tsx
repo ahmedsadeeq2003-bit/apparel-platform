@@ -15,12 +15,21 @@ export function MagneticButton({
   className = "",
   style,
   strength = 0.35,
+  prefetch,
 }: {
   href: string;
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
   strength?: number;
+  /** Passed straight through to next/link. Pass `false` for a link into an
+   * auth-gated, per-request-dynamic destination (e.g. `/editor/new`) --
+   * Next's default eager prefetch can cache that route's response from
+   * before the current auth/session state was settled, so a click can
+   * briefly navigate to a stale result (its own request under it still
+   * comes back correct on any next attempt). Omit for ordinary static/
+   * public destinations, where prefetching is a pure win. */
+  prefetch?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const ref = useRef<HTMLAnchorElement>(null);
@@ -31,7 +40,7 @@ export function MagneticButton({
 
   if (reduceMotion) {
     return (
-      <Link href={href} className={className} style={style}>
+      <Link href={href} className={className} style={style} prefetch={prefetch}>
         {children}
       </Link>
     );
@@ -56,6 +65,7 @@ export function MagneticButton({
         href={href}
         className={className}
         style={style}
+        prefetch={prefetch}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >

@@ -94,6 +94,7 @@ export function ArtworkOnGarment({ pieces }: { pieces: GarmentDemoPiece[] }) {
             >
               <Link
                 href={piece.editorHref}
+                prefetch={false}
                 aria-label={`Use ${piece.artworkName} on a shirt`}
                 className="group relative block"
               >
