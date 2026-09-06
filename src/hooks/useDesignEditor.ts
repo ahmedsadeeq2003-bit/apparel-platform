@@ -36,8 +36,10 @@ import {
   DEFAULT_TEXT_CONTENT,
   DEFAULT_TEXT_FILL,
   DEFAULT_TEXT_FONT_SIZE,
+  MAX_UPLOAD_DIMENSION,
   PRINT_GUIDE_BOUNDS,
 } from "@/lib/editor/constants";
+import { validateUpload } from "@/lib/editor/uploadValidation";
 
 type EditorObject = FabricObjectType & { id?: string };
 
@@ -50,9 +52,20 @@ export type UpdatableProps = Partial<{
   text: string;
   fontFamily: string;
   fontWeight: string | number;
+  fontStyle: "normal" | "italic";
   charSpacing: number;
   lineHeight: number;
   textAlign: string;
+  opacity: number;
+  stroke: string | null;
+  strokeWidth: number;
+  /** A CSS-shadow-string preset ("2px 2px 6px rgba(0,0,0,0.35)") or `null` to
+   * remove it. Fabric's own `_set` converts a string into a `Shadow`
+   * instance automatically (see node_modules/fabric/dist/index.js's
+   * FabricObject._set), so this stays a plain string here rather than
+   * needing a hand-built Shadow object -- one preset, on or off, per the
+   * brief's "shadow-where-supported" ask, not a full shadow editor. */
+  shadow: string | null;
 }>;
 
 export type LayerInfo = {
@@ -81,11 +94,16 @@ export type ActiveObjectProps = {
   boundsLeft: number;
   boundsTop: number;
   fill?: string;
+  opacity: number;
+  stroke?: string;
+  strokeWidth: number;
+  hasShadow: boolean;
   isText: boolean;
   text?: string;
   fontFamily?: string;
   fontSize?: number;
   fontWeight?: string | number;
+  fontStyle?: string;
   charSpacing?: number;
   lineHeight?: number;
   textAlign?: string;
@@ -310,6 +328,34 @@ export function useDesignEditor(
       selectionColor: "rgba(193, 98, 58, 0.12)",
       selectionBorderColor: "#c1623a",
     });
+
+    // Fabric's constructor moves the <canvas> DOM node this ref points at
+    // into a wrapper div it creates (`canvas.wrapperEl`), alongside a second
+    // "upper" canvas it adds for interaction -- see
+    // node_modules/fabric/dist's CanvasDOMManager/StaticCanvasDOMManager.
+    // All three elements get an inline `width`/`height` fixed at
+    // CANVAS_SIZE (600) CSS pixels, which silently overrides the
+    // `absolute inset-0 h-full w-full` Tailwind classes DesignCanvas.tsx
+    // put on the original <canvas> to make it responsively fill the much
+    // smaller print-area window (GARMENT_CANVAS_OVERLAY_PCT, a percentage
+    // of the garment photo). Left uncorrected, that 600x600 wrapper
+    // overflows the print-area window and gets clipped by its
+    // `overflow-hidden` parent to roughly the window's own (smaller) size
+    // -- and since every insertion path below places new objects at the
+    // canvas's logical center (CANVAS_SIZE / 2, i.e. 300,300), they land
+    // outside the visible slice and never appear, on an otherwise-
+    // transparent canvas that gives no other visual sign anything is
+    // wrong. `setDimensions(..., {cssOnly: true})` is Fabric's own
+    // supported way to resize the CSS presentation size independently of
+    // the logical/backstore resolution (still CANVAS_SIZE x CANVAS_SIZE,
+    // set above) -- it also recalculates the offset Fabric uses for
+    // click/drag hit-testing, which a raw style edit wouldn't. `position`/
+    // `inset` aren't covered by that call, so the wrapper (plain
+    // `position: relative` by default) needs those set directly to behave
+    // like the `absolute inset-0` the original element specified.
+    canvas.setDimensions({ width: "100%", height: "100%" }, { cssOnly: true });
+    canvas.wrapperEl.style.position = "absolute";
+    canvas.wrapperEl.style.inset = "0";
     FabricObject.ownDefaults.borderColor = "#c1623a";
     FabricObject.ownDefaults.cornerColor = "#f5f1e8";
     FabricObject.ownDefaults.cornerStrokeColor = "#c1623a";
@@ -524,30 +570,70 @@ export function useDesignEditor(
     canvas.requestRenderAll();
   };
 
+  /** Places a decoded object (raster image or parsed SVG node) centered and
+   * scaled to fit, exactly the way every other insertion path here already
+   * centers/scales/ids new objects -- shared so addImageFromFile's two
+   * branches (raster vs SVG) and the id/canvas wiring stay one
+   * implementation instead of two copies drifting apart. */
+  const placeUploadedObject = (canvas: Canvas, node: FabricObjectType) => {
+    node.set("id", crypto.randomUUID());
+    const maxDim = CANVAS_SIZE * 0.55;
+    const bounds = node.getBoundingRect();
+    const currentDim = Math.max(bounds.width, bounds.height) || 1;
+    const scale = Math.min(1, maxDim / currentDim);
+    node.scale((node.scaleX || 1) * scale);
+    node.set({ left: CANVAS_SIZE / 2, top: CANVAS_SIZE / 2, originX: "center", originY: "center" });
+    canvas.add(node);
+    canvas.setActiveObject(node);
+    canvas.requestRenderAll();
+  };
+
+  /** Validates, decodes, and inserts a customer-uploaded file -- PNG/JPG/
+   * WebP go through FabricImage.fromURL (a raster object, same as before);
+   * SVG is routed through the same trusted loadSVGFromString pipeline the
+   * artwork library uses (see loadSvgAssetObject's own comment on why that
+   * parse path is safe for untrusted input: it's an offscreen XML parse,
+   * never live/executable DOM). Rejects with a user-facing message string
+   * for anything invalid, so the caller can show it rather than the upload
+   * silently failing (a known-unfixed gap this closes -- see EditorShell's
+   * onUpload wiring). */
   const addImageFromFile = (file: File): Promise<void> => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return Promise.resolve();
 
+    const validation = validateUpload(file);
+    if (!validation.ok) return Promise.reject(new Error(validation.message));
+
+    if (file.type === "image/svg+xml") {
+      return file
+        .text()
+        .then(async (svgText) => {
+          const { objects: svgObjects } = await loadSVGFromString(svgText);
+          const valid = svgObjects.filter((o): o is FabricObjectType => o != null);
+          if (valid.length === 0) throw new Error("That SVG has no visible shapes to add.");
+          const node = valid.length > 1 ? fabricUtil.groupSVGElements(valid) : valid[0];
+          placeUploadedObject(canvas, node);
+        })
+        .catch((error) => {
+          throw error instanceof Error ? error : new Error("Couldn't read that SVG file.");
+        });
+    }
+
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onerror = () => reject(reader.error);
+      reader.onerror = () => reject(new Error("Couldn't read that file."));
       reader.onload = async () => {
         try {
           const dataUrl = reader.result as string;
           const img = await FabricImage.fromURL(dataUrl);
-          img.set("id", crypto.randomUUID());
-          const maxDim = CANVAS_SIZE * 0.55;
-          const currentW = img.width ?? maxDim;
-          const currentH = img.height ?? maxDim;
-          const scale = Math.min(1, maxDim / Math.max(currentW, currentH));
-          img.scale(scale);
-          img.set({ left: CANVAS_SIZE / 2, top: CANVAS_SIZE / 2, originX: "center", originY: "center" });
-          canvas.add(img);
-          canvas.setActiveObject(img);
-          canvas.requestRenderAll();
+          if ((img.width ?? 0) > MAX_UPLOAD_DIMENSION || (img.height ?? 0) > MAX_UPLOAD_DIMENSION) {
+            reject(new Error(`Image is too large. Please upload something under ${MAX_UPLOAD_DIMENSION}px per side.`));
+            return;
+          }
+          placeUploadedObject(canvas, img);
           resolve();
-        } catch (error) {
-          reject(error);
+        } catch {
+          reject(new Error("Couldn't read that image file."));
         }
       };
       reader.readAsDataURL(file);
@@ -631,6 +717,23 @@ export function useDesignEditor(
     pushSnapshotDebounced();
   };
 
+  /** Applies uppercase/lowercase to a text object's actual string content --
+   * a one-shot action, not a live CSS-style text-transform, since canvas
+   * rendering has no such transform to piggyback on (Fabric draws whatever
+   * string is in `.text` verbatim). Mutating the string directly is
+   * therefore the correct implementation, not a shortcut around a "real"
+   * property that doesn't exist for canvas text. */
+  const setTextCase = (id: string, mode: "uppercase" | "lowercase") => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+    const target = canvas.getObjects().find((object) => objectId(object) === id);
+    if (!(target instanceof IText)) return;
+    target.set("text", mode === "uppercase" ? target.text.toUpperCase() : target.text.toLowerCase());
+    canvas.requestRenderAll();
+    useEditorStore.getState().markDirty();
+    pushSnapshotDebounced();
+  };
+
   const selectLayer = (id: string) => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
@@ -703,11 +806,16 @@ export function useDesignEditor(
       boundsLeft: Math.round(bounds.left),
       boundsTop: Math.round(bounds.top),
       fill: typeof object.fill === "string" ? object.fill : undefined,
+      opacity: object.opacity ?? 1,
+      stroke: typeof object.stroke === "string" ? object.stroke : undefined,
+      strokeWidth: object.strokeWidth ?? 0,
+      hasShadow: Boolean(object.shadow),
       isText,
       text: isText ? (object as IText).text : undefined,
       fontFamily: isText ? (object as IText).fontFamily : undefined,
       fontSize: isText ? (object as IText).fontSize : undefined,
       fontWeight: isText ? (object as IText).fontWeight : undefined,
+      fontStyle: isText ? (object as IText).fontStyle : undefined,
       charSpacing: isText ? (object as IText).charSpacing : undefined,
       lineHeight: isText ? (object as IText).lineHeight : undefined,
       textAlign: isText ? (object as IText).textAlign : undefined,
@@ -846,6 +954,7 @@ export function useDesignEditor(
     addImageFromFile,
     applyTemplate,
     updateProps,
+    setTextCase,
     deleteSelected,
     deleteObjectById,
     duplicateSelected,

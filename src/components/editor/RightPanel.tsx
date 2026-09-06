@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
 import {
   ArrowsClockwise,
@@ -11,14 +12,26 @@ import {
   Image as ImageIcon,
   SquaresFour,
   Sparkle,
+  TextAa,
+  TextItalic,
   TextT,
   Trash,
 } from "@phosphor-icons/react";
-import { EDITOR_FONTS } from "@/lib/editor/fonts";
+import { EDITOR_FONTS, type EditorFontCategory } from "@/lib/editor/fonts";
 import type { ActiveObjectProps, LayerInfo, UpdatableProps } from "@/hooks/useDesignEditor";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const TEXT_ALIGN_OPTIONS = ["left", "center", "right"] as const;
+
+/** One CSS-shadow-string preset -- see UpdatableProps' `shadow` field for why
+ * a single preset (on/off) rather than a full shadow editor is the right
+ * scope here. */
+const TEXT_SHADOW_PRESET = "2px 2px 6px rgba(27,24,21,0.35)";
+
+/** Font <optgroup> order -- fixed here rather than derived from first-seen
+ * order in EDITOR_FONTS, so the grouping stays stable if fonts are
+ * reordered within their category later. */
+const FONT_CATEGORY_ORDER: EditorFontCategory[] = ["Sans", "Serif", "Display", "Handwritten"];
 
 const PANEL_VARIANTS: Variants = {
   hidden: { opacity: 0, y: 6 },
@@ -40,14 +53,19 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 function ObjectControls({
   active,
   onUpdate,
+  onSetTextCase,
   onDuplicate,
   onDelete,
 }: {
   active: ActiveObjectProps;
   onUpdate: (props: UpdatableProps) => void;
+  onSetTextCase: (mode: "uppercase" | "lowercase") => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const isItalic = active.fontStyle === "italic";
+
   return (
     <div className="flex flex-col gap-5 border-b border-border p-4">
       <div className="flex items-center justify-between">
@@ -89,11 +107,19 @@ function ObjectControls({
               }}
               className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
             >
-              {EDITOR_FONTS.map((font) => (
-                <option key={font.id} value={font.id}>
-                  {font.label} · {font.direction}
-                </option>
-              ))}
+              {FONT_CATEGORY_ORDER.map((category) => {
+                const fonts = EDITOR_FONTS.filter((f) => f.category === category);
+                if (fonts.length === 0) return null;
+                return (
+                  <optgroup key={category} label={category}>
+                    {fonts.map((font) => (
+                      <option key={font.id} value={font.id}>
+                        {font.label} · {font.direction}
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
             </select>
           </label>
 
@@ -123,35 +149,8 @@ function ObjectControls({
             </label>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1.5">
-              <FieldLabel>Letter spacing</FieldLabel>
-              <input
-                type="number"
-                min={-100}
-                max={800}
-                step={10}
-                value={active.charSpacing ?? 0}
-                onChange={(e) => onUpdate({ charSpacing: Number(e.target.value) })}
-                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <FieldLabel>Line height</FieldLabel>
-              <input
-                type="number"
-                min={0.8}
-                max={3}
-                step={0.1}
-                value={active.lineHeight ?? 1.16}
-                onChange={(e) => onUpdate({ lineHeight: Number(e.target.value) })}
-                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
-              />
-            </label>
-          </div>
-
           <div className="flex flex-col gap-1.5">
-            <FieldLabel>Align</FieldLabel>
+            <FieldLabel>Align &amp; style</FieldLabel>
             <div className="flex gap-1">
               {TEXT_ALIGN_OPTIONS.map((align) => (
                 <button
@@ -168,6 +167,18 @@ function ObjectControls({
                   {align}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => onUpdate({ fontStyle: isItalic ? "normal" : "italic" })}
+                aria-pressed={isItalic}
+                aria-label="Italic"
+                title="Italic"
+                className={`flex w-10 items-center justify-center rounded-sm border transition-colors ${
+                  isItalic ? "border-accent text-accent" : "border-border text-muted hover:text-foreground"
+                }`}
+              >
+                <TextItalic size={14} />
+              </button>
             </div>
           </div>
         </>
@@ -198,6 +209,126 @@ function ObjectControls({
           className="accent-accent"
         />
       </label>
+
+      <button
+        type="button"
+        onClick={() => setShowAdvanced((v) => !v)}
+        aria-expanded={showAdvanced}
+        className="flex items-center justify-between text-[0.7rem] font-medium uppercase tracking-wide text-muted transition-colors hover:text-foreground"
+      >
+        Advanced
+        {showAdvanced ? <CaretUp size={12} /> : <CaretDown size={12} />}
+      </button>
+
+      {showAdvanced && (
+        <div className="flex flex-col gap-4">
+          {active.isText && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-1.5">
+                  <FieldLabel>Letter spacing</FieldLabel>
+                  <input
+                    type="number"
+                    min={-100}
+                    max={800}
+                    step={10}
+                    value={active.charSpacing ?? 0}
+                    onChange={(e) => onUpdate({ charSpacing: Number(e.target.value) })}
+                    className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
+                  />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <FieldLabel>Line height</FieldLabel>
+                  <input
+                    type="number"
+                    min={0.8}
+                    max={3}
+                    step={0.1}
+                    value={active.lineHeight ?? 1.16}
+                    onChange={(e) => onUpdate({ lineHeight: Number(e.target.value) })}
+                    className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
+                  />
+                </label>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <FieldLabel>Case</FieldLabel>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onSetTextCase("uppercase")}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-sm border border-border py-2 text-[0.7rem] font-medium text-muted transition-colors hover:border-accent hover:text-foreground"
+                  >
+                    <TextAa size={13} /> UPPERCASE
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSetTextCase("lowercase")}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-sm border border-border py-2 text-[0.7rem] font-medium text-muted transition-colors hover:border-accent hover:text-foreground"
+                  >
+                    <TextAa size={13} /> lowercase
+                  </button>
+                </div>
+              </div>
+
+              <label className="flex items-center justify-between gap-3">
+                <FieldLabel>Shadow</FieldLabel>
+                <button
+                  type="button"
+                  onClick={() => onUpdate({ shadow: active.hasShadow ? null : TEXT_SHADOW_PRESET })}
+                  aria-pressed={active.hasShadow}
+                  className={`rounded-full border px-4 py-1.5 text-[0.7rem] font-medium transition-colors ${
+                    active.hasShadow
+                      ? "border-accent text-accent"
+                      : "border-border text-muted hover:text-foreground"
+                  }`}
+                >
+                  {active.hasShadow ? "On" : "Off"}
+                </button>
+              </label>
+            </>
+          )}
+
+          <label className="flex flex-col gap-1.5">
+            <FieldLabel>Opacity</FieldLabel>
+            <input
+              type="range"
+              min={0.1}
+              max={1}
+              step={0.05}
+              value={active.opacity}
+              onChange={(e) => onUpdate({ opacity: Number(e.target.value) })}
+              className="accent-accent"
+            />
+          </label>
+
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1.5">
+              <FieldLabel>Outline</FieldLabel>
+              <input
+                type="color"
+                value={active.stroke ?? "#000000"}
+                onChange={(e) => onUpdate({ stroke: e.target.value, strokeWidth: active.strokeWidth || 2 })}
+                className="h-9 w-full cursor-pointer rounded-sm border border-border bg-transparent"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <FieldLabel>Outline width</FieldLabel>
+              <input
+                type="number"
+                min={0}
+                max={20}
+                value={active.strokeWidth}
+                onChange={(e) => {
+                  const width = Number(e.target.value);
+                  onUpdate({ strokeWidth: width, stroke: width > 0 ? active.stroke ?? "#000000" : null });
+                }}
+                className="h-10 rounded-sm border border-border bg-surface px-3 text-body-sm text-foreground outline-none transition-colors focus-visible:border-accent"
+              />
+            </label>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -371,6 +502,7 @@ export function RightPanel({
   designLabel,
   layers,
   onUpdate,
+  onSetTextCase,
   onDuplicate,
   onDelete,
   onDeleteLayer,
@@ -391,6 +523,7 @@ export function RightPanel({
   designLabel: string;
   layers: LayerInfo[];
   onUpdate: (props: UpdatableProps) => void;
+  onSetTextCase: (mode: "uppercase" | "lowercase") => void;
   onDuplicate: () => void;
   /** Deletes whatever's currently selected -- the object-controls trash
    * icon's contract. Deliberately NOT reused for the layers list below: a
@@ -422,7 +555,13 @@ export function RightPanel({
           variants={PANEL_VARIANTS}
         >
           {activeObject ? (
-            <ObjectControls active={activeObject} onUpdate={onUpdate} onDuplicate={onDuplicate} onDelete={onDelete} />
+            <ObjectControls
+              active={activeObject}
+              onUpdate={onUpdate}
+              onSetTextCase={onSetTextCase}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+            />
           ) : multiSelectCount > 1 ? (
             <MultiSelectControls count={multiSelectCount} onDuplicate={onDuplicate} onDelete={onDelete} />
           ) : (

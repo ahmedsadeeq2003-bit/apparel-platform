@@ -6,13 +6,7 @@ import { ArtworkThumbnail } from "@/components/editor/ArtworkThumbnail";
 import { CampaignGarment } from "@/components/apparel/CampaignGarment";
 import { EDITORIAL_GARMENT_COLORS } from "@/lib/templates/garmentColors";
 import { ELEMENTS, GRAPHICS, type ArtworkDef } from "@/lib/editor/artwork";
-import type { DesignCategory } from "@/lib/assets/manifest";
-import {
-  ALL_ARTWORK,
-  ARTWORK_CATEGORIES,
-  ARTWORK_CATEGORY_LABELS,
-  filterArtwork,
-} from "@/lib/assets/artworkSearch";
+import { ALL_ARTWORK, ARTWORK_FILTERS, filterArtwork } from "@/lib/assets/artworkSearch";
 import type { DesignTemplate, TemplateCategory } from "@/lib/templates/queries";
 import type { EditorTool } from "@/lib/editor/store";
 
@@ -65,9 +59,10 @@ function ArtworkGrid({ items, onInsert }: { items: ArtworkDef[]; onInsert: (def:
  * safe way to preview an untrusted-by-default SVG) rather than inlining
  * the SVG markup. */
 function AssetLibraryGrid({ onInsert }: { onInsert: (path: string) => void }) {
-  const [category, setCategory] = useState<DesignCategory | "all">("all");
+  const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
   const results = useMemo(() => filterArtwork(ALL_ARTWORK, { category, query }), [category, query]);
+  const isEmptyStyleTag = results.length === 0 && category !== "all" && !query;
 
   return (
     <div className="flex flex-col gap-4">
@@ -77,7 +72,7 @@ function AssetLibraryGrid({ onInsert }: { onInsert: (path: string) => void }) {
       </div>
 
       <label className="relative flex items-center">
-        <span className="sr-only">Search artwork by name or category</span>
+        <span className="sr-only">Search artwork by name, category, or style</span>
         <MagnifyingGlass size={14} className="pointer-events-none absolute left-3 text-muted" aria-hidden />
         <input
           type="search"
@@ -109,23 +104,23 @@ function AssetLibraryGrid({ onInsert }: { onInsert: (path: string) => void }) {
         >
           All
         </button>
-        {ARTWORK_CATEGORIES.map((c) => (
+        {ARTWORK_FILTERS.map((f) => (
           <button
-            key={c}
+            key={f.value}
             type="button"
-            onClick={() => setCategory(c)}
-            aria-pressed={category === c}
+            onClick={() => setCategory(f.value)}
+            aria-pressed={category === f.value}
             className={`shrink-0 rounded-full border px-3 py-1.5 text-[0.7rem] font-medium uppercase tracking-wide transition-colors ${
-              category === c ? "border-foreground bg-foreground text-background" : "border-border text-muted hover:text-foreground"
+              category === f.value ? "border-foreground bg-foreground text-background" : "border-border text-muted hover:text-foreground"
             }`}
           >
-            {ARTWORK_CATEGORY_LABELS[c]}
+            {f.label}
           </button>
         ))}
       </div>
 
       {results.length > 0 ? (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {results.map((item) => (
             <button
               key={item.id}
@@ -133,13 +128,20 @@ function AssetLibraryGrid({ onInsert }: { onInsert: (path: string) => void }) {
               onClick={() => onInsert(item.path)}
               aria-label={`Add ${item.name} to your design`}
               title={item.name}
-              className="flex aspect-square items-center justify-center rounded-sm border border-border bg-surface p-3 transition-colors hover:border-accent"
+              className="flex flex-col gap-1 rounded-sm border border-border bg-surface p-3 text-left transition-colors hover:border-accent"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- static SVG asset, no next/image optimization needed for a fixed-size local vector */}
-              <img src={item.path} alt={item.name} className="h-full w-full object-contain" draggable={false} />
+              <span className="flex aspect-square items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element -- static SVG asset, no next/image optimization needed for a fixed-size local vector */}
+                <img src={item.path} alt={item.name} className="h-full w-full object-contain" draggable={false} />
+              </span>
+              <span className="truncate text-[0.65rem] text-muted">{item.name}</span>
             </button>
           ))}
         </div>
+      ) : isEmptyStyleTag ? (
+        <p className="py-6 text-center text-body-sm text-muted">
+          More {ARTWORK_FILTERS.find((f) => f.value === category)?.label.toLowerCase()} artwork is coming soon.
+        </p>
       ) : (
         <p className="py-6 text-center text-body-sm text-muted">Nothing matches &ldquo;{query}&rdquo;.</p>
       )}
@@ -241,11 +243,11 @@ function UploadPanel({ onUpload }: { onUpload: (file: File) => void }) {
       >
         Choose a file
       </button>
-      <p className="text-[0.7rem] text-muted">PNG, JPG or WebP</p>
+      <p className="text-[0.7rem] text-muted">PNG, JPG, WebP or SVG, up to 10MB</p>
       <input
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp"
+        accept="image/png,image/jpeg,image/webp,image/svg+xml"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];

@@ -184,6 +184,12 @@ export function EditorShell({
     editor.insertSvgAsset(path).catch(() => setFeedback("Couldn't load that artwork"));
   };
 
+  const handleUpload = (file: File) => {
+    editor.addImageFromFile(file).catch((error: unknown) => {
+      setFeedback(error instanceof Error ? error.message : "Couldn't add that file");
+    });
+  };
+
   const panelContent = activeTool && (
     <ToolPanel
       activeTool={activeTool}
@@ -191,7 +197,7 @@ export function EditorShell({
       onApplyTemplate={handleApplyTemplate}
       onInsertArtwork={editor.insertArtwork}
       onInsertSvgAsset={handleInsertSvgAsset}
-      onUpload={(file) => editor.addImageFromFile(file)}
+      onUpload={handleUpload}
       onClose={() => useEditorStore.getState().setActiveTool(null)}
     />
   );
@@ -203,6 +209,7 @@ export function EditorShell({
       designLabel={`${product.name}, ${selectedColor.name}`}
       layers={layers}
       onUpdate={(props) => activeObject && editor.updateProps(activeObject.id, props)}
+      onSetTextCase={(mode) => activeObject && editor.setTextCase(activeObject.id, mode)}
       onDuplicate={editor.duplicateSelected}
       onDelete={editor.deleteSelected}
       onDeleteLayer={editor.deleteObjectById}

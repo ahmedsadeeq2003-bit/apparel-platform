@@ -30,3 +30,21 @@ export const GARMENT_CANVAS_OVERLAY_PCT = GARMENT_PRINT_AREA_PCT;
  * so the print guide and the object-placement clamp in useDesignEditor.ts
  * share one authoritative definition. */
 export const PRINT_GUIDE_BOUNDS = { left: 0, top: 0, width: CANVAS_SIZE, height: CANVAS_SIZE } as const;
+
+/** Customer upload limits -- generous enough for real phone-camera photos
+ * and scanned logos, small enough that a design stays practical to store as
+ * a base64 data URL inside `designs.front_canvas_json`/`back_canvas_json`
+ * (the existing save format, unchanged by Phase 6 -- see the Save/Resume
+ * report). No dimension floor: a small raster still previews and prints
+ * fine, just softer; only an upper bound matters here. */
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+export const MAX_UPLOAD_DIMENSION = 6000;
+
+/** Raster types the upload pipeline accepts, plus SVG -- SVG is parsed
+ * through Fabric's own `loadSVGFromString` (the same trusted, existing path
+ * the artwork library already uses; see loadSvgAssetObject/insertSvgAsset
+ * in useDesignEditor.ts), which turns markup into plain vector drawing
+ * objects and never attaches it to the live DOM, so it can't execute
+ * embedded scripts -- unlike, say, rendering the file with
+ * dangerouslySetInnerHTML or an <object>/<iframe> tag. */
+export const ACCEPTED_UPLOAD_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"] as const;

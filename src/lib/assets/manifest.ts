@@ -21,6 +21,14 @@ export type AssetEntry = {
    * don't need their own id/label. */
   id?: string;
   name?: string;
+  /** Free-form style/subject labels (e.g. "retro", "nature", "streetwear"),
+   * layered on top of the structural `DesignCategory` folder/type an entry
+   * already belongs to -- see STYLE_TAGS in artworkSearch.ts for why this
+   * is a plain string array rather than a second closed union: adding a
+   * new browsable style later (an "anime" grouping, say) is then just
+   * tagging entries and adding one line to STYLE_TAGS, never a type change
+   * here. Omitted where an entry has no particular style association. */
+  tags?: string[];
 };
 
 function pending(path: string): AssetEntry {
@@ -37,12 +45,13 @@ function titleCase(slug: string): string {
     .join(" ");
 }
 
-function designEntry(category: DesignCategory, slug: string): AssetEntry {
+function designEntry(category: DesignCategory, slug: string, tags?: string[]): AssetEntry {
   return {
     id: `${category}-${slug}`,
     name: titleCase(slug),
     path: `/assets/designs/${category}/${slug}.svg`,
     available: true,
+    ...(tags ? { tags } : {}),
   };
 }
 
@@ -117,6 +126,46 @@ export const shirtAssets = {
 export type DesignCategory = "typography" | "graffiti" | "illustration" | "abstract" | "minimal" | "graphic-art";
 export type TemplateCategory = "typography" | "illustration" | "graffiti" | "abstract" | "minimal";
 
+/** Cross-cutting style/subject tags for existing entries, layered on top of
+ * their structural DesignCategory rather than re-filing them -- see
+ * AssetEntry's own comment. Only assets that genuinely fit a tag get one;
+ * most entries below have none, which is correct, not a gap to fill. */
+const STYLE_TAGS_BY_SLUG: Record<string, string[]> = {
+  "hand-drawn-crown": ["streetwear"],
+  "street-lightning": ["streetwear"],
+  "wildstyle-mark": ["streetwear"],
+  "spray-paint-star": ["streetwear"],
+  "street-flame": ["streetwear"],
+  "botanical-flower": ["nature"],
+  "wild-flower": ["nature"],
+  "flying-bird": ["animals"],
+  "butterfly-line-art": ["animals"],
+  "snake-line-art": ["animals"],
+  "kinetic-lines": ["experimental"],
+  "distorted-grid": ["experimental"],
+  "experimental-form": ["experimental"],
+  "asymmetric-shapes": ["experimental"],
+  "tiny-star": ["icons"],
+  "tiny-sun": ["icons"],
+  "tiny-moon": ["icons"],
+  "tiny-flower": ["icons"],
+  "compass-symbol": ["icons"],
+  "minimal-cross": ["icons"],
+  "check-badge": ["icons"],
+  "heart-outline": ["icons"],
+  "shirt-icon": ["icons"],
+  "retro-sun": ["retro"],
+  "retro-dice": ["retro"],
+  "retro-flower": ["retro"],
+  "vintage-starburst": ["retro"],
+  "abstract-retro-symbol": ["retro"],
+  "bold-smiley": ["stickers"],
+  "distorted-smiley": ["stickers"],
+  "star-badge": ["stickers"],
+  "sun-badge": ["stickers"],
+  "wave-badge": ["stickers"],
+};
+
 export const designAssets: Record<DesignCategory, AssetEntry[]> = {
   typography: [
     "create-your-own",
@@ -126,7 +175,7 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "no-signal",
     "off-the-clock",
     "stay-curious",
-  ].map((slug) => designEntry("typography", slug)),
+  ].map((slug) => designEntry("typography", slug, STYLE_TAGS_BY_SLUG[slug])),
   graffiti: [
     "graffiti-face",
     "graffiti-tag-01",
@@ -140,7 +189,7 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "street-flame",
     "street-lightning",
     "wildstyle-mark",
-  ].map((slug) => designEntry("graffiti", slug)),
+  ].map((slug) => designEntry("graffiti", slug, STYLE_TAGS_BY_SLUG[slug])),
   illustration: [
     "abstract-face",
     "botanical-flower",
@@ -154,7 +203,7 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "sun-and-moon",
     "vintage-camera",
     "wild-flower",
-  ].map((slug) => designEntry("illustration", slug)),
+  ].map((slug) => designEntry("illustration", slug, STYLE_TAGS_BY_SLUG[slug])),
   abstract: [
     "abstract-loop",
     "abstract-sun",
@@ -168,7 +217,7 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "ink-splash",
     "kinetic-lines",
     "organic-wave",
-  ].map((slug) => designEntry("abstract", slug)),
+  ].map((slug) => designEntry("abstract", slug, STYLE_TAGS_BY_SLUG[slug])),
   minimal: [
     "abstract-arrow",
     "compass-symbol",
@@ -182,7 +231,12 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "tiny-moon",
     "tiny-star",
     "tiny-sun",
-  ].map((slug) => designEntry("minimal", slug)),
+    // Phase 6: three original icon-style marks, proving the new "icons"
+    // style tag with real (not placeholder) content.
+    "check-badge",
+    "heart-outline",
+    "shirt-icon",
+  ].map((slug) => designEntry("minimal", slug, STYLE_TAGS_BY_SLUG[slug])),
   "graphic-art": [
     "abstract-retro-symbol",
     "bold-smiley",
@@ -196,7 +250,12 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "retro-flower",
     "retro-sun",
     "vintage-starburst",
-  ].map((slug) => designEntry("graphic-art", slug)),
+    // Phase 6: three original circular badge/sticker marks, proving the
+    // new "stickers" style tag with real content.
+    "star-badge",
+    "sun-badge",
+    "wave-badge",
+  ].map((slug) => designEntry("graphic-art", slug, STYLE_TAGS_BY_SLUG[slug])),
 };
 
 export const templateAssets: Record<TemplateCategory, AssetEntry[]> = {
