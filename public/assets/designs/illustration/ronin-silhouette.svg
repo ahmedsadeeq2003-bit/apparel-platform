@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Wide kasa (travel hat) -->
+  <path d="M 128,118 C 145,72 175,52 200,52 C 225,52 255,72 272,118 C 240,130 160,130 128,118 Z" fill="#0a0a0a"/>
+  <ellipse cx="200" cy="119" rx="78" ry="9" fill="#0a0a0a"/>
+  <!-- Head, mostly shadowed under the brim -->
+  <circle cx="200" cy="146" r="17" fill="#0a0a0a"/>
+  <!-- Flowing robed body -->
+  <path d="M 168,158 C 148,205 118,265 96,344 L 304,344 C 282,265 252,205 232,158 C 210,168 190,168 168,158 Z" fill="#0a0a0a"/>
+  <!-- Sash -->
+  <path d="M 128,272 L 272,272 L 266,288 L 134,288 Z" fill="#0a0a0a" opacity="0.65"/>
+  <!-- Katana, diagonal across the body -->
+  <path d="M 96,352 L 240,96" fill="none" stroke="#0a0a0a" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 96,352 L 118,340" fill="none" stroke="#0a0a0a" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="107" cy="346" rx="15" ry="7" fill="none" stroke="#0a0a0a" stroke-width="5" transform="rotate(-25 107 346)"/>
+</svg>

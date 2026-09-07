@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Crescent moon -->
+  <path d="M 230,60 C 280,72 314,118 306,168 C 296,122 258,90 214,86 C 218,74 224,66 230,60 Z" fill="#0a0a0a"/>
+  <!-- Traditional layered cloud (kumo) silhouette drifting beneath it -->
+  <path
+    d="M 60,260
+       C 60,238 80,222 100,226
+       C 104,206 126,192 148,198
+       C 156,178 182,168 204,178
+       C 224,166 252,172 262,192
+       C 286,190 306,206 304,228
+       C 322,232 334,250 326,268
+       C 330,286 316,302 296,300
+       C 288,314 268,320 252,312
+       C 236,326 208,326 194,312
+       C 172,322 146,316 136,300
+       C 112,302 92,288 92,268
+       C 74,268 60,278 60,260 Z"
+    fill="#0a0a0a"
+  />
+  <!-- Small drifting wisps -->
+  <ellipse cx="88" cy="330" rx="26" ry="8" fill="#0a0a0a" opacity="0.6"/>
+  <ellipse cx="140" cy="348" rx="18" ry="6" fill="#0a0a0a" opacity="0.4"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Angular circuit-trace mark built from right-angle strokes and node
+       dots, forming a symmetric emblem rather than a literal circuit
+       diagram. -->
+  <g fill="none" stroke="#0a0a0a" stroke-width="9" stroke-linecap="round">
+    <path d="M 200,60 L 200,140"/>
+    <path d="M 200,140 L 130,140 L 130,200"/>
+    <path d="M 200,140 L 270,140 L 270,200"/>
+    <path d="M 130,200 L 130,260 L 200,260"/>
+    <path d="M 270,200 L 270,260 L 200,260"/>
+    <path d="M 200,260 L 200,340"/>
+    <path d="M 130,200 L 80,200"/>
+    <path d="M 270,200 L 320,200"/>
+  </g>
+  <g fill="#0a0a0a">
+    <circle cx="200" cy="60" r="10"/>
+    <circle cx="130" cy="200" r="10"/>
+    <circle cx="270" cy="200" r="10"/>
+    <circle cx="200" cy="340" r="10"/>
+    <circle cx="80" cy="200" r="7"/>
+    <circle cx="320" cy="200" r="7"/>
+    <circle cx="200" cy="200" r="14"/>
+  </g>
+</svg>

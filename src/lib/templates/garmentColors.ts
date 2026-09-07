@@ -33,6 +33,8 @@ export const EDITORIAL_GARMENT_COLORS: Record<string, string> = {
   experimental: "#D7FF3E",
   music: "#0B0B0C",
   sport: "#D7FF3E",
+  // Phase 7 -- every Anime template ships light ink calibrated for black.
+  anime: "#0B0B0C",
 };
 
 /**

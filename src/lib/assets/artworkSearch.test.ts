@@ -52,7 +52,9 @@ describe("filterArtwork", () => {
   });
 
   it("returns an empty (not missing) result for a style tag with no assets yet", () => {
-    const result = filterArtwork(ALL_ARTWORK, { category: "anime", query: "" });
+    // "anime" itself is now populated (Phase 7) -- "cars" remains a real,
+    // honestly-empty tag for this case.
+    const result = filterArtwork(ALL_ARTWORK, { category: "cars", query: "" });
     expect(result).toHaveLength(0);
   });
 
@@ -65,5 +67,54 @@ describe("filterArtwork", () => {
 
   it("gives every artwork item a tags array, even if empty", () => {
     expect(ALL_ARTWORK.every((item) => Array.isArray(item.tags))).toBe(true);
+  });
+});
+
+describe("Phase 7 -- Anime collection", () => {
+  it("registers real anime artwork under the broad 'anime' tag", () => {
+    const result = filterArtwork(ALL_ARTWORK, { category: "anime", query: "" });
+    // A real, substantial collection, not a token handful.
+    expect(result.length).toBeGreaterThanOrEqual(15);
+  });
+
+  it("every anime substyle tag added to STYLE_TAGS has at least one real asset", () => {
+    const animeSubstyles = ["samurai", "dark-fantasy", "cyberpunk-anime", "mecha", "action", "chibi", "anime-faces", "anime-streetwear"];
+    for (const substyle of animeSubstyles) {
+      expect(STYLE_TAGS.some((tag) => tag.value === substyle)).toBe(true);
+      const matches = filterArtwork(ALL_ARTWORK, { category: substyle, query: "" });
+      expect(matches.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("every anime-tagged piece also carries the broad 'anime' tag (substyle implies umbrella)", () => {
+    const substyleValues = ["samurai", "dark-fantasy", "cyberpunk-anime", "mecha", "action", "chibi", "anime-faces", "anime-streetwear"];
+    const bySubstyle = ALL_ARTWORK.filter((item) => item.tags.some((t) => substyleValues.includes(t)));
+    expect(bySubstyle.length).toBeGreaterThan(0);
+    expect(bySubstyle.every((item) => item.tags.includes("anime"))).toBe(true);
+  });
+
+  it("populates the pre-existing 'manga' and 'japanese' tags rather than inventing near-duplicates", () => {
+    expect(filterArtwork(ALL_ARTWORK, { category: "manga", query: "" }).length).toBeGreaterThan(0);
+    expect(filterArtwork(ALL_ARTWORK, { category: "japanese", query: "" }).length).toBeGreaterThan(0);
+  });
+
+  it("resolves a real anime artwork id the same way any other artwork id resolves", () => {
+    const roninPath = "/assets/designs/illustration/ronin-silhouette.svg";
+    const item = ALL_ARTWORK.find((entry) => entry.path === roninPath);
+    expect(item).toBeDefined();
+    expect(item?.id).toBe("illustration-ronin-silhouette");
+    expect(item?.tags).toContain("samurai");
+  });
+
+  it("searching by substyle name as free text also finds anime artwork", () => {
+    const result = filterArtwork(ALL_ARTWORK, { category: "all", query: "samurai" });
+    expect(result.length).toBeGreaterThan(0);
+    expect(result.every((item) => item.tags.includes("samurai"))).toBe(true);
+  });
+
+  it("existing non-anime artwork and tags are unaffected", () => {
+    const streetwear = filterArtwork(ALL_ARTWORK, { category: "streetwear", query: "" });
+    expect(streetwear.length).toBeGreaterThan(0);
+    expect(streetwear.every((item) => !item.tags.includes("anime"))).toBe(true);
   });
 });

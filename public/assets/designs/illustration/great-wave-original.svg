@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- An original curling-wave composition in the ukiyo-e print tradition
+       (a public-domain artistic convention, not a copy of any specific
+       existing artwork) -- a tall cresting wave with clawed foam tips. -->
+  <path
+    d="M 40,300
+       C 60,240 50,180 90,150
+       C 80,190 100,210 120,190
+       C 110,220 130,232 150,214
+       C 146,244 168,252 186,232
+       C 190,258 168,282 140,286
+       C 168,290 196,278 210,254
+       C 222,282 202,312 168,320
+       C 210,326 250,308 262,272
+       C 280,306 260,344 216,354
+       C 150,368 60,352 40,300 Z"
+    fill="#0a0a0a"
+  />
+  <!-- Foam claws at the crest -->
+  <path d="M 186,232 C 196,214 194,192 178,178 C 184,200 178,218 168,228 Z" fill="#0a0a0a"/>
+  <path d="M 150,214 C 158,196 154,176 140,164 C 146,184 142,200 132,210 Z" fill="#0a0a0a"/>
+  <!-- Scattered foam -->
+  <circle cx="248" cy="240" r="5" fill="#0a0a0a"/>
+  <circle cx="262" cy="256" r="3.5" fill="#0a0a0a"/>
+  <circle cx="272" cy="222" r="3" fill="#0a0a0a"/>
+</svg>

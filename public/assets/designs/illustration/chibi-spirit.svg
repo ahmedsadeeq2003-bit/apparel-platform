@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- An original rounded spirit-mascot -- soft body, tapered tail wisp,
+       big round eyes -- STITCH's own character, not based on any
+       existing franchise mascot. -->
+  <path
+    d="M 200,80 C 270,80 316,132 316,200 C 316,256 288,296 246,312 C 256,300 250,286 236,288 C 222,290 220,304 208,304 C 196,304 196,288 182,288 C 168,288 164,302 152,310 C 112,292 84,254 84,200 C 84,132 130,80 200,80 Z"
+    fill="#0a0a0a"
+  />
+  <!-- Eyes -->
+  <circle cx="164" cy="196" r="22" fill="#F5F1E8"/>
+  <circle cx="170" cy="202" r="10" fill="#0a0a0a"/>
+  <circle cx="174" cy="192" r="4" fill="#F5F1E8"/>
+  <circle cx="236" cy="196" r="22" fill="#F5F1E8"/>
+  <circle cx="242" cy="202" r="10" fill="#0a0a0a"/>
+  <circle cx="246" cy="192" r="4" fill="#F5F1E8"/>
+  <!-- Blush marks -->
+  <ellipse cx="140" cy="232" rx="10" ry="6" fill="#F5F1E8" opacity="0.5"/>
+  <ellipse cx="260" cy="232" rx="10" ry="6" fill="#F5F1E8" opacity="0.5"/>
+</svg>

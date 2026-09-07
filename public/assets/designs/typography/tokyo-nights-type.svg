@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+  <!-- Speed-line accents flanking the wordmark -->
+  <path d="M 60,520 L 340,470" stroke="#0a0a0a" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 60,560 L 300,528" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+  <path d="M 1140,680 L 860,730" stroke="#0a0a0a" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 1140,640 L 900,672" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Stacked anime title-card style wordmark, direct presentation
+       attributes (no <style> block) for the simplest, most broadly
+       supported SVG-to-canvas parse path. -->
+  <text x="600" y="560" font-family="Anton, sans-serif" font-size="220" fill="#0a0a0a" text-anchor="middle">TOKYO</text>
+  <text x="600" y="700" font-family="Archivo, sans-serif" font-weight="700" font-size="70" letter-spacing="18" fill="#0a0a0a" text-anchor="middle">AFTER DARK</text>
+
+  <!-- Underline rule -->
+  <rect x="360" y="740" width="480" height="6" fill="#0a0a0a"/>
+</svg>

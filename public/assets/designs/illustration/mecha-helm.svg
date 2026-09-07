@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Angular mech helmet, side profile, with a real transparent visor
+       slit (fill-rule evenodd hole) so the garment color shows through
+       it. -->
+  <path
+    fill-rule="evenodd"
+    fill="#0a0a0a"
+    d="M 130,80 L 240,80 L 280,110 L 300,160 L 296,220 L 270,260 L 270,300 L 220,300 L 220,270 L 150,270 L 150,300 L 110,300 L 110,250 L 90,210 L 90,140 Z
+       M 128,168 L 250,168 L 250,190 L 128,190 Z"
+  />
+  <!-- Crest fin -->
+  <path d="M 170,80 L 190,30 L 210,80 Z" fill="#0a0a0a"/>
+  <!-- Jaw panel line -->
+  <path d="M 118,232 L 262,232" fill="none" stroke="#0a0a0a" stroke-width="3" opacity="0.3"/>
+</svg>

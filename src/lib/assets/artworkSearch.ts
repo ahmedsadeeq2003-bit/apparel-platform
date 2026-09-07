@@ -47,9 +47,21 @@ export const STYLE_TAGS: { value: string; label: string }[] = [
   { value: "icons", label: "Icons" },
   { value: "stickers", label: "Stickers" },
   { value: "anime", label: "Anime" },
+  // Phase 7: genuine Anime substyles, added alongside real artwork tagged
+  // with each one (see manifest.ts's STYLE_TAGS_BY_SLUG) -- not a
+  // speculative full list of every substyle the brief suggested, only the
+  // ones this collection actually has pieces for.
+  { value: "samurai", label: "Samurai / Ronin" },
+  { value: "dark-fantasy", label: "Dark Fantasy" },
+  { value: "cyberpunk-anime", label: "Cyberpunk Anime" },
+  { value: "mecha", label: "Mecha" },
+  { value: "action", label: "Action / Dynamic" },
+  { value: "chibi", label: "Chibi / Cute" },
+  { value: "anime-faces", label: "Anime Faces" },
+  { value: "anime-streetwear", label: "Anime Streetwear" },
   { value: "cartoon", label: "Cartoon" },
-  { value: "manga", label: "Manga" },
-  { value: "japanese", label: "Japanese" },
+  { value: "manga", label: "Manga / Ink" },
+  { value: "japanese", label: "Japanese Traditional" },
   { value: "gaming", label: "Gaming" },
   { value: "sports", label: "Sports" },
   { value: "music", label: "Music" },

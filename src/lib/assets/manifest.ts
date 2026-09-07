@@ -164,6 +164,30 @@ const STYLE_TAGS_BY_SLUG: Record<string, string[]> = {
   "star-badge": ["stickers"],
   "sun-badge": ["stickers"],
   "wave-badge": ["stickers"],
+  // Phase 7: original anime-inspired streetwear artwork. Every piece
+  // carries the broad "anime" umbrella tag plus one genuinely distinct
+  // substyle tag -- reusing the already-existing "japanese"/"manga" tags
+  // where a piece fits (rather than inventing near-duplicate ones), and
+  // adding new substyle tags to STYLE_TAGS (artworkSearch.ts) only for
+  // the ones that actually have art behind them.
+  "ronin-silhouette": ["anime", "samurai"],
+  "katana-crescent": ["anime", "samurai", "dark-fantasy"],
+  "oni-mask": ["anime", "dark-fantasy"],
+  "dark-moon-cloud": ["anime", "dark-fantasy"],
+  "great-wave-original": ["anime", "japanese"],
+  "torii-sunset": ["anime", "japanese"],
+  "sakura-branch": ["anime", "japanese"],
+  "koi-current": ["anime", "japanese"],
+  "visor-grid": ["anime", "cyberpunk-anime"],
+  "neon-circuit-mark": ["anime", "cyberpunk-anime"],
+  "mecha-helm": ["anime", "mecha"],
+  "speed-slash": ["anime", "action"],
+  "impact-burst": ["anime", "action", "manga"],
+  "halftone-panel": ["anime", "manga"],
+  "ink-brush-stroke": ["anime", "manga"],
+  "chibi-spirit": ["anime", "chibi"],
+  "anime-eye-mark": ["anime", "anime-faces"],
+  "tokyo-nights-type": ["anime", "anime-streetwear"],
 };
 
 export const designAssets: Record<DesignCategory, AssetEntry[]> = {
@@ -175,6 +199,8 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "no-signal",
     "off-the-clock",
     "stay-curious",
+    // Phase 7: anime-streetwear wordmark.
+    "tokyo-nights-type",
   ].map((slug) => designEntry("typography", slug, STYLE_TAGS_BY_SLUG[slug])),
   graffiti: [
     "graffiti-face",
@@ -203,6 +229,16 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "sun-and-moon",
     "vintage-camera",
     "wild-flower",
+    // Phase 7: original anime-inspired illustration pieces -- samurai/
+    // ronin, dark fantasy, Japanese-traditional motifs, mecha, and an
+    // original chibi mascot.
+    "ronin-silhouette",
+    "oni-mask",
+    "great-wave-original",
+    "sakura-branch",
+    "koi-current",
+    "mecha-helm",
+    "chibi-spirit",
   ].map((slug) => designEntry("illustration", slug, STYLE_TAGS_BY_SLUG[slug])),
   abstract: [
     "abstract-loop",
@@ -217,6 +253,11 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "ink-splash",
     "kinetic-lines",
     "organic-wave",
+    // Phase 7: dark-fantasy, cyberpunk and manga-ink textures.
+    "dark-moon-cloud",
+    "neon-circuit-mark",
+    "halftone-panel",
+    "ink-brush-stroke",
   ].map((slug) => designEntry("abstract", slug, STYLE_TAGS_BY_SLUG[slug])),
   minimal: [
     "abstract-arrow",
@@ -255,6 +296,15 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "star-badge",
     "sun-badge",
     "wave-badge",
+    // Phase 7: samurai, Japanese-traditional, cyberpunk and manga-action
+    // graphic marks -- chest-print scale, bolder/simpler than the
+    // illustration-category pieces above.
+    "katana-crescent",
+    "torii-sunset",
+    "visor-grid",
+    "speed-slash",
+    "impact-burst",
+    "anime-eye-mark",
   ].map((slug) => designEntry("graphic-art", slug, STYLE_TAGS_BY_SLUG[slug])),
 };
 

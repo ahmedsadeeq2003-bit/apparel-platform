@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Manga-print halftone gradient inside a panel frame -- dot size grows
+       left to right across a 7x9 grid, the classic screen-tone effect. -->
+  <rect x="30" y="60" width="340" height="280" fill="none" stroke="#0a0a0a" stroke-width="6"/>
+  <g fill="#0a0a0a">
+    <!-- columns 1-7, radius grows with column index -->
+    <circle cx="66" cy="94" r="2"/><circle cx="66" cy="130" r="2"/><circle cx="66" cy="166" r="2"/><circle cx="66" cy="202" r="2"/><circle cx="66" cy="238" r="2"/><circle cx="66" cy="274" r="2"/><circle cx="66" cy="310" r="2"/>
+    <circle cx="112" cy="94" r="4"/><circle cx="112" cy="130" r="4"/><circle cx="112" cy="166" r="4"/><circle cx="112" cy="202" r="4"/><circle cx="112" cy="238" r="4"/><circle cx="112" cy="274" r="4"/><circle cx="112" cy="310" r="4"/>
+    <circle cx="158" cy="94" r="6.5"/><circle cx="158" cy="130" r="6.5"/><circle cx="158" cy="166" r="6.5"/><circle cx="158" cy="202" r="6.5"/><circle cx="158" cy="238" r="6.5"/><circle cx="158" cy="274" r="6.5"/><circle cx="158" cy="310" r="6.5"/>
+    <circle cx="204" cy="94" r="9"/><circle cx="204" cy="130" r="9"/><circle cx="204" cy="166" r="9"/><circle cx="204" cy="202" r="9"/><circle cx="204" cy="238" r="9"/><circle cx="204" cy="274" r="9"/><circle cx="204" cy="310" r="9"/>
+    <circle cx="250" cy="94" r="11.5"/><circle cx="250" cy="130" r="11.5"/><circle cx="250" cy="166" r="11.5"/><circle cx="250" cy="202" r="11.5"/><circle cx="250" cy="238" r="11.5"/><circle cx="250" cy="274" r="11.5"/><circle cx="250" cy="310" r="11.5"/>
+    <circle cx="296" cy="94" r="14"/><circle cx="296" cy="130" r="14"/><circle cx="296" cy="166" r="14"/><circle cx="296" cy="202" r="14"/><circle cx="296" cy="238" r="14"/><circle cx="296" cy="274" r="14"/><circle cx="296" cy="310" r="14"/>
+    <circle cx="342" cy="94" r="16.5"/><circle cx="342" cy="130" r="16.5"/><circle cx="342" cy="166" r="16.5"/><circle cx="342" cy="202" r="16.5"/><circle cx="342" cy="238" r="16.5"/><circle cx="342" cy="274" r="16.5"/><circle cx="342" cy="310" r="16.5"/>
+  </g>
+</svg>

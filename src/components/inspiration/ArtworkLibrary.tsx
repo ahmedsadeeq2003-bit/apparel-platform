@@ -5,21 +5,16 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
 import { ArrowUpRight, MagnifyingGlass, X } from "@phosphor-icons/react";
 import { Container } from "@/components/layout/Container";
-import {
-  ALL_ARTWORK,
-  ARTWORK_CATEGORIES,
-  ARTWORK_CATEGORY_LABELS,
-  filterArtwork,
-  type ArtworkItem,
-} from "@/lib/assets/artworkSearch";
-import type { DesignCategory } from "@/lib/assets/manifest";
+import { ALL_ARTWORK, ARTWORK_CATEGORY_LABELS, ARTWORK_FILTERS, filterArtwork, type ArtworkItem } from "@/lib/assets/artworkSearch";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-const CATEGORY_FILTERS: { value: DesignCategory | "all"; label: string }[] = [
-  { value: "all", label: "All" },
-  ...ARTWORK_CATEGORIES.map((category) => ({ value: category, label: ARTWORK_CATEGORY_LABELS[category] })),
-];
+/** Structural categories first, then style/substyle tags (Anime and its
+ * substyles included) -- the same combined filter list the editor's own
+ * Graphics panel already uses (see ToolPanel.tsx's AssetLibraryGrid), so a
+ * style like Anime is discoverable here too rather than only inside the
+ * editor. One shared list, not a second filter taxonomy for this page. */
+const CATEGORY_FILTERS: { value: string; label: string }[] = [{ value: "all", label: "All" }, ...ARTWORK_FILTERS];
 
 const CARD: Variants = {
   hidden: { opacity: 0, y: 16, scale: 0.96 },
@@ -107,10 +102,16 @@ function ArtworkCard({ item, editorHref, index }: { item: ArtworkItem; editorHre
  */
 export function ArtworkLibrary({ editorHref }: { editorHref: string }) {
   const reduceMotion = useReducedMotion();
-  const [category, setCategory] = useState<DesignCategory | "all">("all");
+  const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => filterArtwork(ALL_ARTWORK, { category, query }), [category, query]);
+  // A style/substyle filter chip (e.g. a still-thin Anime substyle) can
+  // legitimately have zero pieces yet -- distinct from "no search match,"
+  // so it gets an honest "more coming soon" message instead of implying
+  // the search itself failed. Same distinction the editor's own Graphics
+  // panel already makes (see ToolPanel.tsx's AssetLibraryGrid).
+  const isEmptyStyleTag = results.length === 0 && category !== "all" && !query;
   const hrefFor = (item: ArtworkItem) => {
     const [path, existingQuery] = editorHref.split("?");
     const params = new URLSearchParams(existingQuery ?? "");
@@ -155,7 +156,7 @@ export function ArtworkLibrary({ editorHref }: { editorHref: string }) {
           </div>
 
           <label className="relative flex w-full items-center md:w-64">
-            <span className="sr-only">Search artwork by name or category</span>
+            <span className="sr-only">Search artwork by name, category, or style</span>
             <MagnifyingGlass size={16} className="pointer-events-none absolute left-3.5 text-muted" aria-hidden />
             <input
               type="search"
@@ -188,9 +189,14 @@ export function ArtworkLibrary({ editorHref }: { editorHref: string }) {
               ))}
             </AnimatePresence>
           </motion.ul>
+        ) : isEmptyStyleTag ? (
+          <p className="mt-16 text-center text-body text-muted">
+            More {CATEGORY_FILTERS.find((f) => f.value === category)?.label.toLowerCase()} artwork is coming soon.
+          </p>
         ) : (
           <p className="mt-16 text-center text-body text-muted">
-            Nothing matches &ldquo;{query}&rdquo;{category !== "all" ? ` in ${ARTWORK_CATEGORY_LABELS[category]}` : ""}. Try
+            Nothing matches &ldquo;{query}&rdquo;
+            {category !== "all" ? ` in ${CATEGORY_FILTERS.find((f) => f.value === category)?.label}` : ""}. Try
             another search or category.
           </p>
         )}

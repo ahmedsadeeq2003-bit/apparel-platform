@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Classic manga "impact burst" -- radiating tapered spikes from an
+       off-center origin, generated programmatically-by-hand at 24 evenly
+       spaced angles so every spike is genuinely symmetric. -->
+  <g fill="#0a0a0a">
+    <path d="M 200,200 L 200,20 L 208,110 Z"/>
+    <path d="M 200,200 L 260,32 L 244,118 Z"/>
+    <path d="M 200,200 L 312,66 L 272,140 Z"/>
+    <path d="M 200,200 L 352,116 L 292,168 Z"/>
+    <path d="M 200,200 L 376,178 L 300,200 Z"/>
+    <path d="M 200,200 L 380,244 L 296,232 Z"/>
+    <path d="M 200,200 L 360,306 L 280,262 Z"/>
+    <path d="M 200,200 L 320,354 L 256,288 Z"/>
+    <path d="M 200,200 L 264,384 L 228,306 Z"/>
+    <path d="M 200,200 L 200,392 L 200,308 Z"/>
+    <path d="M 200,200 L 136,384 L 172,306 Z"/>
+    <path d="M 200,200 L 80,354 L 144,288 Z"/>
+    <path d="M 200,200 L 40,306 L 120,262 Z"/>
+    <path d="M 200,200 L 20,244 L 104,232 Z"/>
+    <path d="M 200,200 L 24,178 L 100,200 Z"/>
+    <path d="M 200,200 L 48,116 L 108,168 Z"/>
+    <path d="M 200,200 L 88,66 L 128,140 Z"/>
+    <path d="M 200,200 L 140,32 L 156,118 Z"/>
+  </g>
+  <circle cx="200" cy="200" r="34" fill="#0a0a0a"/>
+</svg>

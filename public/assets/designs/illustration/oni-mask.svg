@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Horns -->
+  <path d="M 140,110 C 120,80 118,45 138,18 C 148,50 146,82 152,108 Z" fill="#0a0a0a"/>
+  <path d="M 260,110 C 280,80 282,45 262,18 C 252,50 254,82 248,108 Z" fill="#0a0a0a"/>
+  <!-- Face, with real path holes (fill-rule evenodd) for the brow cuts, eyes
+       and mouth -- so the garment color shows through those areas rather
+       than a hardcoded background swatch that would look wrong on any
+       shirt color but the one it was picked to match. -->
+  <path
+    fill-rule="evenodd"
+    fill="#0a0a0a"
+    d="M 122,132 C 108,200 114,272 148,326 C 165,344 235,344 252,326 C 286,272 292,200 278,132 C 254,104 146,104 122,132 Z
+       M 140,158 L 188,178 L 188,190 L 140,174 Z
+       M 260,158 L 212,178 L 212,190 L 260,174 Z
+       M 181,206 A 17,17 0 1,0 147,206 A 17,17 0 1,0 181,206 Z
+       M 253,206 A 17,17 0 1,0 219,206 A 17,17 0 1,0 253,206 Z
+       M 150,278 L 168,296 L 184,280 L 200,298 L 216,280 L 232,296 L 250,278 L 250,290 L 150,290 Z"
+  />
+  <!-- Pupils, drawn back in on top of the eye holes -->
+  <circle cx="164" cy="206" r="6" fill="#0a0a0a"/>
+  <circle cx="236" cy="206" r="6" fill="#0a0a0a"/>
+  <!-- Nose, solid, drawn on top of the face between the eye holes -->
+  <path d="M 194,214 L 186,252 L 214,252 Z" fill="#0a0a0a"/>
+</svg>

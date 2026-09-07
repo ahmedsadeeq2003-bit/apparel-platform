@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Angular visor / eye shape with a real transparent "lens" hole
+       (fill-rule evenodd) so the garment color shows through it, rather
+       than a hardcoded background fill that would look wrong on any
+       shirt color but the one it was picked to match. -->
+  <path
+    fill-rule="evenodd"
+    fill="#0a0a0a"
+    d="M 60,190 C 100,150 160,132 200,132 C 240,132 300,150 340,190 C 300,222 240,240 200,240 C 160,240 100,222 60,190 Z
+       M 96,190 C 126,166 164,154 200,154 C 236,154 274,166 304,190 C 274,210 236,220 200,220 C 164,220 126,210 96,190 Z"
+  />
+  <!-- Scan line across the lens -->
+  <rect x="96" y="186" width="208" height="8" fill="#0a0a0a"/>
+  <!-- Grid lines radiating behind -->
+  <path d="M 200,132 L 200,60" fill="none" stroke="#0a0a0a" stroke-width="3"/>
+  <path d="M 130,142 L 96,80" fill="none" stroke="#0a0a0a" stroke-width="3"/>
+  <path d="M 270,142 L 304,80" fill="none" stroke="#0a0a0a" stroke-width="3"/>
+  <path d="M 200,240 L 200,320" fill="none" stroke="#0a0a0a" stroke-width="3" opacity="0.5"/>
+  <path d="M 130,232 L 100,300" fill="none" stroke="#0a0a0a" stroke-width="3" opacity="0.5"/>
+  <path d="M 270,232 L 300,300" fill="none" stroke="#0a0a0a" stroke-width="3" opacity="0.5"/>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Three sumi-e style ink brush strokes, thick-to-thin tapered curves
+       with natural break/texture at the tail. -->
+  <path
+    d="M 60,120 C 120,90 200,80 280,100 C 300,105 302,116 282,120 C 210,110 130,120 76,144 C 64,148 54,128 60,120 Z"
+    fill="#0a0a0a"
+  />
+  <path
+    d="M 90,200 C 160,178 240,180 320,206 C 336,211 334,222 316,222 C 244,206 172,206 108,222 C 96,224 84,206 90,200 Z"
+    fill="#0a0a0a"
+  />
+  <path
+    d="M 70,280 C 140,254 220,250 300,270 C 314,274 312,284 296,286 C 224,270 150,274 90,296 C 78,300 66,286 70,280 Z"
+    fill="#0a0a0a"
+    opacity="0.85"
+  />
+  <!-- Texture flecks trailing the third stroke -->
+  <circle cx="316" cy="284" r="3" fill="#0a0a0a"/>
+  <circle cx="328" cy="290" r="2" fill="#0a0a0a" opacity="0.6"/>
+</svg>

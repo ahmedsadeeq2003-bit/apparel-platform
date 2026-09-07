@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Koi body, S-curve swimming pose -->
+  <path
+    d="M 90,140
+       C 130,120 190,120 230,150
+       C 270,178 300,170 330,140
+       C 310,180 290,196 262,204
+       C 292,220 312,250 306,286
+       C 288,258 260,244 230,246
+       C 250,268 254,296 240,320
+       C 230,292 212,272 186,266
+       C 156,278 128,270 110,244
+       C 134,246 154,236 164,216
+       C 128,214 98,192 90,140 Z"
+    fill="#0a0a0a"
+  />
+  <!-- Tail fin -->
+  <path d="M 240,320 C 260,332 286,336 310,328 C 292,344 264,352 238,346 Z" fill="#0a0a0a"/>
+  <!-- Dorsal + pectoral fins -->
+  <path d="M 186,266 C 170,282 150,288 130,284 C 148,272 166,262 182,256 Z" fill="#0a0a0a" opacity="0.85"/>
+  <path d="M 200,168 C 186,182 168,186 150,182 C 166,172 182,164 196,160 Z" fill="#0a0a0a" opacity="0.7"/>
+  <!-- Eye -->
+  <circle cx="106" cy="150" r="6" fill="#F5F1E8"/>
+  <circle cx="106" cy="150" r="2.5" fill="#0a0a0a"/>
+  <!-- Whiskers -->
+  <path d="M 90,158 C 78,164 70,176 68,190" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round"/>
+  <!-- Current lines trailing behind -->
+  <path d="M 300,200 C 330,206 350,220 358,238" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <path d="M 292,224 C 320,232 338,248 344,266" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+</svg>

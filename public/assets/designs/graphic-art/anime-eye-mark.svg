@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- A single large stylized anime-style eye -- sharp upper lid, iris,
+       highlight and lash accents -- used as a standalone iconic graphic
+       mark rather than a full face. -->
+  <path
+    d="M 30,210 C 90,140 160,110 200,110 C 240,110 310,140 370,210 C 310,268 240,296 200,296 C 160,296 90,268 30,210 Z"
+    fill="#0a0a0a"
+  />
+  <circle cx="200" cy="210" r="62" fill="#F5F1E8"/>
+  <circle cx="200" cy="210" r="42" fill="#0a0a0a"/>
+  <circle cx="184" cy="192" r="14" fill="#F5F1E8"/>
+  <circle cx="222" cy="228" r="6" fill="#F5F1E8" opacity="0.7"/>
+  <!-- Lash accents at the outer corner -->
+  <path d="M 358,196 L 388,176" fill="none" stroke="#0a0a0a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 350,222 L 376,214" fill="none" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round"/>
+</svg>

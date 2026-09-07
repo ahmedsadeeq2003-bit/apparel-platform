@@ -54,6 +54,13 @@ describe("resolveArtworkParam", () => {
   it("returns null when undefined", () => {
     expect(resolveArtworkParam(undefined)).toBeNull();
   });
+
+  it("resolves a real Phase 7 anime artwork id through the same generic lookup", () => {
+    const resolved = resolveArtworkParam("illustration-ronin-silhouette");
+    expect(resolved).not.toBeNull();
+    expect(resolved?.path).toBe("/assets/designs/illustration/ronin-silhouette.svg");
+    expect(resolved?.tags).toContain("anime");
+  });
 });
 
 describe("resolveTemplateParam", () => {

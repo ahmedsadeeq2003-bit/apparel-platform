@@ -28,6 +28,9 @@ const DEMO_ARTWORK: { category: DesignCategory; slug: string; colorName: string 
   { category: "typography", slug: "good-energy", colorName: "White" },
   { category: "illustration", slug: "botanical-flower", colorName: "Ash Grey" },
   { category: "graphic-art", slug: "retro-sun", colorName: "Volt Green" },
+  // Phase 7: one hand-picked piece from the new Anime collection, dark ink
+  // on the lightest real color for maximum contrast in this showcase.
+  { category: "illustration", slug: "oni-mask", colorName: "White" },
 ];
 
 /**

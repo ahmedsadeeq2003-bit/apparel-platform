@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Branch -->
+  <path d="M 40,360 C 110,320 150,270 180,220 C 200,186 230,150 300,120" fill="none" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 150,266 C 130,246 110,238 88,240" fill="none" stroke="#0a0a0a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 214,196 C 230,174 250,164 274,166" fill="none" stroke="#0a0a0a" stroke-width="4" stroke-linecap="round"/>
+  <!-- Five-petal blossoms, each a simple flower built from five overlapping
+       petal ellipses around a shared center. -->
+  <g>
+    <g transform="translate(96,236) scale(0.9)">
+      <ellipse cx="0" cy="-14" rx="9" ry="14" fill="#0a0a0a"/>
+      <ellipse cx="13" cy="-4" rx="9" ry="14" fill="#0a0a0a" transform="rotate(72)"/>
+      <ellipse cx="8" cy="11" rx="9" ry="14" fill="#0a0a0a" transform="rotate(144)"/>
+      <ellipse cx="-8" cy="11" rx="9" ry="14" fill="#0a0a0a" transform="rotate(216)"/>
+      <ellipse cx="-13" cy="-4" rx="9" ry="14" fill="#0a0a0a" transform="rotate(288)"/>
+    </g>
+  </g>
+  <g transform="translate(190,206) scale(1.15) rotate(-10)">
+    <ellipse cx="0" cy="-14" rx="9" ry="14" fill="#0a0a0a"/>
+    <ellipse cx="13" cy="-4" rx="9" ry="14" fill="#0a0a0a" transform="rotate(72)"/>
+    <ellipse cx="8" cy="11" rx="9" ry="14" fill="#0a0a0a" transform="rotate(144)"/>
+    <ellipse cx="-8" cy="11" rx="9" ry="14" fill="#0a0a0a" transform="rotate(216)"/>
+    <ellipse cx="-13" cy="-4" rx="9" ry="14" fill="#0a0a0a" transform="rotate(288)"/>
+  </g>
+  <g transform="translate(282,150) scale(1.3) rotate(20)">
+    <ellipse cx="0" cy="-14" rx="9" ry="14" fill="#0a0a0a"/>
+    <ellipse cx="13" cy="-4" rx="9" ry="14" fill="#0a0a0a" transform="rotate(72)"/>
+    <ellipse cx="8" cy="11" rx="9" ry="14" fill="#0a0a0a" transform="rotate(144)"/>
+    <ellipse cx="-8" cy="11" rx="9" ry="14" fill="#0a0a0a" transform="rotate(216)"/>
+    <ellipse cx="-13" cy="-4" rx="9" ry="14" fill="#0a0a0a" transform="rotate(288)"/>
+  </g>
+  <!-- Falling petals -->
+  <ellipse cx="240" cy="260" rx="6" ry="9" fill="#0a0a0a" transform="rotate(30 240 260)"/>
+  <ellipse cx="270" cy="300" rx="5" ry="8" fill="#0a0a0a" opacity="0.6" transform="rotate(-15 270 300)"/>
+</svg>
