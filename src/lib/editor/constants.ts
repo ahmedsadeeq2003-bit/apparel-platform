@@ -1,4 +1,4 @@
-import { GARMENT_PRINT_AREA_PCT } from "@/lib/products/garmentPhoto";
+import { GARMENT_DESIGN_AREA_PCT, GARMENT_PRINT_AREA_PCT } from "@/lib/products/garmentPhoto";
 
 export const CANVAS_SIZE = 600;
 
@@ -13,23 +13,37 @@ export const DEFAULT_TEXT_FILL = "#1b1815";
 export const CANVAS_TEXT_FONT_FAMILY = "Archivo, ui-sans-serif, system-ui, sans-serif";
 
 /** Where the Fabric canvas element itself is displayed on top of the real
- * garment photo, as a percentage of the full photo -- see
- * `GARMENT_PRINT_AREA_PCT`'s own comment in garmentPhoto.ts for how this box
- * was established. DesignCanvas.tsx sizes/positions the actual `<canvas>`
- * to this box rather than rendering it full-photo-size with a smaller inset
- * guide, so the canvas's own coordinate space directly *is* the printable
- * region. */
-export const GARMENT_CANVAS_OVERLAY_PCT = GARMENT_PRINT_AREA_PCT;
+ * garment photo, as a percentage of the full photo. Phase 8: this is now
+ * the much larger `GARMENT_DESIGN_AREA_PCT` (most of the visible torso),
+ * not the smaller print-safe box -- the shirt itself is the canvas; the
+ * print-safe area is guidance shown *inside* it (see PRINT_SAFE_AREA_BOUNDS
+ * below), not the editing boundary. DesignCanvas.tsx sizes/positions the
+ * actual `<canvas>` to this box, so the canvas's own coordinate space
+ * directly *is* this larger design surface. */
+export const GARMENT_CANVAS_OVERLAY_PCT = GARMENT_DESIGN_AREA_PCT;
 
 /** The Fabric canvas is displayed at exactly `GARMENT_CANVAS_OVERLAY_PCT`'s
  * size (see DesignCanvas.tsx), so the canvas's own full 600x600 logical
- * space -- not some smaller region within a larger canvas -- is the
- * printable area. Previously this held a sub-rectangle derived from
- * TShirtMockup's SVG crop geometry, which had no relationship to the real
- * garment photo; that mapping is gone. Still a named export (not inlined)
- * so the print guide and the object-placement clamp in useDesignEditor.ts
- * share one authoritative definition. */
-export const PRINT_GUIDE_BOUNDS = { left: 0, top: 0, width: CANVAS_SIZE, height: CANVAS_SIZE } as const;
+ * space -- not some smaller region within a larger canvas -- is the design
+ * area. Named `DESIGN_AREA_BOUNDS` (not "print guide") because that's
+ * genuinely its only remaining job: the soft drag-back-into-view clamp in
+ * useDesignEditor.ts's clampToDesignArea, not a print-safe restriction. */
+export const DESIGN_AREA_BOUNDS = { left: 0, top: 0, width: CANVAS_SIZE, height: CANVAS_SIZE } as const;
+
+/** The real print-safe area (GARMENT_PRINT_AREA_PCT, unchanged, still the
+ * same box CampaignGarment's static previews use), re-expressed as a
+ * sub-rectangle *within* the canvas's own 0-600 logical space -- i.e.
+ * where on the now-larger canvas that smaller, production-accurate box
+ * actually falls. Shown as a purely visual guide (DesignCanvas.tsx's
+ * corner marks) -- it does not constrain object placement, movement, or
+ * scaling; `DESIGN_AREA_BOUNDS` above is the only bound editing actually
+ * respects. */
+export const PRINT_SAFE_AREA_BOUNDS = {
+  left: ((GARMENT_PRINT_AREA_PCT.left - GARMENT_DESIGN_AREA_PCT.left) / GARMENT_DESIGN_AREA_PCT.width) * CANVAS_SIZE,
+  top: ((GARMENT_PRINT_AREA_PCT.top - GARMENT_DESIGN_AREA_PCT.top) / GARMENT_DESIGN_AREA_PCT.height) * CANVAS_SIZE,
+  width: (GARMENT_PRINT_AREA_PCT.width / GARMENT_DESIGN_AREA_PCT.width) * CANVAS_SIZE,
+  height: (GARMENT_PRINT_AREA_PCT.height / GARMENT_DESIGN_AREA_PCT.height) * CANVAS_SIZE,
+} as const;
 
 /** Customer upload limits -- generous enough for real phone-camera photos
  * and scanned logos, small enough that a design stays practical to store as

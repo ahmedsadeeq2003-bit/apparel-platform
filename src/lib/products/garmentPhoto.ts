@@ -77,6 +77,31 @@ export const GARMENT_TEXTURE_OVERLAY_PCT = {
 } as const;
 
 /**
+ * Phase 8: the live editor's actual design surface -- a much larger box
+ * than `GARMENT_PRINT_AREA_PCT`, spanning most of the visible torso panel
+ * (verified by eye against the real classic-tee-black-front.jpg: stays
+ * clear of the collar/neck, the sleeve seams left/right, and the hem at
+ * the bottom). `GARMENT_PRINT_AREA_PCT` itself is deliberately left
+ * untouched -- it's still the real "print-safe" reference (now shown as a
+ * guide *inside* this bigger area, see PRINT_SAFE_AREA_BOUNDS in
+ * lib/editor/constants.ts) and it's still what CampaignGarment's static
+ * template/artwork previews use, which this phase does not touch. */
+export const GARMENT_DESIGN_AREA_PCT = { left: 15, top: 16, width: 70, height: 66 } as const;
+
+/** Same texture-alignment derivation as GARMENT_TEXTURE_OVERLAY_PCT above,
+ * just relative to the bigger GARMENT_DESIGN_AREA_PCT box instead of the
+ * print-safe one -- GarmentTextureOverlay takes this as an explicit prop
+ * now (see its own comment) rather than assuming one fixed box, since the
+ * live editor and CampaignGarment's static previews are no longer the
+ * same size. */
+export const GARMENT_DESIGN_TEXTURE_OVERLAY_PCT = {
+  left: -(GARMENT_DESIGN_AREA_PCT.left / GARMENT_DESIGN_AREA_PCT.width) * 100,
+  top: -(GARMENT_DESIGN_AREA_PCT.top / GARMENT_DESIGN_AREA_PCT.height) * 100,
+  width: (100 / GARMENT_DESIGN_AREA_PCT.width) * 100,
+  height: (100 / GARMENT_DESIGN_AREA_PCT.height) * 100,
+} as const;
+
+/**
  * The real photographed garment for a DB product slug + color name + side,
  * or `null` if no real photo exists for that combination yet. Callers must
  * treat `null` as "don't render an image here" -- never fall back to a

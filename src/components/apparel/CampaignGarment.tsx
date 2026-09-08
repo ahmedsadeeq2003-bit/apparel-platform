@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useStaticFabricPreview } from "@/hooks/useStaticFabricPreview";
 import { CANVAS_SIZE } from "@/lib/editor/constants";
 import { shirtAssets } from "@/lib/assets/manifest";
+import { GARMENT_TEXTURE_OVERLAY_PCT } from "@/lib/products/garmentPhoto";
 import { nearestHex } from "@/lib/color";
 import { GarmentTextureOverlay } from "@/components/apparel/GarmentTextureOverlay";
 
@@ -117,8 +118,11 @@ export function CampaignGarment({
           className="pointer-events-none absolute inset-0 h-full w-full"
         />
         {/* Real fabric texture/shadow, printed-on-fabric realism -- see
-            GarmentTextureOverlay's own comment. */}
-        <GarmentTextureOverlay photoPath={photo.path} />
+            GarmentTextureOverlay's own comment. This component's own
+            window stays print-safe-area-sized (PHOTO_OVERLAY_PCT above,
+            unchanged by Phase 8's larger live-editor canvas), so it passes
+            the matching, also-unchanged GARMENT_TEXTURE_OVERLAY_PCT. */}
+        <GarmentTextureOverlay photoPath={photo.path} overlayPct={GARMENT_TEXTURE_OVERLAY_PCT} />
       </div>
     </div>
   );

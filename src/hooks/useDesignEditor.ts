@@ -36,8 +36,8 @@ import {
   DEFAULT_TEXT_CONTENT,
   DEFAULT_TEXT_FILL,
   DEFAULT_TEXT_FONT_SIZE,
+  DESIGN_AREA_BOUNDS,
   MAX_UPLOAD_DIMENSION,
-  PRINT_GUIDE_BOUNDS,
 } from "@/lib/editor/constants";
 import { validateUpload } from "@/lib/editor/uploadValidation";
 
@@ -184,18 +184,21 @@ function labelForObject(object: FabricObjectType): string {
   return object.type ? object.type[0].toUpperCase() + object.type.slice(1) : "Object";
 }
 
-/** Keeps a placed object's center from drifting entirely outside the real
- * printable area -- a soft clamp applied after a move/resize/rotate
- * completes, not a hard drag boundary (which would fight the user's hand
- * mid-drag). */
-function clampToPrintGuide(object: FabricObjectType) {
+/** Keeps a placed object's center from drifting entirely outside the
+ * design area (the full canvas -- see DESIGN_AREA_BOUNDS's own comment) --
+ * a soft clamp applied after a move/resize/rotate completes, not a hard
+ * drag boundary (which would fight the user's hand mid-drag), and not a
+ * print-safe restriction: an object can sit anywhere across the shirt,
+ * including outside the print-safe guide, this only keeps it from being
+ * dragged somewhere completely inaccessible. */
+function clampToDesignArea(object: FabricObjectType) {
   const bounds = object.getBoundingRect();
   const centerX = bounds.left + bounds.width / 2;
   const centerY = bounds.top + bounds.height / 2;
-  const minX = PRINT_GUIDE_BOUNDS.left;
-  const maxX = PRINT_GUIDE_BOUNDS.left + PRINT_GUIDE_BOUNDS.width;
-  const minY = PRINT_GUIDE_BOUNDS.top;
-  const maxY = PRINT_GUIDE_BOUNDS.top + PRINT_GUIDE_BOUNDS.height;
+  const minX = DESIGN_AREA_BOUNDS.left;
+  const maxX = DESIGN_AREA_BOUNDS.left + DESIGN_AREA_BOUNDS.width;
+  const minY = DESIGN_AREA_BOUNDS.top;
+  const maxY = DESIGN_AREA_BOUNDS.top + DESIGN_AREA_BOUNDS.height;
 
   let dx = 0;
   let dy = 0;
@@ -378,7 +381,7 @@ export function useDesignEditor(
       pushSnapshot();
     };
     const onObjectModified = (e: { target?: FabricObjectType }) => {
-      if (e.target) clampToPrintGuide(e.target);
+      if (e.target) clampToDesignArea(e.target);
       onMutated();
     };
 

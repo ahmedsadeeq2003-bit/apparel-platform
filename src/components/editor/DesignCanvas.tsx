@@ -3,20 +3,37 @@
 import type { RefObject } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
-import { CANVAS_SIZE, GARMENT_CANVAS_OVERLAY_PCT } from "@/lib/editor/constants";
-import { GARMENT_PHOTO_ASPECT } from "@/lib/products/garmentPhoto";
+import { CANVAS_SIZE, GARMENT_CANVAS_OVERLAY_PCT, PRINT_SAFE_AREA_BOUNDS } from "@/lib/editor/constants";
+import { GARMENT_DESIGN_TEXTURE_OVERLAY_PCT, GARMENT_PHOTO_ASPECT } from "@/lib/products/garmentPhoto";
 import { GarmentTextureOverlay } from "@/components/apparel/GarmentTextureOverlay";
 import type { AssetEntry } from "@/lib/assets/manifest";
 import type { EditorSide } from "@/lib/editor/side";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+/** PRINT_SAFE_AREA_BOUNDS is expressed in the canvas's own 0-600 logical
+ * space; converting to a percentage of the canvas wrapper here (once, at
+ * module load -- these are compile-time constants) is what actually
+ * positions the guide box visually within the now-larger design area. */
+const PRINT_SAFE_AREA_PCT = {
+  left: (PRINT_SAFE_AREA_BOUNDS.left / CANVAS_SIZE) * 100,
+  top: (PRINT_SAFE_AREA_BOUNDS.top / CANVAS_SIZE) * 100,
+  width: (PRINT_SAFE_AREA_BOUNDS.width / CANVAS_SIZE) * 100,
+  height: (PRINT_SAFE_AREA_BOUNDS.height / CANVAS_SIZE) * 100,
+};
+
 /** One L-shaped corner bracket -- print/crop-mark language ("this is the
  * safe area," a convention from actual garment printing rather than a
  * generic dev bounding box) instead of a full dashed rectangle outlining
  * the whole region, which read as UI chrome rather than something that
  * belongs on a shirt. Four of these (one per corner, mirrored via CSS)
- * mark the print-safe region without visually dominating it. */
+ * mark the print-safe region without visually dominating it. Phase 8:
+ * this visual treatment was already right -- only its container moved,
+ * from the canvas wrapper's own edges (when canvas === print area) to the
+ * smaller PRINT_SAFE_AREA_PCT box positioned inside the now-larger canvas
+ * (see the wrapping div in DesignCanvas below), so it now reads as
+ * guidance sitting on a bigger design surface rather than the surface's
+ * own boundary. */
 function CornerMark({ corner }: { corner: "tl" | "tr" | "bl" | "br" }) {
   const isRight = corner === "tr" || corner === "br";
   const isBottom = corner === "bl" || corner === "br";
@@ -124,14 +141,28 @@ export function DesignCanvas({
           {/* Real fabric texture/shadow, printed-on-fabric realism -- see
               GarmentTextureOverlay's own comment. Stacked after the canvas
               so it paints on top of the artwork, not just the blank photo. */}
-          {photo && <GarmentTextureOverlay photoPath={photo.path} />}
+          {photo && <GarmentTextureOverlay photoPath={photo.path} overlayPct={GARMENT_DESIGN_TEXTURE_OVERLAY_PCT} />}
+          {/* Print-safe guide -- purely visual, positioned as a
+              sub-rectangle within the design canvas (PRINT_SAFE_AREA_PCT),
+              not the canvas's own edges. `pointer-events-none` so it never
+              intercepts drags meant for artwork anywhere else on the
+              shirt. */}
           {showGuide && (
-            <>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute"
+              style={{
+                left: `${PRINT_SAFE_AREA_PCT.left}%`,
+                top: `${PRINT_SAFE_AREA_PCT.top}%`,
+                width: `${PRINT_SAFE_AREA_PCT.width}%`,
+                height: `${PRINT_SAFE_AREA_PCT.height}%`,
+              }}
+            >
               <CornerMark corner="tl" />
               <CornerMark corner="tr" />
               <CornerMark corner="bl" />
               <CornerMark corner="br" />
-            </>
+            </div>
           )}
         </div>
         {showGuide && (

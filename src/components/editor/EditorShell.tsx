@@ -17,7 +17,6 @@ import { DesignCanvas } from "./DesignCanvas";
 import { CanvasControls } from "./CanvasControls";
 import { AddToCartDialog } from "./AddToCartDialog";
 import { SelectionToolbar } from "./SelectionToolbar";
-import { EmptyCanvasPrompt } from "./EmptyCanvasPrompt";
 import type { Product, ProductColor } from "@/lib/products/queries";
 import type { DesignTemplate, TemplateCategory } from "@/lib/templates/queries";
 
@@ -255,9 +254,21 @@ export function EditorShell({
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex items-center justify-between gap-3 px-4 pt-4 md:px-6">
-              <h1 className="truncate text-body-sm font-medium text-muted">
-                {previewMode ? "Preview" : product.name}
-              </h1>
+              <div className="flex min-w-0 flex-col">
+                <h1 className="truncate text-body-sm font-medium text-muted">
+                  {previewMode ? "Preview" : product.name}
+                </h1>
+                {/* A small, non-intrusive first-visit hint -- outside the
+                    garment entirely, never on top of it -- that disappears
+                    the instant anything is added. LeftToolbar already
+                    offers every entry point this used to duplicate as
+                    large buttons floating over the shirt. */}
+                {editor.isReady && !editor.isHydrating && !previewMode && layers.length === 0 && (
+                  <span className="truncate text-[0.7rem] text-muted/70">
+                    Your blank canvas -- add a template, artwork, text, or your own upload to begin.
+                  </span>
+                )}
+              </div>
               <div className="flex gap-2">
                 {product.product_colors.map((color) => (
                   <button
@@ -294,14 +305,6 @@ export function EditorShell({
                   <CircleNotch size={16} className="animate-spin text-muted" aria-hidden />
                   <span className="text-body-sm font-medium text-muted">Loading your design...</span>
                 </div>
-              )}
-              {editor.isReady && !editor.isHydrating && !previewMode && layers.length === 0 && (
-                <EmptyCanvasPrompt
-                  onOpenTemplates={() => useEditorStore.getState().setActiveTool("templates")}
-                  onOpenGraphics={() => useEditorStore.getState().setActiveTool("graphics")}
-                  onAddText={editor.addText}
-                  onOpenUpload={() => useEditorStore.getState().setActiveTool("upload")}
-                />
               )}
             </div>
           </div>
