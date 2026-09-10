@@ -118,3 +118,42 @@ describe("Phase 7 -- Anime collection", () => {
     expect(streetwear.every((item) => !item.tags.includes("anime"))).toBe(true);
   });
 });
+
+describe("Phase 9 -- second Anime collection wave", () => {
+  it("grows the anime collection beyond Phase 7's count", () => {
+    const result = filterArtwork(ALL_ARTWORK, { category: "anime", query: "" });
+    // Phase 7 shipped 18; this wave adds 8 more real pieces.
+    expect(result.length).toBeGreaterThanOrEqual(26);
+  });
+
+  it("the new 'poster-style' tag has real assets behind it, not an empty filter", () => {
+    expect(STYLE_TAGS.some((tag) => tag.value === "poster-style")).toBe(true);
+    const matches = filterArtwork(ALL_ARTWORK, { category: "poster-style", query: "" });
+    expect(matches.length).toBeGreaterThanOrEqual(3);
+    expect(matches.every((item) => item.tags.includes("anime"))).toBe(true);
+  });
+
+  it("resolves each new Phase 9 piece by its real manifest id", () => {
+    const slugs = [
+      ["typography", "poster-type-mark"],
+      ["typography", "neon-kana-type"],
+      ["graphic-art", "rage-halftone-poster"],
+      ["graphic-art", "manga-panel-grid"],
+      ["illustration", "blade-kanji-mark"],
+      ["illustration", "masked-ronin-bust"],
+      ["graphic-art", "energy-coil-mark"],
+      ["illustration", "chibi-katana-mascot"],
+    ] as const;
+    for (const [category, slug] of slugs) {
+      const item = ALL_ARTWORK.find((entry) => entry.path === `/assets/designs/${category}/${slug}.svg`);
+      expect(item).toBeDefined();
+      expect(item?.id).toBe(`${category}-${slug}`);
+      expect(item?.tags).toContain("anime");
+    }
+  });
+
+  it("existing Phase 7 anime pieces are unaffected by this second wave", () => {
+    const ronin = ALL_ARTWORK.find((item) => item.id === "illustration-ronin-silhouette");
+    expect(ronin?.tags).toEqual(["anime", "samurai"]);
+  });
+});

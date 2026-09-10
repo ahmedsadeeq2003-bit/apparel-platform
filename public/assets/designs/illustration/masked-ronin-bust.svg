@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Original hooded/masked bust -- a full hood (no hairstyle rendered at
+       all) and a lower face-mask panel, deliberately generic rather than
+       tracing any specific character's silhouette. Eyes are real
+       transparent cutouts (fill-rule evenodd), same technique as
+       oni-mask.svg, with pupils drawn back on top. -->
+  <path
+    fill-rule="evenodd"
+    fill="#0a0a0a"
+    d="M 200,50 C 250,50 284,92 284,144 C 284,172 276,192 264,208 C 300,224 326,256 336,300 L 336,340 L 64,340 L 64,300 C 74,256 100,224 136,208 C 124,192 116,172 116,144 C 116,92 150,50 200,50 Z
+       M 170,168 A 15,15 0 1,0 140,168 A 15,15 0 1,0 170,168 Z
+       M 260,168 A 15,15 0 1,0 230,168 A 15,15 0 1,0 260,168 Z"
+  />
+  <!-- Pupils -->
+  <circle cx="155" cy="168" r="5" fill="#0a0a0a"/>
+  <circle cx="245" cy="168" r="5" fill="#0a0a0a"/>
+  <!-- Lower face-mask panel, drawn on top -->
+  <path d="M 130,206 C 152,224 176,232 200,232 C 224,232 248,224 270,206 C 268,240 240,262 200,262 C 160,262 132,240 130,206 Z" fill="#0a0a0a"/>
+  <!-- Hood seam lines -->
+  <path d="M 200,54 L 200,110" stroke="#F5F1E8" stroke-width="2" opacity="0.35"/>
+  <path d="M 150,264 L 250,264" stroke="#F5F1E8" stroke-width="2" opacity="0.3"/>
+</svg>

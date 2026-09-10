@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- A second original chibi mascot (companion to chibi-spirit.svg),
+       reusing its rounded-body/two-tone-eye construction but posed
+       action-ready: a headband with flowing tails and a small arm holding
+       a tiny katana silhouette. STITCH's own mascot, not based on any
+       existing franchise character. -->
+  <path
+    d="M 200,84 C 268,84 314,134 314,200 C 314,254 288,292 248,308 C 256,296 250,284 238,286 C 224,288 222,300 210,300 C 198,300 198,286 184,286 C 170,286 168,298 156,306 C 116,290 88,254 88,200 C 88,134 132,84 200,84 Z"
+    fill="#0a0a0a"
+  />
+  <!-- Headband -->
+  <path d="M 118,158 L 282,158 L 282,176 L 118,176 Z" fill="#F5F1E8"/>
+  <path d="M 282,164 C 306,168 322,182 328,204 C 314,196 300,192 286,192 Z" fill="#0a0a0a"/>
+  <path d="M 282,172 C 308,180 320,198 322,220 C 306,208 294,202 282,200 Z" fill="#0a0a0a"/>
+  <!-- Eyes -->
+  <circle cx="164" cy="204" r="20" fill="#F5F1E8"/>
+  <circle cx="170" cy="210" r="9" fill="#0a0a0a"/>
+  <circle cx="174" cy="200" r="3.5" fill="#F5F1E8"/>
+  <circle cx="236" cy="204" r="20" fill="#F5F1E8"/>
+  <circle cx="242" cy="210" r="9" fill="#0a0a0a"/>
+  <circle cx="246" cy="200" r="3.5" fill="#F5F1E8"/>
+  <!-- Small arm holding a tiny katana -->
+  <path d="M 250,264 C 268,270 282,264 292,250" fill="none" stroke="#0a0a0a" stroke-width="14" stroke-linecap="round"/>
+  <path d="M 292,250 L 330,206" fill="none" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="296" cy="246" rx="9" ry="4" fill="none" stroke="#0a0a0a" stroke-width="3" transform="rotate(-45 296 246)"/>
+</svg>

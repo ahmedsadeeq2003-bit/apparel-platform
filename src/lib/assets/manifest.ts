@@ -188,6 +188,18 @@ const STYLE_TAGS_BY_SLUG: Record<string, string[]> = {
   "chibi-spirit": ["anime", "chibi"],
   "anime-eye-mark": ["anime", "anime-faces"],
   "tokyo-nights-type": ["anime", "anime-streetwear"],
+  // Phase 9: a second wave of the original anime-inspired collection,
+  // drawing on poster typography, halftone/screen-print texture, manga
+  // panel-grid layout, and a masked-bust motif as *style* references --
+  // no characters, franchises, or copyrighted compositions reproduced.
+  "poster-type-mark": ["anime", "poster-style"],
+  "neon-kana-type": ["anime", "cyberpunk-anime", "anime-streetwear"],
+  "rage-halftone-poster": ["anime", "dark-fantasy", "poster-style"],
+  "manga-panel-grid": ["anime", "manga", "poster-style"],
+  "blade-kanji-mark": ["anime", "samurai", "dark-fantasy"],
+  "masked-ronin-bust": ["anime", "dark-fantasy", "anime-faces"],
+  "energy-coil-mark": ["anime", "action"],
+  "chibi-katana-mascot": ["anime", "chibi", "samurai"],
 };
 
 export const designAssets: Record<DesignCategory, AssetEntry[]> = {
@@ -201,6 +213,9 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "stay-curious",
     // Phase 7: anime-streetwear wordmark.
     "tokyo-nights-type",
+    // Phase 9: poster-title and cyberpunk wordmarks.
+    "poster-type-mark",
+    "neon-kana-type",
   ].map((slug) => designEntry("typography", slug, STYLE_TAGS_BY_SLUG[slug])),
   graffiti: [
     "graffiti-face",
@@ -239,6 +254,10 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "koi-current",
     "mecha-helm",
     "chibi-spirit",
+    // Phase 9: sheathed-blade, masked-bust and a second chibi mascot.
+    "blade-kanji-mark",
+    "masked-ronin-bust",
+    "chibi-katana-mascot",
   ].map((slug) => designEntry("illustration", slug, STYLE_TAGS_BY_SLUG[slug])),
   abstract: [
     "abstract-loop",
@@ -305,6 +324,11 @@ export const designAssets: Record<DesignCategory, AssetEntry[]> = {
     "speed-slash",
     "impact-burst",
     "anime-eye-mark",
+    // Phase 9: halftone poster mark, manga panel-grid, and an abstract
+    // energy-coil action mark.
+    "rage-halftone-poster",
+    "manga-panel-grid",
+    "energy-coil-mark",
   ].map((slug) => designEntry("graphic-art", slug, STYLE_TAGS_BY_SLUG[slug])),
 };
 

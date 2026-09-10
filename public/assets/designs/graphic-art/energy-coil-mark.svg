@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Original abstract energy-coil swirl -- two interlocking tapered
+       C-curves forming a dynamic aura, with three small spark shapes at
+       the open ends. Distinct from speed-slash.svg (straight motion
+       strokes) and impact-burst.svg (radial spikes). -->
+  <path
+    d="M 200,60 C 300,60 340,140 300,200 C 268,248 200,248 190,200 C 182,164 214,146 240,164 C 258,176 254,204 230,210"
+    fill="none" stroke="#0a0a0a" stroke-width="26" stroke-linecap="round"
+  />
+  <path
+    d="M 200,340 C 100,340 60,260 100,200 C 132,152 200,152 210,200 C 218,236 186,254 160,236"
+    fill="none" stroke="#0a0a0a" stroke-width="26" stroke-linecap="round"
+  />
+  <!-- Spark accents -->
+  <path d="M 234,158 L 254,132 L 262,150 L 246,172 Z" fill="#0a0a0a"/>
+  <path d="M 166,242 L 146,268 L 138,250 L 154,228 Z" fill="#0a0a0a"/>
+  <circle cx="200" cy="200" r="10" fill="#0a0a0a"/>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Original manga-page-style panel grid -- an asymmetric layout of four
+       empty panel frames, each carrying a different small graphic device
+       (speed lines, halftone cluster, ink blot, impact shard). No
+       characters, no dialogue -- purely the panel-grid convention itself
+       as a chest-print graphic. -->
+
+  <!-- Panel A: top-left, speed lines -->
+  <rect x="20" y="20" width="210" height="200" fill="none" stroke="#0a0a0a" stroke-width="6"/>
+  <g stroke="#0a0a0a" stroke-linecap="round">
+    <path d="M 45,180 L 130,80" stroke-width="8"/>
+    <path d="M 75,195 L 160,95" stroke-width="6" opacity="0.6"/>
+    <path d="M 105,205 L 190,110" stroke-width="4" opacity="0.4"/>
+  </g>
+
+  <!-- Panel B: top-right, halftone cluster -->
+  <rect x="250" y="20" width="130" height="130" fill="none" stroke="#0a0a0a" stroke-width="6"/>
+  <g fill="#0a0a0a">
+    <circle cx="280" cy="50" r="3"/><circle cx="310" cy="50" r="4.5"/><circle cx="340" cy="50" r="6"/><circle cx="368" cy="50" r="7.5"/>
+    <circle cx="280" cy="80" r="4.5"/><circle cx="310" cy="80" r="6"/><circle cx="340" cy="80" r="7.5"/><circle cx="368" cy="80" r="9"/>
+    <circle cx="280" cy="110" r="6"/><circle cx="310" cy="110" r="7.5"/><circle cx="340" cy="110" r="9"/><circle cx="368" cy="110" r="10.5"/>
+  </g>
+
+  <!-- Panel C: bottom-left, ink blot -->
+  <rect x="20" y="250" width="150" height="130" fill="none" stroke="#0a0a0a" stroke-width="6"/>
+  <path d="M 95,280 C 120,278 138,296 136,318 C 150,326 148,348 128,352 C 118,368 90,368 80,352 C 58,350 54,326 70,314 C 62,294 76,282 95,280 Z" fill="#0a0a0a"/>
+
+  <!-- Panel D: bottom-right, impact shard -->
+  <rect x="190" y="170" width="190" height="210" fill="none" stroke="#0a0a0a" stroke-width="6"/>
+  <path d="M 285,210 L 310,260 L 350,250 L 300,300 L 320,350 L 270,320 L 230,360 L 245,310 L 210,290 L 260,280 Z" fill="#0a0a0a"/>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Original sheathed-katana mark -- a resting saya (scabbard) with a
+       wrapped hilt and a knotted hanging cord, distinct pose from
+       katana-crescent.svg (that piece shows a drawn blade mid-motion; this
+       one is still/contemplative). The parallel diamond-tick line stands
+       in for a decorative cord, not a stand-in for real Japanese text. -->
+
+  <!-- Saya (sheath), diagonal -->
+  <path d="M 96,330 L 268,102" fill="none" stroke="#0a0a0a" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 96,330 L 268,102" fill="none" stroke="#F5F1E8" stroke-width="2" opacity="0.4"/>
+
+  <!-- Hilt wrap crosshatch, near the grip end -->
+  <g stroke="#F5F1E8" stroke-width="3" opacity="0.85">
+    <path d="M 82,352 L 106,332"/>
+    <path d="M 92,364 L 118,342"/>
+    <path d="M 102,376 L 130,352"/>
+  </g>
+  <ellipse cx="86" cy="358" rx="26" ry="12" fill="none" stroke="#0a0a0a" stroke-width="7" transform="rotate(-35 86 358)"/>
+
+  <!-- Hanging cord with two knots -->
+  <path d="M 96,330 C 70,340 56,362 62,388" fill="none" stroke="#0a0a0a" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="62" cy="366" r="5" fill="#0a0a0a"/>
+  <circle cx="62" cy="388" r="6" fill="#0a0a0a"/>
+
+  <!-- Decorative diamond-tick accent line, parallel to the blade -->
+  <g fill="#0a0a0a">
+    <path d="M 150,290 L 156,282 L 162,290 L 156,298 Z"/>
+    <path d="M 178,258 L 184,250 L 190,258 L 184,266 Z"/>
+    <path d="M 206,226 L 212,218 L 218,226 L 212,234 Z"/>
+    <path d="M 234,194 L 240,186 L 246,194 L 240,202 Z"/>
+  </g>
+</svg>

@@ -59,6 +59,10 @@ export const STYLE_TAGS: { value: string; label: string }[] = [
   { value: "chibi", label: "Chibi / Cute" },
   { value: "anime-faces", label: "Anime Faces" },
   { value: "anime-streetwear", label: "Anime Streetwear" },
+  // Phase 9: a second Anime substyle wave, added alongside real artwork
+  // tagged with it (see manifest.ts's STYLE_TAGS_BY_SLUG) -- same rule as
+  // Phase 7's tags: only added because real pieces back it.
+  { value: "poster-style", label: "Poster Style" },
   { value: "cartoon", label: "Cartoon" },
   { value: "manga", label: "Manga / Ink" },
   { value: "japanese", label: "Japanese Traditional" },

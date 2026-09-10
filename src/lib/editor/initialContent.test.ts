@@ -61,6 +61,13 @@ describe("resolveArtworkParam", () => {
     expect(resolved?.path).toBe("/assets/designs/illustration/ronin-silhouette.svg");
     expect(resolved?.tags).toContain("anime");
   });
+
+  it("resolves a real Phase 9 anime artwork id through the same generic lookup", () => {
+    const resolved = resolveArtworkParam("graphic-art-manga-panel-grid");
+    expect(resolved).not.toBeNull();
+    expect(resolved?.path).toBe("/assets/designs/graphic-art/manga-panel-grid.svg");
+    expect(resolved?.tags).toContain("anime");
+  });
 });
 
 describe("resolveTemplateParam", () => {
