@@ -5,6 +5,7 @@ import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
 import { ProductsHero } from "@/components/products/ProductsHero";
 import { ProductCard } from "@/components/products/ProductCard";
+import { GarmentCatalogSection } from "@/components/products/GarmentCatalogSection";
 import { getActiveProducts } from "@/lib/products/queries";
 
 /** Same `.theme-editorial` treatment as the homepage (see tokens.css --
@@ -31,6 +32,7 @@ export default async function ProductsPage() {
             </div>
           </Container>
         </Section>
+        <GarmentCatalogSection />
       </main>
       <SiteFooter />
     </div>

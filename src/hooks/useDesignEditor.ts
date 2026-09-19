@@ -15,8 +15,12 @@ import {
   type FabricObject as FabricObjectType,
 } from "fabric";
 import { useEditorStore } from "@/lib/editor/store";
+import { createClient } from "@/lib/supabase/client";
 import { otherSide, type EditorSide } from "@/lib/editor/side";
 import type { ArtworkDef } from "@/lib/editor/artwork";
+import { sanitizeSvgMarkup } from "@/lib/editor/sanitizeSvg";
+import { getSignedDesignImageUrls, uploadDesignImage } from "@/lib/editor/uploadStorage";
+import { collectSourcePaths, withRefreshedImageSources } from "@/lib/editor/uploadedImageRehydration";
 import { EDITOR_FONTS } from "@/lib/editor/fonts";
 import { toCharSpacing } from "@/lib/editor/textSpacing";
 import { remapTemplateFonts } from "@/lib/editor/templateFonts";
@@ -41,7 +45,16 @@ import {
 } from "@/lib/editor/constants";
 import { validateUpload } from "@/lib/editor/uploadValidation";
 
-type EditorObject = FabricObjectType & { id?: string };
+type EditorObject = FabricObjectType & { id?: string; sourcePath?: string };
+
+/** Property keys `.toObject()`/`.clone()` must carry alongside Fabric's own
+ * built-ins -- `id` (every insertion path stamps one, used for layers/
+ * updateProps/delete-by-id) and `sourcePath` (Phase 2: the durable Supabase
+ * Storage path behind an uploaded raster image's *current* `src`, see
+ * placeUploadedRasterObject/rehydrateUploadedImageSources below). Shared so
+ * every serialization call site stays in sync rather than four independent
+ * `["id"]` literals silently drifting once one of them needs a second key. */
+const SERIALIZE_KEYS: string[] = ["id", "sourcePath"];
 
 export type UpdatableProps = Partial<{
   left: number;
@@ -281,7 +294,7 @@ export function useDesignEditor(
     const canvas = fabricCanvasRef.current;
     if (!canvas || suppressHistoryRef.current) return;
     const side = useEditorStore.getState().side;
-    const snapshot = JSON.stringify(canvas.toObject(["id"]));
+    const snapshot = JSON.stringify(canvas.toObject(SERIALIZE_KEYS));
     historyRef.current[side] = pushHistory(historyRef.current[side], snapshot);
     syncHistoryFlags(side);
     useEditorStore.getState().bumpCanvasVersion();
@@ -449,8 +462,20 @@ export function useDesignEditor(
     (async () => {
       try {
         if (initialContent.kind === "design") {
-          const front = initialContent.front ?? { objects: [] };
-          const back = initialContent.back ?? { objects: [] };
+          const rawFront = initialContent.front ?? { objects: [] };
+          const rawBack = initialContent.back ?? { objects: [] };
+          // Phase 2 (Customer Artwork Upload): any uploaded-raster-image
+          // `src` stored in this saved design is a Supabase Storage signed
+          // URL that was only ever valid for a limited time from whenever
+          // it was last saved -- re-signed here, for BOTH sides (not just
+          // whichever loads onto the canvas first), before either one is
+          // used, so a later undo or front/back toggle that replays the
+          // *other* side's stored JSON also sees a working image rather
+          // than one carrying a long-expired URL.
+          const sourcePaths = [...collectSourcePaths(rawFront), ...collectSourcePaths(rawBack)];
+          const freshUrls = await getSignedDesignImageUrls(sourcePaths);
+          const front = withRefreshedImageSources(rawFront, freshUrls) ?? { objects: [] };
+          const back = withRefreshedImageSources(rawBack, freshUrls) ?? { objects: [] };
           const startSide = initialContent.startSide;
           await loadJsonOntoCanvas(canvas, startSide === "front" ? front : back);
           if (cancelled) return;
@@ -469,7 +494,7 @@ export function useDesignEditor(
             canvas.setActiveObject(node);
             canvas.requestRenderAll();
           }
-          finish(canvas.toObject(["id"]), null, "front");
+          finish(canvas.toObject(SERIALIZE_KEYS), null, "front");
         }
       } catch (error) {
         console.error("Failed to load initial editor content", initialContent, error);
@@ -577,9 +602,11 @@ export function useDesignEditor(
    * scaled to fit, exactly the way every other insertion path here already
    * centers/scales/ids new objects -- shared so addImageFromFile's two
    * branches (raster vs SVG) and the id/canvas wiring stay one
-   * implementation instead of two copies drifting apart. */
-  const placeUploadedObject = (canvas: Canvas, node: FabricObjectType) => {
-    node.set("id", crypto.randomUUID());
+   * implementation instead of two copies drifting apart. `extraProps` is
+   * how the raster branch attaches `sourcePath` (see below) without this
+   * shared helper needing to know anything about Supabase Storage. */
+  const placeUploadedObject = (canvas: Canvas, node: FabricObjectType, extraProps?: Record<string, unknown>) => {
+    node.set({ id: crypto.randomUUID(), ...extraProps });
     const maxDim = CANVAS_SIZE * 0.55;
     const bounds = node.getBoundingRect();
     const currentDim = Math.max(bounds.width, bounds.height) || 1;
@@ -591,15 +618,48 @@ export function useDesignEditor(
     canvas.requestRenderAll();
   };
 
-  /** Validates, decodes, and inserts a customer-uploaded file -- PNG/JPG/
-   * WebP go through FabricImage.fromURL (a raster object, same as before);
-   * SVG is routed through the same trusted loadSVGFromString pipeline the
-   * artwork library uses (see loadSvgAssetObject's own comment on why that
-   * parse path is safe for untrusted input: it's an offscreen XML parse,
-   * never live/executable DOM). Rejects with a user-facing message string
-   * for anything invalid, so the caller can show it rather than the upload
-   * silently failing (a known-unfixed gap this closes -- see EditorShell's
-   * onUpload wiring). */
+  /** Decodes a raster file locally (never uploaded) purely to read its
+   * natural pixel dimensions, via a throwaway `Image` + object URL --
+   * revoked in every branch (success, decode failure, or the caller never
+   * awaiting further) so this never leaks a blob URL. Rejecting an
+   * oversized file *before* uploading it to Storage (rather than after,
+   * with a follow-up delete) means an oversized upload never touches
+   * Storage at all. */
+  const readRasterDimensions = (file: File): Promise<{ width: number; height: number }> =>
+    new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const probe = new Image();
+      probe.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve({ width: probe.naturalWidth, height: probe.naturalHeight });
+      };
+      probe.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Couldn't read that image file."));
+      };
+      probe.src = objectUrl;
+    });
+
+  /** Validates, decodes, and inserts a customer-uploaded file -- rejects
+   * with a user-facing message string for anything invalid, so the caller
+   * can show it rather than the upload silently failing.
+   *
+   * SVG is sanitized (sanitizeSvgMarkup -- strips <script>, event-handler
+   * attributes, javascript:/external URIs; see its own comment) and then
+   * routed through the same loadSVGFromString pipeline the artwork library
+   * uses. A sanitized SVG parses into real vector Path/Group objects, which
+   * already serialize as structured JSON -- no separate persistence
+   * concern.
+   *
+   * PNG/JPG/WebP are uploaded to the customer's own private Supabase
+   * Storage folder (see uploadStorage.ts) rather than kept as an in-memory
+   * base64 data URL: the Fabric Image object's *live* `src` is a signed
+   * URL (works immediately, and for the rest of this session), but the
+   * durable reference saved into canvas_json is the storage `path` (see
+   * `sourcePath` on EditorObject/SERIALIZE_KEYS) -- re-resolved to a fresh
+   * signed URL by rehydrateUploadedImageSources whenever a saved design
+   * carrying one is reopened, so nothing that expires ever needs to stay
+   * valid forever inside a database row. */
   const addImageFromFile = (file: File): Promise<void> => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return Promise.resolve();
@@ -610,8 +670,10 @@ export function useDesignEditor(
     if (file.type === "image/svg+xml") {
       return file
         .text()
-        .then(async (svgText) => {
-          const { objects: svgObjects } = await loadSVGFromString(svgText);
+        .then(async (rawSvgText) => {
+          const sanitized = sanitizeSvgMarkup(rawSvgText);
+          if (!sanitized) throw new Error("That SVG has no visible shapes to add.");
+          const { objects: svgObjects } = await loadSVGFromString(sanitized);
           const valid = svgObjects.filter((o): o is FabricObjectType => o != null);
           if (valid.length === 0) throw new Error("That SVG has no visible shapes to add.");
           const node = valid.length > 1 ? fabricUtil.groupSVGElements(valid) : valid[0];
@@ -622,26 +684,24 @@ export function useDesignEditor(
         });
     }
 
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error("Couldn't read that file."));
-      reader.onload = async () => {
-        try {
-          const dataUrl = reader.result as string;
-          const img = await FabricImage.fromURL(dataUrl);
-          if ((img.width ?? 0) > MAX_UPLOAD_DIMENSION || (img.height ?? 0) > MAX_UPLOAD_DIMENSION) {
-            reject(new Error(`Image is too large. Please upload something under ${MAX_UPLOAD_DIMENSION}px per side.`));
-            return;
-          }
-          placeUploadedObject(canvas, img);
-          resolve();
-        } catch {
-          reject(new Error("Couldn't read that image file."));
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    return (async () => {
+      const { width, height } = await readRasterDimensions(file);
+      if (width > MAX_UPLOAD_DIMENSION || height > MAX_UPLOAD_DIMENSION) {
+        throw new Error(`Image is too large. Please upload something under ${MAX_UPLOAD_DIMENSION}px per side.`);
+      }
+
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sign in to upload artwork.");
+
+      const { path, signedUrl } = await uploadDesignImage(file, user.id);
+      const img = await FabricImage.fromURL(signedUrl, { crossOrigin: "anonymous" });
+      placeUploadedObject(canvas, img, { sourcePath: path });
+    })();
   };
+
 
   /** Guards keyboard shortcuts (Delete/Backspace especially) from firing
    * while the user is actively typing inside a text object -- otherwise
@@ -695,7 +755,7 @@ export function useDesignEditor(
     const active = canvas.getActiveObject();
     if (!active) return;
 
-    const clone = await active.clone();
+    const clone = await active.clone(SERIALIZE_KEYS);
     clone.set({
       left: (active.left ?? 0) + 16,
       top: (active.top ?? 0) + 16,
@@ -895,7 +955,7 @@ export function useDesignEditor(
     const current = useEditorStore.getState().side;
     const next = otherSide(current);
 
-    const currentSnapshot = JSON.stringify(canvas.toObject(["id"]));
+    const currentSnapshot = JSON.stringify(canvas.toObject(SERIALIZE_KEYS));
     historyRef.current[current] = pushHistory(historyRef.current[current], currentSnapshot);
 
     suppressHistoryRef.current = true;
@@ -925,7 +985,7 @@ export function useDesignEditor(
     if (canvas) {
       historyRef.current[side] = pushHistory(
         historyRef.current[side],
-        JSON.stringify(canvas.toObject(["id"])),
+        JSON.stringify(canvas.toObject(SERIALIZE_KEYS)),
       );
     }
     const parseOrNull = (snapshot: string) => {

@@ -109,6 +109,12 @@ export function AddToCartDialog({
         <p className="mt-3 text-center text-[0.7rem] text-muted">
           Pricing is calculated at checkout.
         </p>
+        {/* Phase 2F: reaffirmed at the point of committing to a design, not
+            just at upload time -- covers artwork placed from the library
+            too, not only uploads. */}
+        <p className="mt-1.5 text-center text-[0.65rem] leading-snug text-muted/80">
+          By continuing, you confirm you have the right to reproduce the artwork used in this design.
+        </p>
       </div>
     </div>
   );

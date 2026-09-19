@@ -101,6 +101,59 @@ export const GARMENT_DESIGN_TEXTURE_OVERLAY_PCT = {
   height: (100 / GARMENT_DESIGN_AREA_PCT.height) * 100,
 } as const;
 
+export type GarmentGeometryPct = { left: number; top: number; width: number; height: number };
+
+/**
+ * Phase 3 (Garment Catalog): design-area/print-safe geometry, keyed by
+ * `products.slug` -- each garment type has its own proportions (a hoodie's
+ * body/pocket/hood silhouette isn't the same shape as a tee), so the single
+ * classic-tee-shaped GARMENT_DESIGN_AREA_PCT/GARMENT_PRINT_AREA_PCT pair
+ * above can no longer be the *only* geometry the editor knows about.
+ *
+ * Only `classic-tee` has a real entry -- it's the one garment with real
+ * photographed colors (see shirtAssets in manifest.ts) and the exact
+ * numbers already verified against those photos (see both constants'
+ * own comments). Oversized Tee/Hoodie/Sweatshirt are NOT given invented
+ * geometry here: there is no real garment photo to verify a design/print
+ * area against yet (see src/lib/products/garments.ts's own comment on why
+ * those three stay `available: false` and out of the `products` table
+ * rather than being seeded with fabricated colors/photos). Their geometry
+ * simply doesn't exist here until a real photo does; getGarmentGeometryPct
+ * falls back to classic-tee's numbers for any slug with no entry, which is
+ * dead code today (no other product resolves in getProductBySlug) and
+ * exists only so the editor never crashes on an unrecognized slug -- not a
+ * claim that those numbers are correct for a not-yet-photographed garment.
+ */
+const GARMENT_GEOMETRY_BY_SLUG: Record<string, { designAreaPct: GarmentGeometryPct; printAreaPct: GarmentGeometryPct }> = {
+  "classic-tee": { designAreaPct: GARMENT_DESIGN_AREA_PCT, printAreaPct: GARMENT_PRINT_AREA_PCT },
+};
+
+/** The design-area/print-safe geometry for one product slug -- what
+ * DesignCanvas.tsx and lib/editor/constants.ts's per-product helpers
+ * actually consume, so the editor reads geometry from garment
+ * configuration (Phase 3A) instead of importing one fixed pair of
+ * constants. */
+export function getGarmentGeometryPct(productSlug: string): { designAreaPct: GarmentGeometryPct; printAreaPct: GarmentGeometryPct } {
+  return GARMENT_GEOMETRY_BY_SLUG[productSlug] ?? GARMENT_GEOMETRY_BY_SLUG["classic-tee"];
+}
+
+/** Same texture-alignment derivation as GARMENT_TEXTURE_OVERLAY_PCT/
+ * GARMENT_DESIGN_TEXTURE_OVERLAY_PCT above, generalized to any product
+ * slug's own design-area box (see getGarmentGeometryPct) instead of always
+ * classic-tee's. DesignCanvas.tsx uses this (not the two fixed constants
+ * above) so a future garment with its own real photo and design-area
+ * geometry gets a correctly-aligned fabric-texture overlay automatically,
+ * with no per-garment component code. */
+export function getGarmentDesignTextureOverlayPct(productSlug: string): GarmentGeometryPct {
+  const { designAreaPct } = getGarmentGeometryPct(productSlug);
+  return {
+    left: -(designAreaPct.left / designAreaPct.width) * 100,
+    top: -(designAreaPct.top / designAreaPct.height) * 100,
+    width: (100 / designAreaPct.width) * 100,
+    height: (100 / designAreaPct.height) * 100,
+  };
+}
+
 /**
  * The real photographed garment for a DB product slug + color name + side,
  * or `null` if no real photo exists for that combination yet. Callers must

@@ -90,7 +90,7 @@ function ArtworkCard({ item, editorHref, index }: { item: ArtworkItem; editorHre
 }
 
 /**
- * The full 67-piece STITCH artwork library (see src/lib/assets/manifest.ts
+ * The full 99-piece STITCH artwork library (see src/lib/assets/manifest.ts
  * -- designAssets), browsable and filterable client-side. `editorHref` is
  * the base `/editor/new?product=...&color=...` destination -- a plain
  * string, deliberately not a per-item function: this component (and its

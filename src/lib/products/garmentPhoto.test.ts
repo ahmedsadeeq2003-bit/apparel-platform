@@ -4,6 +4,8 @@ import {
   GARMENT_DESIGN_TEXTURE_OVERLAY_PCT,
   GARMENT_PRINT_AREA_PCT,
   GARMENT_TEXTURE_OVERLAY_PCT,
+  getGarmentDesignTextureOverlayPct,
+  getGarmentGeometryPct,
 } from "./garmentPhoto";
 
 /**
@@ -96,5 +98,29 @@ describe("GARMENT_DESIGN_TEXTURE_OVERLAY_PCT", () => {
     };
     expect(pointOnOverlayImagePct.x).toBeCloseTo(pointOnPhotoPct.x, 5);
     expect(pointOnOverlayImagePct.y).toBeCloseTo(pointOnPhotoPct.y, 5);
+  });
+});
+
+/** Phase 3 (Garment Catalog): the per-product-slug geometry lookup
+ * DesignCanvas.tsx now actually calls, instead of importing the fixed
+ * GARMENT_DESIGN_AREA_PCT/GARMENT_PRINT_AREA_PCT pair directly. */
+describe("getGarmentGeometryPct / getGarmentDesignTextureOverlayPct", () => {
+  it("resolves classic-tee to the real, verified geometry pair", () => {
+    const geometry = getGarmentGeometryPct("classic-tee");
+    expect(geometry.designAreaPct).toEqual(GARMENT_DESIGN_AREA_PCT);
+    expect(geometry.printAreaPct).toEqual(GARMENT_PRINT_AREA_PCT);
+  });
+
+  it("falls back to classic-tee's geometry for a product slug with no real garment photo yet", () => {
+    // Oversized Tee/Hoodie/Sweatshirt (see lib/products/garments.ts) have no
+    // real photo, hence no real geometry entry -- this must never throw or
+    // silently return undefined, since the editor calls this unconditionally.
+    for (const slug of ["oversized-tee", "hoodie", "sweatshirt", "not-a-real-slug"]) {
+      expect(getGarmentGeometryPct(slug)).toEqual(getGarmentGeometryPct("classic-tee"));
+    }
+  });
+
+  it("getGarmentDesignTextureOverlayPct(\"classic-tee\") matches the pre-Phase-3 fixed constant exactly", () => {
+    expect(getGarmentDesignTextureOverlayPct("classic-tee")).toEqual(GARMENT_DESIGN_TEXTURE_OVERLAY_PCT);
   });
 });

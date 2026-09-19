@@ -299,6 +299,7 @@ export function EditorShell({
                 label={`${product.name}, ${selectedColor.name}, ${side}`}
                 zoom={zoom}
                 showGuide={!previewMode}
+                productSlug={product.slug}
               />
               {(!editor.isReady || editor.isHydrating) && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-background/85 backdrop-blur-sm">

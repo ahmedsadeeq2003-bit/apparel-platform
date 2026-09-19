@@ -1,26 +1,30 @@
 "use client";
 
-import type { RefObject } from "react";
+import { useMemo, type RefObject } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
-import { CANVAS_SIZE, GARMENT_CANVAS_OVERLAY_PCT, PRINT_SAFE_AREA_BOUNDS } from "@/lib/editor/constants";
-import { GARMENT_DESIGN_TEXTURE_OVERLAY_PCT, GARMENT_PHOTO_ASPECT } from "@/lib/products/garmentPhoto";
+import { CANVAS_SIZE, getGarmentCanvasOverlayPct, getPrintSafeAreaBounds } from "@/lib/editor/constants";
+import { getGarmentDesignTextureOverlayPct, GARMENT_PHOTO_ASPECT } from "@/lib/products/garmentPhoto";
 import { GarmentTextureOverlay } from "@/components/apparel/GarmentTextureOverlay";
 import type { AssetEntry } from "@/lib/assets/manifest";
 import type { EditorSide } from "@/lib/editor/side";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** PRINT_SAFE_AREA_BOUNDS is expressed in the canvas's own 0-600 logical
- * space; converting to a percentage of the canvas wrapper here (once, at
- * module load -- these are compile-time constants) is what actually
- * positions the guide box visually within the now-larger design area. */
-const PRINT_SAFE_AREA_PCT = {
-  left: (PRINT_SAFE_AREA_BOUNDS.left / CANVAS_SIZE) * 100,
-  top: (PRINT_SAFE_AREA_BOUNDS.top / CANVAS_SIZE) * 100,
-  width: (PRINT_SAFE_AREA_BOUNDS.width / CANVAS_SIZE) * 100,
-  height: (PRINT_SAFE_AREA_BOUNDS.height / CANVAS_SIZE) * 100,
-};
+/** getPrintSafeAreaBounds's result is expressed in the canvas's own 0-600
+ * logical space; converting to a percentage of the canvas wrapper here is
+ * what actually positions the guide box visually within the now-larger
+ * design area. Phase 3: computed per-render from `productSlug` (garment
+ * geometry now varies by garment) rather than once at module load. */
+function printSafeAreaPctFor(productSlug: string) {
+  const bounds = getPrintSafeAreaBounds(productSlug);
+  return {
+    left: (bounds.left / CANVAS_SIZE) * 100,
+    top: (bounds.top / CANVAS_SIZE) * 100,
+    width: (bounds.width / CANVAS_SIZE) * 100,
+    height: (bounds.height / CANVAS_SIZE) * 100,
+  };
+}
 
 /** One L-shaped corner bracket -- print/crop-mark language ("this is the
  * safe area," a convention from actual garment printing rather than a
@@ -60,6 +64,7 @@ export function DesignCanvas({
   label,
   zoom,
   showGuide,
+  productSlug,
 }: {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   /** The real garment photo for the current product/color/side, resolved by
@@ -70,8 +75,16 @@ export function DesignCanvas({
   label: string;
   zoom: number;
   showGuide: boolean;
+  /** Phase 3 (Garment Catalog): which garment's own design-area/print-safe
+   * geometry to render against (garmentPhoto.ts's getGarmentGeometryPct) --
+   * every garment has its own proportions, so this can no longer be a fixed
+   * module-level constant the way it was pre-Phase-3. */
+  productSlug: string;
 }) {
   const reduceMotion = useReducedMotion();
+  const garmentCanvasOverlayPct = useMemo(() => getGarmentCanvasOverlayPct(productSlug), [productSlug]);
+  const printSafeAreaPct = useMemo(() => printSafeAreaPctFor(productSlug), [productSlug]);
+  const designTextureOverlayPct = useMemo(() => getGarmentDesignTextureOverlayPct(productSlug), [productSlug]);
 
   return (
     // `flex-1 min-h-0` is the same idiom EditorShell.tsx's own chain of
@@ -126,10 +139,10 @@ export function DesignCanvas({
         <div
           className="absolute overflow-hidden"
           style={{
-            left: `${GARMENT_CANVAS_OVERLAY_PCT.left}%`,
-            top: `${GARMENT_CANVAS_OVERLAY_PCT.top}%`,
-            width: `${GARMENT_CANVAS_OVERLAY_PCT.width}%`,
-            height: `${GARMENT_CANVAS_OVERLAY_PCT.height}%`,
+            left: `${garmentCanvasOverlayPct.left}%`,
+            top: `${garmentCanvasOverlayPct.top}%`,
+            width: `${garmentCanvasOverlayPct.width}%`,
+            height: `${garmentCanvasOverlayPct.height}%`,
           }}
         >
           <canvas
@@ -141,9 +154,9 @@ export function DesignCanvas({
           {/* Real fabric texture/shadow, printed-on-fabric realism -- see
               GarmentTextureOverlay's own comment. Stacked after the canvas
               so it paints on top of the artwork, not just the blank photo. */}
-          {photo && <GarmentTextureOverlay photoPath={photo.path} overlayPct={GARMENT_DESIGN_TEXTURE_OVERLAY_PCT} />}
+          {photo && <GarmentTextureOverlay photoPath={photo.path} overlayPct={designTextureOverlayPct} />}
           {/* Print-safe guide -- purely visual, positioned as a
-              sub-rectangle within the design canvas (PRINT_SAFE_AREA_PCT),
+              sub-rectangle within the design canvas (printSafeAreaPct),
               not the canvas's own edges. `pointer-events-none` so it never
               intercepts drags meant for artwork anywhere else on the
               shirt. */}
@@ -152,10 +165,10 @@ export function DesignCanvas({
               aria-hidden
               className="pointer-events-none absolute"
               style={{
-                left: `${PRINT_SAFE_AREA_PCT.left}%`,
-                top: `${PRINT_SAFE_AREA_PCT.top}%`,
-                width: `${PRINT_SAFE_AREA_PCT.width}%`,
-                height: `${PRINT_SAFE_AREA_PCT.height}%`,
+                left: `${printSafeAreaPct.left}%`,
+                top: `${printSafeAreaPct.top}%`,
+                width: `${printSafeAreaPct.width}%`,
+                height: `${printSafeAreaPct.height}%`,
               }}
             >
               <CornerMark corner="tl" />

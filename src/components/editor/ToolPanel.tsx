@@ -244,6 +244,15 @@ function UploadPanel({ onUpload }: { onUpload: (file: File) => void }) {
         Choose a file
       </button>
       <p className="text-[0.7rem] text-muted">PNG, JPG, WebP or SVG, up to 10MB</p>
+      {/* Phase 2 (Customer Artwork Upload): concise, non-intimidating rights
+          language, not a legal wall -- STITCH doesn't screen upload content
+          by subject matter (see addImageFromFile's own comment), so this is
+          the one place that responsibility is made explicit to the
+          customer, matching AddToCartDialog's identical line at the point
+          they actually commit to the design. */}
+      <p className="text-[0.65rem] leading-snug text-muted/80">
+        Your artwork, your responsibility -- upload only artwork you have the right to use.
+      </p>
       <input
         ref={inputRef}
         type="file"
